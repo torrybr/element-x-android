@@ -16,28 +16,36 @@
 
 package io.element.android.features.location.impl.all
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationSearching
 import androidx.compose.material.icons.filled.MyLocation
+import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.mapbox.mapboxsdk.camera.CameraPosition
 import com.mapbox.mapboxsdk.geometry.LatLng
 import io.element.android.compound.theme.ElementTheme
 import io.element.android.compound.tokens.generated.CompoundIcons
-import io.element.android.compound.tokens.generated.TypographyTokens
 import io.element.android.features.location.api.internal.rememberTileStyleUrl
 import io.element.android.features.location.impl.common.MapDefaults
 import io.element.android.features.location.impl.common.PermissionDeniedDialog
@@ -55,11 +63,8 @@ import io.element.android.libraries.designsystem.theme.components.TopAppBar
 import io.element.android.libraries.designsystem.utils.CommonDrawables
 import io.element.android.libraries.maplibre.compose.CameraMode
 import io.element.android.libraries.maplibre.compose.CameraMoveStartedReason
-import io.element.android.libraries.maplibre.compose.IconAnchor
 import io.element.android.libraries.maplibre.compose.MapboxMap
-import io.element.android.libraries.maplibre.compose.Symbol
 import io.element.android.libraries.maplibre.compose.rememberCameraPositionState
-import io.element.android.libraries.maplibre.compose.rememberSymbolState
 import io.element.android.libraries.ui.strings.CommonStrings
 import kotlinx.collections.immutable.toImmutableMap
 
@@ -115,7 +120,7 @@ fun ShowAllLocationView(
             TopAppBar(
                 title = {
                     Text(
-                        text = stringResource(CommonStrings.screen_view_location_title),
+                        text = "Show Room Name Here",
                         style = ElementTheme.typography.aliasScreenTitle,
                     )
                 },
@@ -147,12 +152,7 @@ fun ShowAllLocationView(
             }
         },
     ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .padding(paddingValues)
-                .consumeWindowInsets(paddingValues)
-                .fillMaxSize(),
-        ) {
+        Box(modifier = Modifier.padding(paddingValues)) {
             MapboxMap(
                 styleUri = rememberTileStyleUrl(),
                 modifier = Modifier.fillMaxSize(),
@@ -164,7 +164,33 @@ fun ShowAllLocationView(
                     locationEnabled = state.hasLocationPermission,
                 ),
             )
+            Column(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(end = 16.dp, top = 16.dp), // Adds padding on the right side
+                verticalArrangement = Arrangement.spacedBy(8.dp) // Space between buttons
+            ) {
+                RoundedIconButton(icon = Icons.Filled.Star, onClick = { /* Handle Star click */ })
+                RoundedIconButton(icon = Icons.Filled.Place, onClick = { /* Handle Place click */ })
+                RoundedIconButton(icon = Icons.Filled.Settings, onClick = { /* Handle Settings click */ })
+            }
         }
+    }
+}
+
+@Composable
+fun RoundedIconButton(icon: ImageVector, onClick: () -> Unit) {
+    IconButton(
+        onClick = onClick,
+        modifier = Modifier
+            .size(48.dp)
+            .background(Color.White, CircleShape)
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = "Icon",
+            tint = Color.Black
+        )
     }
 }
 
