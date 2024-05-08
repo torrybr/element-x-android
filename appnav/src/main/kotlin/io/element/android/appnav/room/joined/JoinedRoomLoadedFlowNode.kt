@@ -33,6 +33,8 @@ import dagger.assisted.AssistedInject
 import io.element.android.anvilannotations.ContributesNode
 import io.element.android.appnav.di.RoomComponentFactory
 import io.element.android.appnav.room.RoomNavigationTarget
+import io.element.android.features.location.api.ShowAllLocationEntryPoint
+import io.element.android.features.location.api.ShowLocationEntryPoint
 import io.element.android.features.messages.api.MessagesEntryPoint
 import io.element.android.features.roomdetails.api.RoomDetailsEntryPoint
 import io.element.android.libraries.architecture.BackstackView
@@ -65,7 +67,7 @@ class JoinedRoomLoadedFlowNode @AssistedInject constructor(
     roomComponentFactory: RoomComponentFactory,
 ) : BaseFlowNode<JoinedRoomLoadedFlowNode.NavTarget>(
     backstack = BackStack(
-        initialElement = when (val input = plugins.filterIsInstance(Inputs::class.java).first().initialElement) {
+        initialElement = when (val input = plugins.filterIsInstance<Inputs>().first().initialElement) {
             is RoomNavigationTarget.Messages -> NavTarget.Messages(input.focusedEventId)
             RoomNavigationTarget.Details -> NavTarget.RoomDetails
             RoomNavigationTarget.NotificationSettings -> NavTarget.RoomNotificationSettings
@@ -178,6 +180,7 @@ class JoinedRoomLoadedFlowNode @AssistedInject constructor(
     }
 
     sealed interface NavTarget : Parcelable {
+
         @Parcelize
         data class Messages(val focusedEventId: EventId? = null) : NavTarget
 

@@ -33,6 +33,8 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Public
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -122,7 +124,8 @@ fun MessagesView(
     onCreatePollClick: () -> Unit,
     onJoinCallClick: () -> Unit,
     modifier: Modifier = Modifier,
-    forceJumpToBottomVisibility: Boolean = false
+    forceJumpToBottomVisibility: Boolean = false,
+    onShowMapClicked: () -> Unit
 ) {
     OnLifecycleEvent { _, event ->
         state.voiceMessageComposerState.eventSink(VoiceMessageComposerEvents.LifecycleEvent(event))
@@ -199,6 +202,7 @@ fun MessagesView(
                     },
                     onRoomDetailsClick = onRoomDetailsClick,
                     onJoinCallClick = onJoinCallClick,
+                    onShowMapClicked = onShowMapClicked,
                 )
             }
         },
@@ -457,6 +461,7 @@ private fun MessagesViewTopBar(
     onRoomDetailsClick: () -> Unit,
     onJoinCallClick: () -> Unit,
     onBackClick: () -> Unit,
+    onShowMapClicked: () -> Unit,
 ) {
     TopAppBar(
         navigationIcon = {
@@ -478,6 +483,7 @@ private fun MessagesViewTopBar(
             }
         },
         actions = {
+            OpenMapMenuItem(onShowMapClicked = onShowMapClicked)
             CallMenuItem(
                 isCallOngoing = callState == RoomCallState.ONGOING,
                 onClick = onJoinCallClick,
@@ -504,6 +510,16 @@ private fun CallMenuItem(
                 contentDescription = stringResource(CommonStrings.a11y_start_call),
             )
         }
+    }
+}
+
+@Composable
+private fun OpenMapMenuItem(
+    onShowMapClicked: () -> Unit,
+) {
+    // Create a button with a map icon
+    IconButton(onClick = { onShowMapClicked() }) {
+        Icon(Icons.Outlined.Public, contentDescription = "Map description")
     }
 }
 
@@ -563,5 +579,6 @@ internal fun MessagesViewPreview(@PreviewParameter(MessagesStateProvider::class)
         onCreatePollClick = {},
         onJoinCallClick = {},
         forceJumpToBottomVisibility = true,
+        onShowMapClicked = {}
     )
 }

@@ -39,5 +39,6 @@ internal fun MessagesViewWithTypingPreview(
         onSendLocationClick = {},
         onCreatePollClick = {},
         onJoinCallClick = {},
+        onShowMapClicked = {},
     )
 }

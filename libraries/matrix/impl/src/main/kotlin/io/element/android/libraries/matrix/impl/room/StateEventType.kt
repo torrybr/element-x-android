@@ -67,4 +67,5 @@ fun RustStateEventType.map(): StateEventType = when (this) {
     RustStateEventType.ROOM_TOPIC -> StateEventType.ROOM_TOPIC
     RustStateEventType.SPACE_CHILD -> StateEventType.SPACE_CHILD
     RustStateEventType.SPACE_PARENT -> StateEventType.SPACE_PARENT
+    org.matrix.rustcomponents.sdk.StateEventType.BEACON_INFO -> TODO()
 }

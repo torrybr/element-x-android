@@ -34,6 +34,7 @@ import io.element.android.features.call.api.CallType
 import io.element.android.features.call.api.ElementCallEntryPoint
 import io.element.android.features.location.api.Location
 import io.element.android.features.location.api.SendLocationEntryPoint
+import io.element.android.features.location.api.ShowAllLocationEntryPoint
 import io.element.android.features.location.api.ShowLocationEntryPoint
 import io.element.android.features.messages.api.MessagesEntryPoint
 import io.element.android.features.messages.impl.attachments.Attachment
@@ -82,6 +83,7 @@ class MessagesFlowNode @AssistedInject constructor(
     private val createPollEntryPoint: CreatePollEntryPoint,
     private val elementCallEntryPoint: ElementCallEntryPoint,
     private val analyticsService: AnalyticsService,
+    private val showAllLocationEntryPoint: ShowAllLocationEntryPoint,
 ) : BaseFlowNode<MessagesFlowNode.NavTarget>(
     backstack = BackStack(
         initialElement = NavTarget.Messages,
@@ -94,6 +96,7 @@ class MessagesFlowNode @AssistedInject constructor(
     plugins = plugins
 ) {
     data class Inputs(val focusedEventId: EventId?) : NodeInputs
+
     private val inputs = inputs<Inputs>()
 
     sealed interface NavTarget : Parcelable {
@@ -133,9 +136,16 @@ class MessagesFlowNode @AssistedInject constructor(
 
         @Parcelize
         data class EditPoll(val eventId: EventId) : NavTarget
+
+        @Parcelize
+        data class ShowAllLocation(val desc: String) : NavTarget
     }
 
     private val callback = plugins<MessagesEntryPoint.Callback>().firstOrNull()
+
+    /**
+     * TODO (tb): whats the difference between callback and backstack?
+     */
 
     override fun resolve(navTarget: NavTarget, buildContext: BuildContext): Node {
         return when (navTarget) {
@@ -193,6 +203,10 @@ class MessagesFlowNode @AssistedInject constructor(
                         analyticsService.captureInteraction(Interaction.Name.MobileRoomCallButton)
                         elementCallEntryPoint.startCall(callType)
                     }
+
+                    override fun onShowMapClicked() {
+                        backstack.push(NavTarget.ShowAllLocation("Show all locations"))
+                    }
                 }
                 val inputs = MessagesNode.Inputs(
                     focusedEventId = inputs.focusedEventId,
@@ -247,8 +261,17 @@ class MessagesFlowNode @AssistedInject constructor(
                     .params(CreatePollEntryPoint.Params(mode = CreatePollMode.EditPoll(eventId = navTarget.eventId)))
                     .build()
             }
+
             NavTarget.Empty -> {
                 node(buildContext) {}
+            }
+            is NavTarget.ShowAllLocation -> {
+                /**
+                 * TODO (tb): should this be at a higher parent level such as JoinedRoomLoadedFlowNode?
+                 */
+                val fakeLocation = Location(38.88008149818724, -77.02612967929726, .1.toFloat())
+                val inputs = ShowAllLocationEntryPoint.Inputs(fakeLocation, navTarget.desc)
+                showAllLocationEntryPoint.createNode(this, buildContext, inputs)
             }
         }
     }
