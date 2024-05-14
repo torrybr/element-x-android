@@ -473,6 +473,14 @@ class FakeMatrixRoom(
         return sendLocationResult
     }
 
+    override suspend fun startBeaconInfo(): Result<Unit> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun updateUserLocation(geoUri: String): Result<Unit> {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun createPoll(
         question: String,
         answers: List<String>,

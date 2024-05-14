@@ -74,6 +74,7 @@ import org.matrix.rustcomponents.sdk.RoomMessageEventContentWithoutRelation
 import org.matrix.rustcomponents.sdk.SendAttachmentJoinHandle
 import org.matrix.rustcomponents.sdk.TimelineDiff
 import org.matrix.rustcomponents.sdk.TimelineItem
+import org.matrix.rustcomponents.sdk.UserLocation
 import org.matrix.rustcomponents.sdk.messageEventContentFromHtml
 import org.matrix.rustcomponents.sdk.messageEventContentFromMarkdown
 import org.matrix.rustcomponents.sdk.use
@@ -435,6 +436,15 @@ class RustTimeline(
     override suspend fun cancelSend(transactionId: TransactionId): Result<Unit> = withContext(dispatcher) {
         runCatching {
             inner.cancelSend(transactionId.value)
+        }
+    }
+
+    /**
+     * TODO (tb): add userLocation struct as method param here
+     */
+    override suspend fun updateUserLocation(geoUri: String): Result<Unit> = withContext(dispatcher) {
+        runCatching {
+            inner.updateUserLocation(geoUri)
         }
     }
 

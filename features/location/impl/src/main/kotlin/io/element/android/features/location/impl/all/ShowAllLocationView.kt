@@ -16,6 +16,7 @@
 
 package io.element.android.features.location.impl.all
 
+import android.location.Location
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -23,15 +24,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AcUnit
+import androidx.compose.material.icons.filled.AirlineStops
+import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.LocationSearching
 import androidx.compose.material.icons.filled.MyLocation
-import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -44,12 +44,14 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.mapbox.mapboxsdk.camera.CameraPosition
 import com.mapbox.mapboxsdk.geometry.LatLng
+import com.mapbox.maps.MapboxExperimental
 import io.element.android.compound.theme.ElementTheme
 import io.element.android.compound.tokens.generated.CompoundIcons
-import io.element.android.features.location.api.internal.rememberTileStyleUrl
-import io.element.android.features.location.impl.common.MapDefaults
+import com.mapbox.maps.extension.compose.MapboxMap
+
 import io.element.android.features.location.impl.common.PermissionDeniedDialog
 import io.element.android.features.location.impl.common.PermissionRationaleDialog
+import io.element.android.features.location.impl.common.ShowAllMapDefaults
 import io.element.android.libraries.designsystem.components.button.BackButton
 import io.element.android.libraries.designsystem.preview.ElementPreview
 import io.element.android.libraries.designsystem.preview.PreviewsDayNight
@@ -60,15 +62,12 @@ import io.element.android.libraries.designsystem.theme.components.IconButton
 import io.element.android.libraries.designsystem.theme.components.Scaffold
 import io.element.android.libraries.designsystem.theme.components.Text
 import io.element.android.libraries.designsystem.theme.components.TopAppBar
-import io.element.android.libraries.designsystem.utils.CommonDrawables
 import io.element.android.libraries.maplibre.compose.CameraMode
 import io.element.android.libraries.maplibre.compose.CameraMoveStartedReason
-import io.element.android.libraries.maplibre.compose.MapboxMap
 import io.element.android.libraries.maplibre.compose.rememberCameraPositionState
 import io.element.android.libraries.ui.strings.CommonStrings
-import kotlinx.collections.immutable.toImmutableMap
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, MapboxExperimental::class)
 @Composable
 fun ShowAllLocationView(
     state: ShowAllLocationState,
@@ -92,7 +91,7 @@ fun ShowAllLocationView(
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.Builder()
             .target(LatLng(state.location.lat, state.location.lon))
-            .zoom(MapDefaults.DEFAULT_ZOOM)
+            .zoom(ShowAllMapDefaults.DEFAULT_ZOOM)
             .build()
     }
 
@@ -101,7 +100,7 @@ fun ShowAllLocationView(
             false -> cameraPositionState.cameraMode = CameraMode.NONE
             true -> {
                 cameraPositionState.position = CameraPosition.Builder()
-                    .zoom(MapDefaults.DEFAULT_ZOOM)
+                    .zoom(ShowAllMapDefaults.DEFAULT_ZOOM)
                     .build()
                 cameraPositionState.cameraMode = CameraMode.TRACKING
             }
@@ -153,26 +152,37 @@ fun ShowAllLocationView(
         },
     ) { paddingValues ->
         Box(modifier = Modifier.padding(paddingValues)) {
-            MapboxMap(
-                styleUri = rememberTileStyleUrl(),
-                modifier = Modifier.fillMaxSize(),
-                images = mapOf(PIN_ID to CommonDrawables.pin).toImmutableMap(),
-                cameraPositionState = cameraPositionState,
-                uiSettings = MapDefaults.uiSettings,
-                symbolManagerSettings = MapDefaults.symbolManagerSettings,
-                locationSettings = MapDefaults.locationSettings.copy(
-                    locationEnabled = state.hasLocationPermission,
-                ),
-            )
+//            MapLibre(
+//                modifier = Modifier.fillMaxSize(),
+//                styleUrl = rememberTileStyleUrl(),
+//                locationRequestProperties = LocationRequestProperties(),
+//            )
+            MapboxMap(modifier = Modifier.fillMaxSize())
+
+//            MapboxMap(
+//                styleUri = rememberTileStyleUrl(),
+//                modifier = Modifier.fillMaxSize(),
+//                images = mapOf(PIN_ID to CommonDrawables.pin).toImmutableMap(),
+//                cameraPositionState = cameraPositionState,
+//                uiSettings = ShowAllMapDefaults.uiSettings,
+//                symbolManagerSettings = ShowAllMapDefaults.symbolManagerSettings,
+//                locationSettings = ShowAllMapDefaults.locationSettings.copy(
+//                    locationEnabled = state.hasLocationPermission,
+//                ),
+//            )
             Column(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .padding(end = 16.dp, top = 16.dp), // Adds padding on the right side
                 verticalArrangement = Arrangement.spacedBy(8.dp) // Space between buttons
             ) {
-                RoundedIconButton(icon = Icons.Filled.Star, onClick = { /* Handle Star click */ })
-                RoundedIconButton(icon = Icons.Filled.Place, onClick = { /* Handle Place click */ })
-                RoundedIconButton(icon = Icons.Filled.Settings, onClick = { /* Handle Settings click */ })
+                RoundedIconButton(icon = Icons.Filled.Settings, onClick = { /* Handle Star click */ })
+                RoundedIconButton(icon = Icons.Filled.Layers, onClick = { /* Handle Place click */ })
+                RoundedIconButton(icon = Icons.Filled.AirlineStops, onClick = { /* Handle Settings click */ })
+                RoundedIconButton(icon = Icons.Filled.AcUnit, onClick = {
+                    state.eventSink(ShowAllLocationEvents.StartBeaconInfo)
+                })
+
             }
         }
     }

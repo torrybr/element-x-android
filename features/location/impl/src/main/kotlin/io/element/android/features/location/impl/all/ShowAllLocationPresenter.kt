@@ -22,6 +22,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -34,9 +35,12 @@ import io.element.android.features.location.impl.common.permissions.PermissionsP
 import io.element.android.features.location.impl.common.permissions.PermissionsState
 import io.element.android.libraries.architecture.Presenter
 import io.element.android.libraries.core.meta.BuildMeta
+import io.element.android.libraries.matrix.api.room.MatrixRoom
+import kotlinx.coroutines.launch
 
 class ShowAllLocationPresenter @AssistedInject constructor(
     permissionsPresenterFactory: PermissionsPresenter.Factory,
+    private val room: MatrixRoom,
     private val locationActions: LocationActions,
     private val buildMeta: BuildMeta,
     @Assisted private val location: Location,
@@ -58,6 +62,8 @@ class ShowAllLocationPresenter @AssistedInject constructor(
             mutableStateOf(ShowAllLocationState.Dialog.None)
         }
 
+        val scope = rememberCoroutineScope()
+
         LaunchedEffect(permissionsState.permissions) {
             if (permissionsState.isAnyGranted) {
                 permissionDialog = ShowAllLocationState.Dialog.None
@@ -66,7 +72,9 @@ class ShowAllLocationPresenter @AssistedInject constructor(
 
         fun handleEvents(event: ShowAllLocationEvents) {
             when (event) {
-                ShowAllLocationEvents.Share -> locationActions.share(location, description)
+                ShowAllLocationEvents.StartBeaconInfo -> scope.launch {
+                    startBeaconInfo()
+                }
                 is ShowAllLocationEvents.TrackMyLocation -> {
                     if (event.enabled) {
                         when {
@@ -84,6 +92,7 @@ class ShowAllLocationPresenter @AssistedInject constructor(
                     permissionDialog = ShowAllLocationState.Dialog.None
                 }
                 ShowAllLocationEvents.RequestPermissions -> permissionsState.eventSink(PermissionsEvents.RequestPermissions)
+                ShowAllLocationEvents.Share -> TODO()
             }
         }
 
@@ -96,5 +105,13 @@ class ShowAllLocationPresenter @AssistedInject constructor(
             appName = appName,
             eventSink = ::handleEvents,
         )
+    }
+
+    private suspend fun startBeaconInfo() {
+        room.startBeaconInfo()
+        //wait 10 seconds
+        Thread.sleep(5000) // pause to test arrival times
+        room.updateUserLocation("geo:51.5008,0.1247;u=35")
+//        print("Beacon info started")
     }
 }

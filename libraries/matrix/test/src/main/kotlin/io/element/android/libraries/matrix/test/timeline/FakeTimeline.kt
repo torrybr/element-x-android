@@ -339,6 +339,10 @@ class FakeTimeline(
         progressCallback
     )
 
+    override suspend fun updateUserLocation(geoUri: String): Result<Unit> {
+        TODO("Not yet implemented")
+    }
+
     var sendReadReceiptLambda: (
         eventId: EventId,
         receiptType: ReceiptType,

@@ -52,6 +52,9 @@ dependencies {
     implementation(projects.anvilannotations)
     anvil(projects.anvilcodegen)
     ksp(libs.showkase.processor)
+//    implementation(libs.ramani.maplibre)
+//    implementation(libs.maps.compose)
+//    implementation(libs.android)
 
     testImplementation(libs.test.junit)
     testImplementation(libs.coroutines.test)

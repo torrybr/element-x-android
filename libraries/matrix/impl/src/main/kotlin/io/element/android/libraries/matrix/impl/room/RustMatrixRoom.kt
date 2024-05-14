@@ -521,6 +521,16 @@ class RustMatrixRoom(
         return liveTimeline.sendLocation(body, geoUri, description, zoomLevel, assetType)
     }
 
+    override suspend fun startBeaconInfo(): Result<Unit> = withContext(roomDispatcher) {
+        runCatching {
+            innerRoom.startBeaconInfo()
+        }
+    }
+
+    override suspend fun updateUserLocation(geoUri: String): Result<Unit> {
+        return liveTimeline.updateUserLocation(geoUri)
+    }
+
     override suspend fun createPoll(
         question: String,
         answers: List<String>,

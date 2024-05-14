@@ -22,4 +22,6 @@ sealed interface ShowAllLocationEvents {
     data object DismissDialog : ShowAllLocationEvents
     data object RequestPermissions : ShowAllLocationEvents
     data object OpenAppSettings : ShowAllLocationEvents
+
+    data object StartBeaconInfo : ShowAllLocationEvents
 }
