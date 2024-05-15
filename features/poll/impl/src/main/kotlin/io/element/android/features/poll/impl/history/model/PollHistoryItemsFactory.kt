@@ -25,6 +25,10 @@ import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
+/**
+ * (tb): creating a poll history list item from a timeline item
+
+ */
 class PollHistoryItemsFactory @Inject constructor(
     private val pollContentStateFactory: PollContentStateFactory,
     private val daySeparatorFormatter: DaySeparatorFormatter,

@@ -50,8 +50,11 @@ dependencies {
     implementation(projects.libraries.uiStrings)
     implementation(libs.dagger)
     implementation(projects.anvilannotations)
+    implementation(libs.play.services.location)
     anvil(projects.anvilcodegen)
     ksp(libs.showkase.processor)
+    implementation(libs.ramani.maplibre)
+
 //    implementation(libs.ramani.maplibre)
 //    implementation(libs.maps.compose)
 //    implementation(libs.android)

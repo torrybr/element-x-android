@@ -24,6 +24,7 @@ import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ComposeNode
 import androidx.compose.runtime.currentComposer
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import org.maplibre.android.location.LocationComponentActivationOptions
@@ -47,6 +48,7 @@ internal class MapPropertiesNode(
             LocationComponentActivationOptions.Builder(context, style)
                 .locationComponentOptions(
                     LocationComponentOptions.builder(context)
+//                        .bearingTintColor(Color.Red.toArgb())
 //                        .backgroundTintColor(locationSettings.backgroundTintColor.toArgb())
 //                        .foregroundTintColor(locationSettings.foregroundTintColor.toArgb())
 //                        .backgroundStaleTintColor(locationSettings.backgroundStaleTintColor.toArgb())

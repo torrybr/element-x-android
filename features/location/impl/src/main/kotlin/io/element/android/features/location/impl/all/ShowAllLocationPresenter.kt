@@ -16,6 +16,7 @@
 
 package io.element.android.features.location.impl.all
 
+import android.location.LocationProvider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -24,6 +25,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import com.google.android.gms.location.FusedLocationProviderClient
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -107,11 +109,30 @@ class ShowAllLocationPresenter @AssistedInject constructor(
         )
     }
 
+    // Create a list of GeoURIs representing a route through Washington D.C.
+    val routeTracks = arrayListOf(
+        "geo:38.8730,-77.0074", // Nationals Park
+        "geo:38.8763,-77.0059", // Navy Yard Metro Station
+        "geo:38.8765,-77.0006", // The Yards Park
+        "geo:38.8899,-77.0091", // U.S. Capitol
+        "geo:38.8913,-77.0300", // National Museum of American History
+        "geo:38.8895,-77.0353", // Washington Monument
+        "geo:38.8893,-77.0502"  // Lincoln Memorial
+    )
+
     private suspend fun startBeaconInfo() {
         room.startBeaconInfo()
         //wait 10 seconds
         Thread.sleep(5000) // pause to test arrival times
-        room.updateUserLocation("geo:51.5008,0.1247;u=35")
-//        print("Beacon info started")
+        updateLocation()
+    }
+
+    private suspend fun updateLocation() {
+
+        for (track in routeTracks) {
+            room.updateUserLocation(track)
+            //wait 10 seconds
+            Thread.sleep(1000) // pause to test arrival times
+        }
     }
 }

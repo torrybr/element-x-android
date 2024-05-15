@@ -35,7 +35,7 @@ coroutines = "1.8.1"
 accompanist = "0.34.0"
 
 # Test
-#ramaniMaplibre = "0.3.0"
+ramaniMaplibre = "0.3.0"
 test_core = "1.5.0"
 
 #other
@@ -60,6 +60,7 @@ autoservice = "1.1.1"
 androidx-test-ext-junit = "1.1.5"
 espresso-core = "3.5.1"
 kover = "0.8.0"
+playServicesLocation = "21.2.0"
 
 [libraries]
 # Project
@@ -124,8 +125,7 @@ coroutines_test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", ve
 accompanist_permission = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanist" }
 
 # Libraries
-maps-compose = { module = "com.mapbox.extension:maps-compose", version.ref = "mapsCompose" }
-#ramani-maplibre = { module = "org.ramani-maps:ramani-maplibre", version.ref = "ramaniMaplibre" }
+ramani-maplibre = { module = "org.ramani-maps:ramani-maplibre", version.ref = "ramaniMaplibre" }
 squareup_seismic = "com.squareup:seismic:1.0.3"
 
 # network
@@ -216,6 +216,7 @@ android_composeCompiler = { module = "androidx.compose.compiler:compiler", versi
 androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidx-test-ext-junit" }
 espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso-core" }
 appcompat = "androidx.appcompat:appcompat:1.7.0"
+play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
 
 [bundles]
 

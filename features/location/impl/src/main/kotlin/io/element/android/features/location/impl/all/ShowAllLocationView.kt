@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -40,14 +41,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.mapbox.mapboxsdk.camera.CameraPosition
 import com.mapbox.mapboxsdk.geometry.LatLng
-import com.mapbox.maps.MapboxExperimental
 import io.element.android.compound.theme.ElementTheme
 import io.element.android.compound.tokens.generated.CompoundIcons
-import com.mapbox.maps.extension.compose.MapboxMap
+import io.element.android.compound.tokens.generated.TypographyTokens
+import io.element.android.features.location.api.internal.rememberTileStyleUrl
 
 import io.element.android.features.location.impl.common.PermissionDeniedDialog
 import io.element.android.features.location.impl.common.PermissionRationaleDialog
@@ -66,8 +69,12 @@ import io.element.android.libraries.maplibre.compose.CameraMode
 import io.element.android.libraries.maplibre.compose.CameraMoveStartedReason
 import io.element.android.libraries.maplibre.compose.rememberCameraPositionState
 import io.element.android.libraries.ui.strings.CommonStrings
+import org.ramani.compose.LocationRequestProperties
+import org.ramani.compose.LocationStyling
+import org.ramani.compose.MapLibre
+import org.ramani.compose.UiSettings
 
-@OptIn(ExperimentalMaterial3Api::class, MapboxExperimental::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ShowAllLocationView(
     state: ShowAllLocationState,
@@ -152,24 +159,24 @@ fun ShowAllLocationView(
         },
     ) { paddingValues ->
         Box(modifier = Modifier.padding(paddingValues)) {
-//            MapLibre(
-//                modifier = Modifier.fillMaxSize(),
-//                styleUrl = rememberTileStyleUrl(),
-//                locationRequestProperties = LocationRequestProperties(),
-//            )
-            MapboxMap(modifier = Modifier.fillMaxSize())
+            MapLibre(
+                modifier = Modifier.fillMaxSize(),
+                styleUrl = rememberTileStyleUrl(),
+                locationRequestProperties = LocationRequestProperties(interval = 250L),
+            )
+            state.description?.let {
+                Text(
+                    text = it,
+                    textAlign = TextAlign.Center,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    style = TypographyTokens.fontBodyMdRegular,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
+                )
+            }
 
-//            MapboxMap(
-//                styleUri = rememberTileStyleUrl(),
-//                modifier = Modifier.fillMaxSize(),
-//                images = mapOf(PIN_ID to CommonDrawables.pin).toImmutableMap(),
-//                cameraPositionState = cameraPositionState,
-//                uiSettings = ShowAllMapDefaults.uiSettings,
-//                symbolManagerSettings = ShowAllMapDefaults.symbolManagerSettings,
-//                locationSettings = ShowAllMapDefaults.locationSettings.copy(
-//                    locationEnabled = state.hasLocationPermission,
-//                ),
-//            )
             Column(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
