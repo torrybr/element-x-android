@@ -137,5 +137,5 @@ internal fun InReplyToDetails.Ready.metadata(): InReplyToMetadata? = when (event
     is LegacyCallInviteContent,
     is CallNotifyContent,
     null -> null
-    is BeaconShareContent -> TODO()
+    is BeaconShareContent -> null
 }

@@ -38,10 +38,10 @@ import io.element.android.services.analytics.api.AnalyticsService
  */
 @ContributesNode(RoomScope::class)
 class ShowAllLocationNode @AssistedInject constructor(
-    presenterFactory: ShowAllLocationPresenter.Factory,
     analyticsService: AnalyticsService,
     @Assisted buildContext: BuildContext,
     @Assisted plugins: List<Plugin>,
+    private val presenter: ShowAllLocationPresenter,
 ) : Node(buildContext, plugins = plugins) {
     init {
         lifecycle.subscribe(
@@ -52,7 +52,6 @@ class ShowAllLocationNode @AssistedInject constructor(
     }
 
     private val inputs: ShowAllLocationEntryPoint.Inputs = inputs()
-    private val presenter = presenterFactory.create(inputs.location, inputs.description)
 
     @Composable
     override fun View(modifier: Modifier) {

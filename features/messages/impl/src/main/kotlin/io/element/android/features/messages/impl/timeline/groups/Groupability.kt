@@ -99,6 +99,6 @@ internal fun MatrixTimelineItem.Event.canBeDisplayedInBubbleBlock(): Boolean {
         is LegacyCallInviteContent,
         CallNotifyContent,
         is StateContent -> false
-        is BeaconShareContent -> TODO()
+        is BeaconShareContent -> false
     }
 }

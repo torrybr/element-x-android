@@ -56,22 +56,9 @@ data class PollContent(
 
 // TODO (tb): get the naming convetino correct
 data class BeaconShareContent(
-    val beaconInfo: TempBeaconInfoContent,
-    val lastLocation: TempLocation,
+    val lastLocation: String,
     val userId: String
 ) : EventContent
-
-data class TempBeaconInfoContent(
-    val description: String,
-    val live: Boolean,
-    val timeout: ULong?
-)
-
-data class TempLocation(
-    val lat: Double,
-    val lon: Double,
-    val accuracy: Float,
-)
 
 data class UnableToDecryptContent(
     val data: Data

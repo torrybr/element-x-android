@@ -18,6 +18,7 @@ package io.element.android.libraries.matrix.impl.timeline.item.event
 
 import io.element.android.libraries.matrix.api.core.UserId
 import io.element.android.libraries.matrix.api.timeline.item.event.CallNotifyContent
+import io.element.android.libraries.matrix.api.timeline.item.event.BeaconShareContent
 import io.element.android.libraries.matrix.api.timeline.item.event.EventContent
 import io.element.android.libraries.matrix.api.timeline.item.event.FailedToParseMessageLikeContent
 import io.element.android.libraries.matrix.api.timeline.item.event.FailedToParseStateContent
@@ -127,6 +128,13 @@ class TimelineEventContentMapper(private val eventMessageMapper: EventMessageMap
         }
         is TimelineItemContentKind.CallInvite -> LegacyCallInviteContent
         is TimelineItemContentKind.CallNotify -> CallNotifyContent
+        // TODO (tb): clean this up and update rust api for better parsing names
+        is TimelineItemContentKind.TestBeaconModel -> {
+            BeaconShareContent(
+                lastLocation = kind.location.geoUri,
+                userId = kind.userId
+            )
+        }
         else -> UnknownContent
     }
 }

@@ -16,7 +16,6 @@
 
 package io.element.android.features.location.impl.all
 
-import android.location.LocationProvider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -26,11 +25,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import com.google.android.gms.location.FusedLocationProviderClient
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
 import io.element.android.features.location.api.Location
+import io.element.android.features.location.impl.all.model.ShowLocationItemFactory
+import io.element.android.features.location.impl.all.model.ShowLocationItems
 import io.element.android.features.location.impl.common.MapDefaults
 import io.element.android.features.location.impl.common.actions.LocationActions
 import io.element.android.features.location.impl.common.permissions.PermissionsEvents
@@ -42,20 +39,16 @@ import io.element.android.libraries.matrix.api.room.MatrixRoom
 import io.element.android.libraries.matrix.api.timeline.TimelineProvider
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class ShowAllLocationPresenter @AssistedInject constructor(
+class ShowAllLocationPresenter @Inject constructor(
     permissionsPresenterFactory: PermissionsPresenter.Factory,
     private val room: MatrixRoom,
     private val locationActions: LocationActions,
     private val buildMeta: BuildMeta,
     private val timelineProvider: TimelineProvider,
-    @Assisted private val location: Location,
-    @Assisted private val description: String?
+    private val showLocationItemFactory: ShowLocationItemFactory,
 ) : Presenter<ShowAllLocationState> {
-    @AssistedFactory
-    interface Factory {
-        fun create(location: Location, description: String?): ShowAllLocationPresenter
-    }
 
     private val permissionsPresenter = permissionsPresenterFactory.create(MapDefaults.permissions)
 
@@ -68,15 +61,17 @@ class ShowAllLocationPresenter @AssistedInject constructor(
         var permissionDialog: ShowAllLocationState.Dialog by remember {
             mutableStateOf(ShowAllLocationState.Dialog.None)
         }
+
         val roomName by remember { derivedStateOf { room.name } }
         var showTileProviderPicker: Boolean by remember { mutableStateOf(false) }
 
-        val beaconInfoItemsFlow = remember {
+        val locationHistoryItemsFlow = remember {
             timeline.timelineItems.map { items ->
-                // find all of the file events
-
+                showLocationItemFactory.create(items)
             }
         }
+
+        val locationHistoryItems by locationHistoryItemsFlow.collectAsState(initial = ShowLocationItems())
 
         val scope = rememberCoroutineScope()
 
@@ -120,8 +115,8 @@ class ShowAllLocationPresenter @AssistedInject constructor(
 
         return ShowAllLocationState(
             permissionDialog = permissionDialog,
-            location = location,
-            description = description,
+            location = Location(1.23, 2.34, 4f),
+            description = "This is a description",
             hasLocationPermission = permissionsState.isAnyGranted,
             isTrackMyLocation = isTrackMyLocation,
             appName = appName,

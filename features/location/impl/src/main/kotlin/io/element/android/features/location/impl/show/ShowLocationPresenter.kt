@@ -18,6 +18,7 @@ package io.element.android.features.location.impl.show
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -27,6 +28,7 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import io.element.android.features.location.api.Location
+import io.element.android.features.location.impl.all.model.ShowLocationItemFactory
 import io.element.android.features.location.impl.common.MapDefaults
 import io.element.android.features.location.impl.common.actions.LocationActions
 import io.element.android.features.location.impl.common.permissions.PermissionsEvents
@@ -34,6 +36,8 @@ import io.element.android.features.location.impl.common.permissions.PermissionsP
 import io.element.android.features.location.impl.common.permissions.PermissionsState
 import io.element.android.libraries.architecture.Presenter
 import io.element.android.libraries.core.meta.BuildMeta
+import io.element.android.libraries.matrix.api.timeline.TimelineProvider
+import kotlinx.coroutines.flow.map
 
 class ShowLocationPresenter @AssistedInject constructor(
     permissionsPresenterFactory: PermissionsPresenter.Factory,
@@ -51,6 +55,7 @@ class ShowLocationPresenter @AssistedInject constructor(
 
     @Composable
     override fun present(): ShowLocationState {
+
         val permissionsState: PermissionsState = permissionsPresenter.present()
         var isTrackMyLocation by remember { mutableStateOf(false) }
         val appName by remember { derivedStateOf { buildMeta.applicationName } }

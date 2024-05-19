@@ -70,6 +70,7 @@ class DefaultTimelineEventFormatter @Inject constructor(
             }
             RedactedContent,
             is StickerContent,
+            is BeaconShareContent,
             is PollContent,
             is UnableToDecryptContent,
             is MessageContent,
@@ -81,7 +82,6 @@ class DefaultTimelineEventFormatter @Inject constructor(
                 }
                 sp.getString(CommonStrings.common_unsupported_event)
             }
-            is BeaconShareContent -> TODO()
         }
     }
 }

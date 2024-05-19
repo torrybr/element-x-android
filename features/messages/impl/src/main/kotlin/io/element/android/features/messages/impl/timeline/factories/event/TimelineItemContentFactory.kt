@@ -69,7 +69,7 @@ class TimelineItemContentFactory @Inject constructor(
             is StateContent -> stateFactory.create(eventTimelineItem)
             is StickerContent -> stickerFactory.create(itemContent)
             is PollContent -> pollFactory.create(eventTimelineItem, itemContent)
-            is BeaconShareContent -> TODO()
+            is BeaconShareContent -> TimelineItemUnknownContent
             is UnableToDecryptContent -> utdFactory.create(itemContent)
             is CallNotifyContent -> TimelineItemCallNotifyContent()
             is UnknownContent -> TimelineItemUnknownContent
