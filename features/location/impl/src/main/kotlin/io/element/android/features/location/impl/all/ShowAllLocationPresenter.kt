@@ -19,6 +19,7 @@ package io.element.android.features.location.impl.all
 import android.location.LocationProvider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -38,6 +39,8 @@ import io.element.android.features.location.impl.common.permissions.PermissionsS
 import io.element.android.libraries.architecture.Presenter
 import io.element.android.libraries.core.meta.BuildMeta
 import io.element.android.libraries.matrix.api.room.MatrixRoom
+import io.element.android.libraries.matrix.api.timeline.TimelineProvider
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 class ShowAllLocationPresenter @AssistedInject constructor(
@@ -45,6 +48,7 @@ class ShowAllLocationPresenter @AssistedInject constructor(
     private val room: MatrixRoom,
     private val locationActions: LocationActions,
     private val buildMeta: BuildMeta,
+    private val timelineProvider: TimelineProvider,
     @Assisted private val location: Location,
     @Assisted private val description: String?
 ) : Presenter<ShowAllLocationState> {
@@ -57,11 +61,21 @@ class ShowAllLocationPresenter @AssistedInject constructor(
 
     @Composable
     override fun present(): ShowAllLocationState {
+        val timeline by timelineProvider.activeTimelineFlow().collectAsState()
         val permissionsState: PermissionsState = permissionsPresenter.present()
         var isTrackMyLocation by remember { mutableStateOf(false) }
         val appName by remember { derivedStateOf { buildMeta.applicationName } }
         var permissionDialog: ShowAllLocationState.Dialog by remember {
             mutableStateOf(ShowAllLocationState.Dialog.None)
+        }
+        val roomName by remember { derivedStateOf { room.name } }
+        var showTileProviderPicker: Boolean by remember { mutableStateOf(false) }
+
+        val beaconInfoItemsFlow = remember {
+            timeline.timelineItems.map { items ->
+                // find all of the file events
+
+            }
         }
 
         val scope = rememberCoroutineScope()
@@ -95,6 +109,12 @@ class ShowAllLocationPresenter @AssistedInject constructor(
                 }
                 ShowAllLocationEvents.RequestPermissions -> permissionsState.eventSink(PermissionsEvents.RequestPermissions)
                 ShowAllLocationEvents.Share -> TODO()
+                ShowAllLocationEvents.OpenTileProvider -> {
+                    showTileProviderPicker = true
+                }
+                ShowAllLocationEvents.DismissTileProviderPicker -> {
+                    showTileProviderPicker = false
+                }
             }
         }
 
@@ -105,6 +125,8 @@ class ShowAllLocationPresenter @AssistedInject constructor(
             hasLocationPermission = permissionsState.isAnyGranted,
             isTrackMyLocation = isTrackMyLocation,
             appName = appName,
+            roomName = roomName ?: "",
+            showTileProviderPicker = showTileProviderPicker,
             eventSink = ::handleEvents,
         )
     }

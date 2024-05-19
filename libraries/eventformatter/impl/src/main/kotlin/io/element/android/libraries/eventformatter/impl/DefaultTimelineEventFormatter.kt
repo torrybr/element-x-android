@@ -22,6 +22,7 @@ import io.element.android.libraries.di.SessionScope
 import io.element.android.libraries.eventformatter.api.TimelineEventFormatter
 import io.element.android.libraries.eventformatter.impl.mode.RenderingMode
 import io.element.android.libraries.matrix.api.timeline.item.event.CallNotifyContent
+import io.element.android.libraries.matrix.api.timeline.item.event.BeaconShareContent
 import io.element.android.libraries.matrix.api.timeline.item.event.EventTimelineItem
 import io.element.android.libraries.matrix.api.timeline.item.event.FailedToParseMessageLikeContent
 import io.element.android.libraries.matrix.api.timeline.item.event.FailedToParseStateContent
@@ -80,6 +81,7 @@ class DefaultTimelineEventFormatter @Inject constructor(
                 }
                 sp.getString(CommonStrings.common_unsupported_event)
             }
+            is BeaconShareContent -> TODO()
         }
     }
 }

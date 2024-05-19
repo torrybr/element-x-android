@@ -51,6 +51,7 @@ import io.element.android.compound.theme.ElementTheme
 import io.element.android.compound.tokens.generated.CompoundIcons
 import io.element.android.compound.tokens.generated.TypographyTokens
 import io.element.android.features.location.api.internal.rememberTileStyleUrl
+import io.element.android.features.location.impl.common.MapDefaults
 
 import io.element.android.features.location.impl.common.PermissionDeniedDialog
 import io.element.android.features.location.impl.common.PermissionRationaleDialog
@@ -67,8 +68,10 @@ import io.element.android.libraries.designsystem.theme.components.Text
 import io.element.android.libraries.designsystem.theme.components.TopAppBar
 import io.element.android.libraries.maplibre.compose.CameraMode
 import io.element.android.libraries.maplibre.compose.CameraMoveStartedReason
+import io.element.android.libraries.maplibre.compose.MapboxMap
 import io.element.android.libraries.maplibre.compose.rememberCameraPositionState
 import io.element.android.libraries.ui.strings.CommonStrings
+import kotlinx.collections.immutable.toImmutableMap
 import org.ramani.compose.LocationRequestProperties
 import org.ramani.compose.LocationStyling
 import org.ramani.compose.MapLibre
@@ -126,7 +129,7 @@ fun ShowAllLocationView(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Show Room Name Here",
+                        text = state.roomName,
                         style = ElementTheme.typography.aliasScreenTitle,
                     )
                 },
@@ -159,11 +162,23 @@ fun ShowAllLocationView(
         },
     ) { paddingValues ->
         Box(modifier = Modifier.padding(paddingValues)) {
-            MapLibre(
+//            MapLibre(
+//                modifier = Modifier.fillMaxSize(),
+//                styleUrl = rememberTileStyleUrl(),
+//                locationRequestProperties = LocationRequestProperties(interval = 250L),
+//            )
+
+            MapboxMap(
+                styleUri = rememberTileStyleUrl(),
                 modifier = Modifier.fillMaxSize(),
-                styleUrl = rememberTileStyleUrl(),
-                locationRequestProperties = LocationRequestProperties(interval = 250L),
+                cameraPositionState = cameraPositionState,
+                uiSettings = MapDefaults.uiSettings,
+                symbolManagerSettings = MapDefaults.symbolManagerSettings,
+                locationSettings = MapDefaults.locationSettings.copy(
+                    locationEnabled = state.hasLocationPermission,
+                ),
             )
+
             state.description?.let {
                 Text(
                     text = it,
@@ -184,13 +199,14 @@ fun ShowAllLocationView(
                 verticalArrangement = Arrangement.spacedBy(8.dp) // Space between buttons
             ) {
                 RoundedIconButton(icon = Icons.Filled.Settings, onClick = { /* Handle Star click */ })
-                RoundedIconButton(icon = Icons.Filled.Layers, onClick = { /* Handle Place click */ })
+                RoundedIconButton(icon = Icons.Filled.Layers, onClick = { state.eventSink(ShowAllLocationEvents.OpenTileProvider) })
                 RoundedIconButton(icon = Icons.Filled.AirlineStops, onClick = { /* Handle Settings click */ })
                 RoundedIconButton(icon = Icons.Filled.AcUnit, onClick = {
                     state.eventSink(ShowAllLocationEvents.StartBeaconInfo)
                 })
 
             }
+            TileProviderBottomSheet(state = state, onTileProviderSelected = { TODO() })
         }
     }
 }

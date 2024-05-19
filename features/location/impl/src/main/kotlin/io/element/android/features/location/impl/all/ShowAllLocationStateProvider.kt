@@ -21,6 +21,10 @@ import io.element.android.features.location.api.Location
 
 private const val APP_NAME = "ApplicationName"
 
+/**
+ *  inject or provide the state for previews or testing, ensuring that the UI can be rendered with various
+ *  predefined states for development or testing purposes
+ */
 class ShowAllLocationStateProvider : PreviewParameterProvider<ShowAllLocationState> {
     override val values: Sequence<ShowAllLocationState>
         get() = sequenceOf(
@@ -66,5 +70,7 @@ fun aShowAllLocationState(
     hasLocationPermission = hasLocationPermission,
     isTrackMyLocation = isTrackMyLocation,
     appName = appName,
+    roomName = "RoomName",
+    showTileProviderPicker = false,
     eventSink = eventSink,
 )

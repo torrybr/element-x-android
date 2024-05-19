@@ -51,6 +51,7 @@ dependencies {
     implementation(libs.dagger)
     implementation(projects.anvilannotations)
     implementation(libs.play.services.location)
+    implementation(project(":libraries:dateformatter:api"))
     anvil(projects.anvilcodegen)
     ksp(libs.showkase.processor)
     implementation(libs.ramani.maplibre)

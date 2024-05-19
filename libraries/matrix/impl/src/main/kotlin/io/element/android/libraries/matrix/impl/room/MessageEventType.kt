@@ -43,6 +43,7 @@ fun MessageEventType.map(): MessageLikeEventType = when (this) {
     MessageEventType.UNSTABLE_POLL_END -> MessageLikeEventType.UNSTABLE_POLL_END
     MessageEventType.UNSTABLE_POLL_RESPONSE -> MessageLikeEventType.UNSTABLE_POLL_RESPONSE
     MessageEventType.UNSTABLE_POLL_START -> MessageLikeEventType.UNSTABLE_POLL_START
+    MessageEventType.BEACON -> MessageLikeEventType.BEACON
 }
 
 fun MessageLikeEventType.map(): MessageEventType = when (this) {
@@ -69,5 +70,5 @@ fun MessageLikeEventType.map(): MessageEventType = when (this) {
     MessageLikeEventType.UNSTABLE_POLL_END -> MessageEventType.UNSTABLE_POLL_END
     MessageLikeEventType.UNSTABLE_POLL_RESPONSE -> MessageEventType.UNSTABLE_POLL_RESPONSE
     MessageLikeEventType.UNSTABLE_POLL_START -> MessageEventType.UNSTABLE_POLL_START
-    MessageLikeEventType.BEACON -> TODO()
+    MessageLikeEventType.BEACON -> MessageEventType.BEACON
 }

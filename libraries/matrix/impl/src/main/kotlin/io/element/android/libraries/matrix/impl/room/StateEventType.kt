@@ -42,6 +42,7 @@ fun StateEventType.map(): RustStateEventType = when (this) {
     StateEventType.ROOM_TOPIC -> RustStateEventType.ROOM_TOPIC
     StateEventType.SPACE_CHILD -> RustStateEventType.SPACE_CHILD
     StateEventType.SPACE_PARENT -> RustStateEventType.SPACE_PARENT
+    StateEventType.BEACON_INFO -> RustStateEventType.BEACON_INFO
 }
 
 fun RustStateEventType.map(): StateEventType = when (this) {
@@ -67,5 +68,5 @@ fun RustStateEventType.map(): StateEventType = when (this) {
     RustStateEventType.ROOM_TOPIC -> StateEventType.ROOM_TOPIC
     RustStateEventType.SPACE_CHILD -> StateEventType.SPACE_CHILD
     RustStateEventType.SPACE_PARENT -> StateEventType.SPACE_PARENT
-    org.matrix.rustcomponents.sdk.StateEventType.BEACON_INFO -> TODO()
+    org.matrix.rustcomponents.sdk.StateEventType.BEACON_INFO -> StateEventType.BEACON_INFO
 }

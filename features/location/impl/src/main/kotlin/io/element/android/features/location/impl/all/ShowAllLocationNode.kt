@@ -31,6 +31,11 @@ import io.element.android.libraries.architecture.inputs
 import io.element.android.libraries.di.RoomScope
 import io.element.android.services.analytics.api.AnalyticsService
 
+/**
+ * manage the lifecycle and integration of various components like analytics and presenter for the location feature.
+ * The Node class is a crucial part of your architecture, serving as a bridge between the view and the underlying logic,
+ * also managing dependencies like the presenter and analytics service.
+ */
 @ContributesNode(RoomScope::class)
 class ShowAllLocationNode @AssistedInject constructor(
     presenterFactory: ShowAllLocationPresenter.Factory,

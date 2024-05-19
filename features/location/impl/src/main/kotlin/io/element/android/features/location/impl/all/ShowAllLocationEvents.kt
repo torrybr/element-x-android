@@ -24,4 +24,8 @@ sealed interface ShowAllLocationEvents {
     data object OpenAppSettings : ShowAllLocationEvents
 
     data object StartBeaconInfo : ShowAllLocationEvents
+
+    data object OpenTileProvider : ShowAllLocationEvents
+
+    data object DismissTileProviderPicker : ShowAllLocationEvents
 }

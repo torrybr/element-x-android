@@ -55,12 +55,17 @@ class PollHistoryItemsFactory @Inject constructor(
     private suspend fun create(timelineItem: MatrixTimelineItem): PollHistoryItem? {
         return when (timelineItem) {
             is MatrixTimelineItem.Event -> {
-                val pollContent = timelineItem.event.content as? PollContent ?: return null
-                val pollContentState = pollContentStateFactory.create(timelineItem.event, pollContent)
-                PollHistoryItem(
-                    formattedDate = daySeparatorFormatter.format(timelineItem.event.timestamp),
-                    state = pollContentState
-                )
+                val pollContent = timelineItem.event.content as? PollContent
+
+                if (pollContent != null) {
+                    val pollContentState = pollContentStateFactory.create(timelineItem.event, pollContent)
+                    PollHistoryItem(
+                        formattedDate = daySeparatorFormatter.format(timelineItem.event.timestamp),
+                        state = pollContentState
+                    )
+                } else {
+                    return null
+                }
             }
             else -> null
         }

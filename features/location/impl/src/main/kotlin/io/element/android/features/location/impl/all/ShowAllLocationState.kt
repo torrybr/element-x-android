@@ -18,13 +18,19 @@ package io.element.android.features.location.impl.all
 
 import io.element.android.features.location.api.Location
 
+/**
+ * defines the state for the "Show All Location" feature, including all the variables and data structures
+ * that represent the UI state at any given time
+ */
 data class ShowAllLocationState(
     val permissionDialog: Dialog,
     val location: Location,
     val description: String?,
     val hasLocationPermission: Boolean,
     val isTrackMyLocation: Boolean,
+    val showTileProviderPicker: Boolean,
     val appName: String,
+    val roomName: String,
     val eventSink: (ShowAllLocationEvents) -> Unit,
 ) {
     sealed interface Dialog {

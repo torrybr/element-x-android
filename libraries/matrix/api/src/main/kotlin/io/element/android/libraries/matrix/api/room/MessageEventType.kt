@@ -40,4 +40,5 @@ enum class MessageEventType {
     UNSTABLE_POLL_END,
     UNSTABLE_POLL_RESPONSE,
     UNSTABLE_POLL_START,
+    BEACON
 }

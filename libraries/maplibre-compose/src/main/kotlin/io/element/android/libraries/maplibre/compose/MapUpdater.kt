@@ -31,6 +31,7 @@ import org.maplibre.android.location.LocationComponentActivationOptions
 import org.maplibre.android.location.LocationComponentOptions
 import org.maplibre.android.location.OnCameraTrackingChangedListener
 import org.maplibre.android.location.engine.LocationEngineRequest
+import org.maplibre.android.location.modes.RenderMode
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.Style
 
@@ -57,6 +58,7 @@ internal class MapPropertiesNode(
 //                        .pulseEnabled(locationSettings.pulseEnabled)
 //                        .pulseColor(locationSettings.pulseColor.toArgb())
 //                        .compassAnimationEnabled(true)
+//                        .compassAnimationEnabled(true)
                         .build()
                 )
                 .useDefaultLocationEngine(true)
@@ -69,6 +71,7 @@ internal class MapPropertiesNode(
 //                )
                 .build()
         )
+        map.locationComponent.renderMode = RenderMode.COMPASS
         cameraPositionState.setMap(map)
     }
 
