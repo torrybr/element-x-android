@@ -178,7 +178,7 @@ class ShowAllLocationPresenter @Inject constructor(
     private suspend fun startBeaconInfo() {
         room.startBeaconInfo()
         //wait 10 seconds
-        Thread.sleep(5000) // pause to test arrival times
+        delay(5000) // pause to test arrival times
         startBeaconInfo2()
     }
 

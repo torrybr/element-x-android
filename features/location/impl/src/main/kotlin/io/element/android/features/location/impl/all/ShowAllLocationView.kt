@@ -51,6 +51,7 @@ import io.element.android.compound.tokens.generated.CompoundIcons
 import io.element.android.compound.tokens.generated.TypographyTokens
 import io.element.android.features.location.api.Location.Companion.fromGeoUri
 import io.element.android.features.location.api.internal.rememberTileStyleUrl
+import io.element.android.features.location.impl.all.model.ShowLocationItem
 
 import io.element.android.features.location.impl.common.PermissionDeniedDialog
 import io.element.android.features.location.impl.common.PermissionRationaleDialog
@@ -71,6 +72,7 @@ import io.element.android.libraries.maplibre.compose.CameraMoveStartedReason
 import io.element.android.libraries.maplibre.compose.rememberCameraPositionState
 import io.element.android.libraries.ui.strings.CommonStrings
 import org.ramani.compose.Circle
+import org.ramani.compose.CircleWithItem
 import org.ramani.compose.LocationRequestProperties
 import org.ramani.compose.MapLibre
 import org.ramani.compose.Symbol
@@ -167,24 +169,10 @@ fun ShowAllLocationView(
                 images = listOf(PIN_ID to CommonDrawables.pin),
             ) {
                 state.showLocationItems.ongoing.forEach { item ->
-                    LocationSymbol(item.state.location)
+                    LocationSymbol(item)
                 }
             }
-
-//            MapboxMap(
-//                styleUri = rememberTileStyleUrl(),
-//                modifier = Modifier.fillMaxSize(),
-//                cameraPositionState = cameraPositionState,
-//                uiSettings = MapDefaults.uiSettings,
-//                images = mapOf(PIN_ID to CommonDrawables.pin).toImmutableMap(),
-//                symbolManagerSettings = MapDefaults.symbolManagerSettings,
-//                locationSettings = MapDefaults.locationSettings.copy(
-//                    locationEnabled = state.hasLocationPermission,
-//                ),
-//            )
-//            {
-//
-//            }
+            
             state.description?.let {
                 Text(
                     text = it,
@@ -234,36 +222,13 @@ fun RoundedIconButton(icon: ImageVector, onClick: () -> Unit) {
 }
 
 @Composable
-fun LocationSymbol(locationUri: String) {
-    val location = fromGeoUri(locationUri)
+fun LocationSymbol(item: ShowLocationItem) {
+    val location = fromGeoUri(item.state.location)
     location?.let {
         val latLng = LatLng(it.lat, it.lon)
-        Circle(center = latLng, radius = 10.0F, color = "Blue", zIndex = 1)
-//        Symbol(
-//            center = latLng,
-//            color = "Blue",
-//            size = 30.0F,
-//            isDraggable = false,
-//            text = "TEST ME",
-//            zIndex = 999
-//        )
+        CircleWithItem(center = latLng, radius = 10.0F, color = "Blue", text = item.state.user, isDraggable = false, zIndex = 1, itemSize = 10F)
     }
 }
-
-//@Composable
-//fun LocationSymbol(locationUri: String) {
-//    val location = fromGeoUri(locationUri)
-//    location?.let {
-//        val latLng = LatLng(it.lat, it.lon)
-//        Symbol(
-//            iconId = PIN_ID,
-//            state = rememberSymbolState(
-//                position = latLng,
-//            ),
-//            iconAnchor = IconAnchor.BOTTOM,
-//        )
-//    }
-//}
 
 @PreviewsDayNight
 @Composable
