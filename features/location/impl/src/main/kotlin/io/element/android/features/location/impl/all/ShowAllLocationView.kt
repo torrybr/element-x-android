@@ -16,7 +16,6 @@
 
 package io.element.android.features.location.impl.all
 
-import android.location.Location
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -50,8 +49,8 @@ import com.mapbox.mapboxsdk.geometry.LatLng
 import io.element.android.compound.theme.ElementTheme
 import io.element.android.compound.tokens.generated.CompoundIcons
 import io.element.android.compound.tokens.generated.TypographyTokens
+import io.element.android.features.location.api.Location.Companion.fromGeoUri
 import io.element.android.features.location.api.internal.rememberTileStyleUrl
-import io.element.android.features.location.impl.common.MapDefaults
 
 import io.element.android.features.location.impl.common.PermissionDeniedDialog
 import io.element.android.features.location.impl.common.PermissionRationaleDialog
@@ -66,16 +65,15 @@ import io.element.android.libraries.designsystem.theme.components.IconButton
 import io.element.android.libraries.designsystem.theme.components.Scaffold
 import io.element.android.libraries.designsystem.theme.components.Text
 import io.element.android.libraries.designsystem.theme.components.TopAppBar
+import io.element.android.libraries.designsystem.utils.CommonDrawables
 import io.element.android.libraries.maplibre.compose.CameraMode
 import io.element.android.libraries.maplibre.compose.CameraMoveStartedReason
-import io.element.android.libraries.maplibre.compose.MapboxMap
 import io.element.android.libraries.maplibre.compose.rememberCameraPositionState
 import io.element.android.libraries.ui.strings.CommonStrings
-import kotlinx.collections.immutable.toImmutableMap
+import org.ramani.compose.Circle
 import org.ramani.compose.LocationRequestProperties
-import org.ramani.compose.LocationStyling
 import org.ramani.compose.MapLibre
-import org.ramani.compose.UiSettings
+import org.ramani.compose.Symbol
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -100,7 +98,7 @@ fun ShowAllLocationView(
 
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.Builder()
-            .target(LatLng(state.location.lat, state.location.lon))
+            .target(LatLng(38.879366660251435, -77.02429536242268))
             .zoom(ShowAllMapDefaults.DEFAULT_ZOOM)
             .build()
     }
@@ -162,23 +160,31 @@ fun ShowAllLocationView(
         },
     ) { paddingValues ->
         Box(modifier = Modifier.padding(paddingValues)) {
-//            MapLibre(
-//                modifier = Modifier.fillMaxSize(),
-//                styleUrl = rememberTileStyleUrl(),
-//                locationRequestProperties = LocationRequestProperties(interval = 250L),
-//            )
-
-            MapboxMap(
-                styleUri = rememberTileStyleUrl(),
+            MapLibre(
                 modifier = Modifier.fillMaxSize(),
-                cameraPositionState = cameraPositionState,
-                uiSettings = MapDefaults.uiSettings,
-                symbolManagerSettings = MapDefaults.symbolManagerSettings,
-                locationSettings = MapDefaults.locationSettings.copy(
-                    locationEnabled = state.hasLocationPermission,
-                ),
-            )
+                styleUrl = rememberTileStyleUrl(),
+                locationRequestProperties = LocationRequestProperties(interval = 250L),
+                images = listOf(PIN_ID to CommonDrawables.pin),
+            ) {
+                state.showLocationItems.ongoing.forEach { item ->
+                    LocationSymbol(item.state.location)
+                }
+            }
 
+//            MapboxMap(
+//                styleUri = rememberTileStyleUrl(),
+//                modifier = Modifier.fillMaxSize(),
+//                cameraPositionState = cameraPositionState,
+//                uiSettings = MapDefaults.uiSettings,
+//                images = mapOf(PIN_ID to CommonDrawables.pin).toImmutableMap(),
+//                symbolManagerSettings = MapDefaults.symbolManagerSettings,
+//                locationSettings = MapDefaults.locationSettings.copy(
+//                    locationEnabled = state.hasLocationPermission,
+//                ),
+//            )
+//            {
+//
+//            }
             state.description?.let {
                 Text(
                     text = it,
@@ -226,6 +232,38 @@ fun RoundedIconButton(icon: ImageVector, onClick: () -> Unit) {
         )
     }
 }
+
+@Composable
+fun LocationSymbol(locationUri: String) {
+    val location = fromGeoUri(locationUri)
+    location?.let {
+        val latLng = LatLng(it.lat, it.lon)
+        Circle(center = latLng, radius = 10.0F, color = "Blue", zIndex = 1)
+//        Symbol(
+//            center = latLng,
+//            color = "Blue",
+//            size = 30.0F,
+//            isDraggable = false,
+//            text = "TEST ME",
+//            zIndex = 999
+//        )
+    }
+}
+
+//@Composable
+//fun LocationSymbol(locationUri: String) {
+//    val location = fromGeoUri(locationUri)
+//    location?.let {
+//        val latLng = LatLng(it.lat, it.lon)
+//        Symbol(
+//            iconId = PIN_ID,
+//            state = rememberSymbolState(
+//                position = latLng,
+//            ),
+//            iconAnchor = IconAnchor.BOTTOM,
+//        )
+//    }
+//}
 
 @PreviewsDayNight
 @Composable

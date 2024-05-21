@@ -17,6 +17,7 @@
 package io.element.android.features.location.impl.all
 
 import io.element.android.features.location.api.Location
+import io.element.android.features.location.impl.all.model.ShowLocationItems
 
 /**
  * defines the state for the "Show All Location" feature, including all the variables and data structures
@@ -32,6 +33,7 @@ data class ShowAllLocationState(
     val appName: String,
     val roomName: String,
     val eventSink: (ShowAllLocationEvents) -> Unit,
+    val showLocationItems: ShowLocationItems
 ) {
     sealed interface Dialog {
         data object None : Dialog

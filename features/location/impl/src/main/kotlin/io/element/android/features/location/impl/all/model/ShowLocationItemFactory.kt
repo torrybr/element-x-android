@@ -27,7 +27,9 @@ import kotlinx.coroutines.withContext
 class ShowLocationItemFactory @Inject constructor(
     private val daySeparatorFormatter: DaySeparatorFormatter,
     private val dispatchers: CoroutineDispatchers,
-) {
+    private val locationContentStateFactory: ShowLocationContentStateFactory,
+
+    ) {
 
     suspend fun create(timelineItems: List<MatrixTimelineItem>) = withContext(dispatchers.computation) {
         val ongoing = ArrayList<ShowLocationItem>()
@@ -47,18 +49,14 @@ class ShowLocationItemFactory @Inject constructor(
             is MatrixTimelineItem.Event -> {
                 val locationContent = timelineItem.event.content as? BeaconShareContent
                 if (locationContent != null) {
-                    println()
+                    val locationContentState = locationContentStateFactory.create(timelineItem.event, locationContent)
+                    ShowLocationItem(
+                        formattedDate = daySeparatorFormatter.format(timelineItem.event.timestamp),
+                        state = locationContentState
+                    )
+                } else {
+                    return null
                 }
-//                if (pollContent != null) {
-//                    val locationContentState = pollContentStateFactory.create(timelineItem.event, pollContent)
-//                    ShowLocationItem.kt(
-//                        formattedDate = daySeparatorFormatter.format(timelineItem.event.timestamp),
-//                        state = pollContentState
-//                    )
-//                } else {
-//                    return null
-//                }
-                return null
             }
             else -> null
         }

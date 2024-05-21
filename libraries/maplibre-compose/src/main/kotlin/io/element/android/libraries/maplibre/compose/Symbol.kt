@@ -93,6 +93,7 @@ public fun Symbol(
 ) {
     val mapApplier = currentComposer.applier as MapApplier
     val symbolManager = mapApplier.symbolManager
+
     ComposeNode<SymbolNode, MapApplier>(
         factory = {
             SymbolNode(

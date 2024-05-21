@@ -18,6 +18,9 @@ package io.element.android.features.location.impl.all
 
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import io.element.android.features.location.api.Location
+import io.element.android.features.location.impl.all.model.ShowLocationItem
+import io.element.android.features.location.impl.all.model.ShowLocationItemState
+import io.element.android.features.location.impl.all.model.ShowLocationItems
 
 private const val APP_NAME = "ApplicationName"
 
@@ -64,6 +67,7 @@ fun aShowAllLocationState(
     appName: String = APP_NAME,
     eventSink: (ShowAllLocationEvents) -> Unit = {},
 ) = ShowAllLocationState(
+    showLocationItems = TODO(),
     permissionDialog = permissionDialog,
     location = location,
     description = description,
@@ -74,3 +78,11 @@ fun aShowAllLocationState(
     showTileProviderPicker = false,
     eventSink = eventSink,
 )
+
+//internal fun aLocationHistoryItem(
+//    formattedDate: String = "01/12/2023",
+//    state: ShowLocationItemState = aLocationContentState(),
+//) = ShowLocationItem(
+//    formattedDate = formattedDate,
+//    state = state,
+//)

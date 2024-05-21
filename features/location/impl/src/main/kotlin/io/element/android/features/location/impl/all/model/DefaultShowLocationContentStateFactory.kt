@@ -16,9 +16,20 @@
 
 package io.element.android.features.location.impl.all.model
 
+import com.squareup.anvil.annotations.ContributesBinding
+import io.element.android.libraries.di.RoomScope
 import io.element.android.libraries.matrix.api.timeline.item.event.BeaconShareContent
 import io.element.android.libraries.matrix.api.timeline.item.event.EventTimelineItem
+import javax.inject.Inject
 
-interface ShowLocationContentStateFactory {
-    suspend fun create(event: EventTimelineItem, content: BeaconShareContent): ShowLocationItemState
+@ContributesBinding(RoomScope::class)
+class DefaultShowLocationContentStateFactory @Inject constructor() : ShowLocationContentStateFactory {
+    override suspend fun create(event: EventTimelineItem, content: BeaconShareContent): ShowLocationItemState {
+        return ShowLocationItemState(
+            user = content.userId,
+            location = content.lastLocation,
+            lastUpdated = event.timestamp.toString(),
+            isMine = event.isOwn,
+        )
+    }
 }

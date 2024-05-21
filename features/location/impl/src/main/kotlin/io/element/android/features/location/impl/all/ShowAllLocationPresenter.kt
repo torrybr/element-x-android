@@ -37,9 +37,12 @@ import io.element.android.libraries.architecture.Presenter
 import io.element.android.libraries.core.meta.BuildMeta
 import io.element.android.libraries.matrix.api.room.MatrixRoom
 import io.element.android.libraries.matrix.api.timeline.TimelineProvider
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.math.pow
+import kotlin.math.sqrt
 
 class ShowAllLocationPresenter @Inject constructor(
     permissionsPresenterFactory: PermissionsPresenter.Factory,
@@ -64,6 +67,8 @@ class ShowAllLocationPresenter @Inject constructor(
 
         val roomName by remember { derivedStateOf { room.name } }
         var showTileProviderPicker: Boolean by remember { mutableStateOf(false) }
+
+        val loc by remember { mutableStateOf(Location(38.879366660251435, -77.02429536242268, 4f)) }
 
         val locationHistoryItemsFlow = remember {
             timeline.timelineItems.map { items ->
@@ -115,8 +120,9 @@ class ShowAllLocationPresenter @Inject constructor(
 
         return ShowAllLocationState(
             permissionDialog = permissionDialog,
-            location = Location(1.23, 2.34, 4f),
-            description = "This is a description",
+            showLocationItems = locationHistoryItems,
+            location = loc,
+            description = locationHistoryItems.ongoing.joinToString(", ") { it.state.user },
             hasLocationPermission = permissionsState.isAnyGranted,
             isTrackMyLocation = isTrackMyLocation,
             appName = appName,
@@ -126,30 +132,60 @@ class ShowAllLocationPresenter @Inject constructor(
         )
     }
 
-    // Create a list of GeoURIs representing a route through Washington D.C.
-    val routeTracks = arrayListOf(
-        "geo:38.8730,-77.0074", // Nationals Park
-        "geo:38.8763,-77.0059", // Navy Yard Metro Station
-        "geo:38.8765,-77.0006", // The Yards Park
-        "geo:38.8899,-77.0091", // U.S. Capitol
-        "geo:38.8913,-77.0300", // National Museum of American History
-        "geo:38.8895,-77.0353", // Washington Monument
-        "geo:38.8893,-77.0502"  // Lincoln Memorial
-    )
+    // Calculate the straight line distance between two geo points for simplicity
+    fun distanceBetween(point1: GeoPoint, point2: GeoPoint): Double {
+        val latDiff = point2.latitude - point1.latitude
+        val lonDiff = point2.longitude - point1.longitude
+        return sqrt(latDiff.pow(2) + lonDiff.pow(2)) * 111.32 // Approx. conversion to kilometers
+    }
+
+    // Interpolate points between two geo points
+    fun interpolatePoints(start: GeoPoint, end: GeoPoint, numPoints: Int): List<GeoPoint> {
+        val points = mutableListOf<GeoPoint>()
+        for (i in 0..numPoints) {
+            val fraction = i.toDouble() / numPoints
+            val interpolatedLat = start.latitude + (end.latitude - start.latitude) * fraction
+            val interpolatedLon = start.longitude + (end.longitude - start.longitude) * fraction
+            points.add(GeoPoint(interpolatedLat, interpolatedLon))
+        }
+        return points
+    }
+
+    private suspend fun startBeaconInfo2() {
+        val routeTracks = listOf(
+            GeoPoint(38.8730, -77.0074), // Nationals Park
+            GeoPoint(38.8763, -77.0059), // Navy Yard Metro Station
+            GeoPoint(38.8765, -77.0006), // The Yards Park
+            GeoPoint(38.8899, -77.0091), // U.S. Capitol
+            GeoPoint(38.8913, -77.0300), // National Museum of American History
+            GeoPoint(38.8895, -77.0353), // Washington Monument
+            GeoPoint(38.8893, -77.0502)  // Lincoln Memorial
+        )
+
+        for (i in 0 until routeTracks.size - 1) {
+            val currentLocation = routeTracks[i]
+            val nextLocation = routeTracks[i + 1]
+            val interpolatedPoints = interpolatePoints(currentLocation, nextLocation, 10) // Create 10 intermediate points
+
+            for (point in interpolatedPoints) {
+//                updateUserLocation(point.toGeoURI())
+                room.updateUserLocation(point.toGeoURI())
+                delay(1000L) // Shorter delay for more frequent updates
+            }
+        }
+    }
 
     private suspend fun startBeaconInfo() {
         room.startBeaconInfo()
         //wait 10 seconds
         Thread.sleep(5000) // pause to test arrival times
-        updateLocation()
+        startBeaconInfo2()
     }
 
     private suspend fun updateLocation() {
-
-        for (track in routeTracks) {
-            room.updateUserLocation(track)
-            //wait 10 seconds
-            Thread.sleep(1000) // pause to test arrival times
-        }
     }
+}
+
+data class GeoPoint(val latitude: Double, val longitude: Double) {
+    fun toGeoURI(): String = "geo:$latitude,$longitude"
 }
