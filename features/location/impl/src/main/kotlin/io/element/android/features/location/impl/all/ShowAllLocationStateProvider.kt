@@ -66,7 +66,8 @@ fun aShowAllLocationState(
     isTrackMyLocation: Boolean = false,
     appName: String = APP_NAME,
     eventSink: (ShowAllLocationEvents) -> Unit = {},
-) = ShowAllLocationState(
+
+    ) = ShowAllLocationState(
     showLocationItems = TODO(),
     permissionDialog = permissionDialog,
     location = location,
@@ -77,6 +78,7 @@ fun aShowAllLocationState(
     roomName = "RoomName",
     showTileProviderPicker = false,
     eventSink = eventSink,
+    isSharingLocation = false,
 )
 
 //internal fun aLocationHistoryItem(

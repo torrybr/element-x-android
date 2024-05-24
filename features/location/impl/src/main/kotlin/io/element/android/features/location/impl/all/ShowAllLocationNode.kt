@@ -16,6 +16,7 @@
 
 package io.element.android.features.location.impl.all
 
+import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.bumble.appyx.core.lifecycle.subscribe
@@ -28,6 +29,7 @@ import im.vector.app.features.analytics.plan.MobileScreen
 import io.element.android.anvilannotations.ContributesNode
 import io.element.android.features.location.api.ShowAllLocationEntryPoint
 import io.element.android.libraries.architecture.inputs
+import io.element.android.libraries.di.ApplicationContext
 import io.element.android.libraries.di.RoomScope
 import io.element.android.services.analytics.api.AnalyticsService
 
@@ -50,8 +52,6 @@ class ShowAllLocationNode @AssistedInject constructor(
             }
         )
     }
-
-    private val inputs: ShowAllLocationEntryPoint.Inputs = inputs()
 
     @Composable
     override fun View(modifier: Modifier) {

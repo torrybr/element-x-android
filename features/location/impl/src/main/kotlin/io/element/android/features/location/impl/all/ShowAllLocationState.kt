@@ -33,7 +33,8 @@ data class ShowAllLocationState(
     val appName: String,
     val roomName: String,
     val eventSink: (ShowAllLocationEvents) -> Unit,
-    val showLocationItems: ShowLocationItems
+    val showLocationItems: ShowLocationItems,
+    val isSharingLocation: Boolean
 ) {
     sealed interface Dialog {
         data object None : Dialog

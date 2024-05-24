@@ -41,8 +41,25 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.math.pow
-import kotlin.math.sqrt
+
+import android.Manifest
+import android.annotation.SuppressLint
+import android.os.Looper
+import androidx.annotation.RequiresPermission
+import androidx.compose.runtime.*
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleOwner
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationResult
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.Priority
+import io.element.android.libraries.matrix.api.timeline.Timeline
+import kotlinx.coroutines.CoroutineScope
+import java.util.concurrent.TimeUnit
 
 class ShowAllLocationPresenter @Inject constructor(
     permissionsPresenterFactory: PermissionsPresenter.Factory,
@@ -55,9 +72,10 @@ class ShowAllLocationPresenter @Inject constructor(
 
     private val permissionsPresenter = permissionsPresenterFactory.create(MapDefaults.permissions)
 
+    @SuppressLint("MissingPermission", "DefaultLocale")
     @Composable
     override fun present(): ShowAllLocationState {
-        val timeline by timelineProvider.activeTimelineFlow().collectAsState()
+
         val permissionsState: PermissionsState = permissionsPresenter.present()
         var isTrackMyLocation by remember { mutableStateOf(false) }
         val appName by remember { derivedStateOf { buildMeta.applicationName } }
@@ -70,6 +88,41 @@ class ShowAllLocationPresenter @Inject constructor(
 
         val loc by remember { mutableStateOf(Location(38.879366660251435, -77.02429536242268, 4f)) }
 
+        var isSharingLocation: Boolean by remember {
+            mutableStateOf(false)
+        }
+
+        val scope = rememberCoroutineScope()
+
+        ///////////////////////////// Location Functions /////////////////////////////
+        var locationRequest by remember {
+            mutableStateOf<LocationRequest?>(null)
+        }
+
+        // Only register the location updates effect when we have a request
+        if (locationRequest != null) {
+            LocationUpdatesEffect(locationRequest!!) { result ->
+                // For each result update the text
+                for (currentLocation in result.locations) {
+                    scope.launch {
+                        locationUpdate(currentLocation)
+                    }
+                }
+            }
+        }
+
+
+        LaunchedEffect(permissionsState.permissions) {
+            if (permissionsState.isAnyGranted) {
+                permissionDialog = ShowAllLocationState.Dialog.None
+            }
+        }
+        ///////////////////////////// End Location Functions /////////////////////////////
+
+        ///////////////////////////// Timeline Functions /////////////////////////////
+        val timeline by timelineProvider.activeTimelineFlow().collectAsState()
+        val paginationState by timeline.paginationStatus(Timeline.PaginationDirection.BACKWARDS).collectAsState()
+
         val locationHistoryItemsFlow = remember {
             timeline.timelineItems.map { items ->
                 showLocationItemFactory.create(items)
@@ -78,18 +131,25 @@ class ShowAllLocationPresenter @Inject constructor(
 
         val locationHistoryItems by locationHistoryItemsFlow.collectAsState(initial = ShowLocationItems())
 
-        val scope = rememberCoroutineScope()
-
-        LaunchedEffect(permissionsState.permissions) {
-            if (permissionsState.isAnyGranted) {
-                permissionDialog = ShowAllLocationState.Dialog.None
-            }
+        LaunchedEffect(paginationState, locationHistoryItems.size) {
+            if (locationHistoryItems.size == 0 && paginationState.canPaginate) loadMore(timeline)
         }
+
+        ///////////////////////////// End Timeline Functions /////////////////////////////
 
         fun handleEvents(event: ShowAllLocationEvents) {
             when (event) {
-                ShowAllLocationEvents.StartBeaconInfo -> scope.launch {
-                    startBeaconInfo()
+                ShowAllLocationEvents.StartBeaconInfo -> {
+                    isSharingLocation = true
+                    locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, TimeUnit.SECONDS.toMillis(3)).build()
+                    scope.launch {
+                        startBeaconInfo()
+
+                    }
+                }
+                ShowAllLocationEvents.StopBeaconInfo -> {
+                    isSharingLocation = false
+                    locationRequest = null
                 }
                 is ShowAllLocationEvents.TrackMyLocation -> {
                     if (event.enabled) {
@@ -108,7 +168,6 @@ class ShowAllLocationPresenter @Inject constructor(
                     permissionDialog = ShowAllLocationState.Dialog.None
                 }
                 ShowAllLocationEvents.RequestPermissions -> permissionsState.eventSink(PermissionsEvents.RequestPermissions)
-                ShowAllLocationEvents.Share -> TODO()
                 ShowAllLocationEvents.OpenTileProvider -> {
                     showTileProviderPicker = true
                 }
@@ -122,70 +181,74 @@ class ShowAllLocationPresenter @Inject constructor(
             permissionDialog = permissionDialog,
             showLocationItems = locationHistoryItems,
             location = loc,
-            description = locationHistoryItems.ongoing.joinToString(", ") { it.state.user },
+            description = "",
             hasLocationPermission = permissionsState.isAnyGranted,
             isTrackMyLocation = isTrackMyLocation,
             appName = appName,
             roomName = roomName ?: "",
             showTileProviderPicker = showTileProviderPicker,
             eventSink = ::handleEvents,
+            isSharingLocation = isSharingLocation
         )
     }
 
-    // Calculate the straight line distance between two geo points for simplicity
-    fun distanceBetween(point1: GeoPoint, point2: GeoPoint): Double {
-        val latDiff = point2.latitude - point1.latitude
-        val lonDiff = point2.longitude - point1.longitude
-        return sqrt(latDiff.pow(2) + lonDiff.pow(2)) * 111.32 // Approx. conversion to kilometers
-    }
-
-    // Interpolate points between two geo points
-    fun interpolatePoints(start: GeoPoint, end: GeoPoint, numPoints: Int): List<GeoPoint> {
-        val points = mutableListOf<GeoPoint>()
-        for (i in 0..numPoints) {
-            val fraction = i.toDouble() / numPoints
-            val interpolatedLat = start.latitude + (end.latitude - start.latitude) * fraction
-            val interpolatedLon = start.longitude + (end.longitude - start.longitude) * fraction
-            points.add(GeoPoint(interpolatedLat, interpolatedLon))
-        }
-        return points
-    }
-
-    private suspend fun startBeaconInfo2() {
-        val routeTracks = listOf(
-            GeoPoint(38.8730, -77.0074), // Nationals Park
-            GeoPoint(38.8763, -77.0059), // Navy Yard Metro Station
-            GeoPoint(38.8765, -77.0006), // The Yards Park
-            GeoPoint(38.8899, -77.0091), // U.S. Capitol
-            GeoPoint(38.8913, -77.0300), // National Museum of American History
-            GeoPoint(38.8895, -77.0353), // Washington Monument
-            GeoPoint(38.8893, -77.0502)  // Lincoln Memorial
-        )
-
-        for (i in 0 until routeTracks.size - 1) {
-            val currentLocation = routeTracks[i]
-            val nextLocation = routeTracks[i + 1]
-            val interpolatedPoints = interpolatePoints(currentLocation, nextLocation, 10) // Create 10 intermediate points
-
-            for (point in interpolatedPoints) {
-//                updateUserLocation(point.toGeoURI())
-                room.updateUserLocation(point.toGeoURI())
-                delay(1000L) // Shorter delay for more frequent updates
-            }
-        }
+    private fun CoroutineScope.loadMore(timeline: Timeline) = launch {
+        timeline.paginate(Timeline.PaginationDirection.BACKWARDS)
     }
 
     private suspend fun startBeaconInfo() {
         room.startBeaconInfo()
-        //wait 10 seconds
+        //wait 5 seconds
         delay(5000) // pause to test arrival times
-        startBeaconInfo2()
     }
 
-    private suspend fun updateLocation() {
+    private suspend fun locationUpdate(currentLocation: android.location.Location) {
+        val matrixLocation = Location(currentLocation.latitude, currentLocation.longitude, currentLocation.accuracy)
+        room.updateUserLocation(matrixLocation.toGeoUri())
     }
 }
 
-data class GeoPoint(val latitude: Double, val longitude: Double) {
-    fun toGeoURI(): String = "geo:$latitude,$longitude"
+/**
+ * An effect that request location updates based on the provided request and ensures that the
+ * updates are added and removed whenever the composable enters or exists the composition.
+ */
+@RequiresPermission(
+    anyOf = [Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION],
+)
+@Composable
+fun LocationUpdatesEffect(
+    locationRequest: LocationRequest,
+    lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
+    onUpdate: (result: LocationResult) -> Unit,
+) {
+    val context = LocalContext.current
+    val currentOnUpdate by rememberUpdatedState(newValue = onUpdate)
+
+    // Whenever on of these parameters changes, dispose and restart the effect.
+    DisposableEffect(locationRequest, lifecycleOwner) {
+        val locationClient = LocationServices.getFusedLocationProviderClient(context)
+        val locationCallback: LocationCallback = object : LocationCallback() {
+            override fun onLocationResult(result: LocationResult) {
+                currentOnUpdate(result)
+            }
+        }
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_START) {
+                locationClient.requestLocationUpdates(
+                    locationRequest, locationCallback, Looper.getMainLooper(),
+                )
+            } else if (event == Lifecycle.Event.ON_STOP) {
+                locationClient.removeLocationUpdates(locationCallback)
+            }
+        }
+
+        // Add the observer to the lifecycle
+        lifecycleOwner.lifecycle.addObserver(observer)
+
+        // When the effect leaves the Composition, remove the observer
+        onDispose {
+            locationClient.removeLocationUpdates(locationCallback)
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
 }

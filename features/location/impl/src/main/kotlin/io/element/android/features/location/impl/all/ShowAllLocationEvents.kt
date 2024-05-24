@@ -17,7 +17,6 @@
 package io.element.android.features.location.impl.all
 
 sealed interface ShowAllLocationEvents {
-    data object Share : ShowAllLocationEvents
     data class TrackMyLocation(val enabled: Boolean) : ShowAllLocationEvents
     data object DismissDialog : ShowAllLocationEvents
     data object RequestPermissions : ShowAllLocationEvents
@@ -28,4 +27,6 @@ sealed interface ShowAllLocationEvents {
     data object OpenTileProvider : ShowAllLocationEvents
 
     data object DismissTileProviderPicker : ShowAllLocationEvents
+
+    data object StopBeaconInfo : ShowAllLocationEvents
 }

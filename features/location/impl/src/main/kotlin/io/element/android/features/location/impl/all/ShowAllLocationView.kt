@@ -25,13 +25,17 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AcUnit
 import androidx.compose.material.icons.filled.AirlineStops
 import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.LocationSearching
 import androidx.compose.material.icons.filled.MyLocation
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Stop
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -70,12 +74,9 @@ import io.element.android.libraries.designsystem.utils.CommonDrawables
 import io.element.android.libraries.maplibre.compose.CameraMode
 import io.element.android.libraries.maplibre.compose.CameraMoveStartedReason
 import io.element.android.libraries.maplibre.compose.rememberCameraPositionState
-import io.element.android.libraries.ui.strings.CommonStrings
-import org.ramani.compose.Circle
 import org.ramani.compose.CircleWithItem
 import org.ramani.compose.LocationRequestProperties
 import org.ramani.compose.MapLibre
-import org.ramani.compose.Symbol
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -100,9 +101,9 @@ fun ShowAllLocationView(
 
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.Builder()
-            .target(LatLng(38.879366660251435, -77.02429536242268))
             .zoom(ShowAllMapDefaults.DEFAULT_ZOOM)
             .build()
+        cameraMode = CameraMode.NONE
     }
 
     LaunchedEffect(state.isTrackMyLocation) {
@@ -139,13 +140,9 @@ fun ShowAllLocationView(
                     )
                 },
                 actions = {
-                    IconButton(
-                        onClick = { state.eventSink(ShowAllLocationEvents.Share) }
-                    ) {
-                        Icon(
-                            imageVector = CompoundIcons.ShareAndroid(),
-                            contentDescription = stringResource(CommonStrings.action_share),
-                        )
+                    /// Uncommeting this will crash the app
+                    IconButton(onClick = { /*TODO*/ }) {
+
                     }
                 }
             )
@@ -172,7 +169,7 @@ fun ShowAllLocationView(
                     LocationSymbol(item)
                 }
             }
-            
+
             state.description?.let {
                 Text(
                     text = it,
@@ -192,13 +189,17 @@ fun ShowAllLocationView(
                     .padding(end = 16.dp, top = 16.dp), // Adds padding on the right side
                 verticalArrangement = Arrangement.spacedBy(8.dp) // Space between buttons
             ) {
+                RoundedIconButton(icon = if (state.isSharingLocation) Icons.Filled.Stop else Icons.Filled.PlayArrow,
+                    onClick = {
+                        if (!state.isSharingLocation) {
+                            state.eventSink(ShowAllLocationEvents.StartBeaconInfo)
+                        } else {
+                            state.eventSink(ShowAllLocationEvents.StopBeaconInfo) // Assuming you have an event for this
+                        }
+                    })
                 RoundedIconButton(icon = Icons.Filled.Settings, onClick = { /* Handle Star click */ })
                 RoundedIconButton(icon = Icons.Filled.Layers, onClick = { state.eventSink(ShowAllLocationEvents.OpenTileProvider) })
                 RoundedIconButton(icon = Icons.Filled.AirlineStops, onClick = { /* Handle Settings click */ })
-                RoundedIconButton(icon = Icons.Filled.AcUnit, onClick = {
-                    state.eventSink(ShowAllLocationEvents.StartBeaconInfo)
-                })
-
             }
             TileProviderBottomSheet(state = state, onTileProviderSelected = { TODO() })
         }
