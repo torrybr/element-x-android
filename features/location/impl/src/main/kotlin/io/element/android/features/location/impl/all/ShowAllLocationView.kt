@@ -25,9 +25,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AcUnit
 import androidx.compose.material.icons.filled.AirlineStops
 import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.LocationSearching
@@ -35,23 +33,20 @@ import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Stop
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
-import com.mapbox.mapboxsdk.camera.CameraPosition
 import com.mapbox.mapboxsdk.geometry.LatLng
 import io.element.android.compound.theme.ElementTheme
-import io.element.android.compound.tokens.generated.CompoundIcons
 import io.element.android.compound.tokens.generated.TypographyTokens
 import io.element.android.features.location.api.Location.Companion.fromGeoUri
 import io.element.android.features.location.api.internal.rememberTileStyleUrl
@@ -59,7 +54,6 @@ import io.element.android.features.location.impl.all.model.ShowLocationItem
 
 import io.element.android.features.location.impl.common.PermissionDeniedDialog
 import io.element.android.features.location.impl.common.PermissionRationaleDialog
-import io.element.android.features.location.impl.common.ShowAllMapDefaults
 import io.element.android.libraries.designsystem.components.button.BackButton
 import io.element.android.libraries.designsystem.preview.ElementPreview
 import io.element.android.libraries.designsystem.preview.PreviewsDayNight
@@ -71,12 +65,10 @@ import io.element.android.libraries.designsystem.theme.components.Scaffold
 import io.element.android.libraries.designsystem.theme.components.Text
 import io.element.android.libraries.designsystem.theme.components.TopAppBar
 import io.element.android.libraries.designsystem.utils.CommonDrawables
-import io.element.android.libraries.maplibre.compose.CameraMode
-import io.element.android.libraries.maplibre.compose.CameraMoveStartedReason
-import io.element.android.libraries.maplibre.compose.rememberCameraPositionState
 import org.ramani.compose.CircleWithItem
 import org.ramani.compose.LocationRequestProperties
 import org.ramani.compose.MapLibre
+import org.ramani.compose.CameraPosition
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -99,30 +91,8 @@ fun ShowAllLocationView(
         )
     }
 
-    val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.Builder()
-            .zoom(ShowAllMapDefaults.DEFAULT_ZOOM)
-            .build()
-        cameraMode = CameraMode.NONE
-    }
+    val cameraPosition = rememberSaveable { mutableStateOf(CameraPosition()) }
 
-    LaunchedEffect(state.isTrackMyLocation) {
-        when (state.isTrackMyLocation) {
-            false -> cameraPositionState.cameraMode = CameraMode.NONE
-            true -> {
-                cameraPositionState.position = CameraPosition.Builder()
-                    .zoom(ShowAllMapDefaults.DEFAULT_ZOOM)
-                    .build()
-                cameraPositionState.cameraMode = CameraMode.TRACKING
-            }
-        }
-    }
-
-    LaunchedEffect(cameraPositionState.isMoving) {
-        if (cameraPositionState.cameraMoveStartedReason == CameraMoveStartedReason.GESTURE) {
-            state.eventSink(ShowAllLocationEvents.TrackMyLocation(false))
-        }
-    }
 
     Scaffold(
         modifier = modifier,
@@ -164,6 +134,7 @@ fun ShowAllLocationView(
                 styleUrl = rememberTileStyleUrl(),
                 locationRequestProperties = LocationRequestProperties(interval = 250L),
                 images = listOf(PIN_ID to CommonDrawables.pin),
+                cameraPosition = cameraPosition.value,
             ) {
                 state.showLocationItems.ongoing.forEach { item ->
                     LocationSymbol(item)
