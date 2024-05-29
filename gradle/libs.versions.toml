@@ -35,7 +35,7 @@ coroutines = "1.8.1"
 accompanist = "0.34.0"
 
 # Test
-ramaniMaplibre = "0.4.0"
+ramaniMaplibre = "0.3.0"
 test_core = "1.5.0"
 
 #other
@@ -64,7 +64,6 @@ playServicesLocation = "21.2.0"
 
 [libraries]
 # Project
-android = { module = "com.mapbox.maps:android", version.ref = "android" }
 android_gradle_plugin = { module = "com.android.tools.build:gradle", version.ref = "android_gradle_plugin" }
 # https://developer.android.com/studio/write/java8-support#library-desugaring-versions
 android_desugar = "com.android.tools:desugar_jdk_libs:2.0.4"

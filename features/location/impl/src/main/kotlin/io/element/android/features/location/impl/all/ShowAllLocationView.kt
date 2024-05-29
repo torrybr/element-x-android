@@ -45,6 +45,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
+import com.mapbox.mapboxsdk.geometry.LatLng
 import io.element.android.compound.theme.ElementTheme
 import io.element.android.compound.tokens.generated.TypographyTokens
 import io.element.android.features.location.api.Location.Companion.fromGeoUri
@@ -64,13 +65,10 @@ import io.element.android.libraries.designsystem.theme.components.Scaffold
 import io.element.android.libraries.designsystem.theme.components.Text
 import io.element.android.libraries.designsystem.theme.components.TopAppBar
 import io.element.android.libraries.designsystem.utils.CommonDrawables
-import org.maplibre.android.geometry.LatLng
-import org.maplibre.android.location.modes.RenderMode
 import org.ramani.compose.CircleWithItem
 import org.ramani.compose.LocationRequestProperties
 import org.ramani.compose.MapLibre
 import org.ramani.compose.CameraPosition
-import org.ramani.compose.Symbol
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -139,7 +137,6 @@ fun ShowAllLocationView(
                 locationRequestProperties = LocationRequestProperties(interval = 250L),
                 images = listOf(PIN_ID to CommonDrawables.pin),
                 cameraPosition = cameraPosition.value,
-                renderMode = RenderMode.COMPASS
             ) {
                 state.showLocationItems.ongoing.filter { !it.state.isMine }.map { item ->
                     LocationSymbol(item)
