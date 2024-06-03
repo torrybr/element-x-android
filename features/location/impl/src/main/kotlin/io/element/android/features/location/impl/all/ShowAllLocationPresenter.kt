@@ -84,7 +84,7 @@ class ShowAllLocationPresenter @Inject constructor(
             mutableStateOf(ShowAllLocationState.Dialog.None)
         }
 
-        val roomName by remember { derivedStateOf { room.name } }
+        val roomName by remember { derivedStateOf { room.displayName } }
         var showTileProviderPicker: Boolean by remember { mutableStateOf(false) }
 
         // User location is null until the fused data provider can provide a location
@@ -188,7 +188,7 @@ class ShowAllLocationPresenter @Inject constructor(
             hasLocationPermission = permissionsState.isAnyGranted,
             isTrackMyLocation = isTrackMyLocation,
             appName = appName,
-            roomName = roomName ?: "",
+            roomName = roomName,
             showTileProviderPicker = showTileProviderPicker,
             eventSink = ::handleEvents,
             isSharingLocation = isSharingLocation
@@ -200,7 +200,7 @@ class ShowAllLocationPresenter @Inject constructor(
     }
 
     private suspend fun startBeaconInfo() {
-        room.startBeaconInfo()
+        room.startBeaconInfo((30 * 1000).toULong())
         //wait 5 seconds
         delay(5000) // pause to test arrival times
     }

@@ -473,7 +473,7 @@ class FakeMatrixRoom(
         return sendLocationResult
     }
 
-    override suspend fun startBeaconInfo(): Result<Unit> {
+    override suspend fun startBeaconInfo(durationMillis: ULong): Result<Unit> {
         TODO("Not yet implemented")
     }
 

@@ -237,7 +237,7 @@ interface MatrixRoom : Closeable {
         assetType: AssetType? = null,
     ): Result<Unit>
 
-    suspend fun startBeaconInfo(): Result<Unit>
+    suspend fun startBeaconInfo(durationMillis: ULong): Result<Unit>
 
     suspend fun updateUserLocation(geoUri: String): Result<Unit>
 
