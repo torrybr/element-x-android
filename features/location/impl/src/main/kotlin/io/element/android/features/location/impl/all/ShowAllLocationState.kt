@@ -16,7 +16,7 @@
 
 package io.element.android.features.location.impl.all
 
-import io.element.android.features.location.api.Location
+import android.location.Location
 import io.element.android.features.location.impl.all.model.ShowLocationItems
 
 /**
@@ -25,7 +25,6 @@ import io.element.android.features.location.impl.all.model.ShowLocationItems
  */
 data class ShowAllLocationState(
     val permissionDialog: Dialog,
-    val location: Location,
     val description: String?,
     val hasLocationPermission: Boolean,
     val isTrackMyLocation: Boolean,

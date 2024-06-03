@@ -24,14 +24,12 @@ import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ComposeNode
 import androidx.compose.runtime.currentComposer
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import org.maplibre.android.location.LocationComponentActivationOptions
 import org.maplibre.android.location.LocationComponentOptions
 import org.maplibre.android.location.OnCameraTrackingChangedListener
 import org.maplibre.android.location.engine.LocationEngineRequest
-import org.maplibre.android.location.modes.RenderMode
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.Style
 
@@ -49,29 +47,23 @@ internal class MapPropertiesNode(
             LocationComponentActivationOptions.Builder(context, style)
                 .locationComponentOptions(
                     LocationComponentOptions.builder(context)
-//                        .bearingTintColor(Color.Red.toArgb())
-//                        .backgroundTintColor(locationSettings.backgroundTintColor.toArgb())
-//                        .foregroundTintColor(locationSettings.foregroundTintColor.toArgb())
-//                        .backgroundStaleTintColor(locationSettings.backgroundStaleTintColor.toArgb())
-//                        .foregroundStaleTintColor(locationSettings.foregroundStaleTintColor.toArgb())
-//                        .accuracyColor(locationSettings.accuracyColor.toArgb())
-//                        .pulseEnabled(locationSettings.pulseEnabled)
-//                        .pulseColor(locationSettings.pulseColor.toArgb())
-//                        .compassAnimationEnabled(true)
-//                        .compassAnimationEnabled(true)
+                        .backgroundTintColor(locationSettings.backgroundTintColor.toArgb())
+                        .foregroundTintColor(locationSettings.foregroundTintColor.toArgb())
+                        .backgroundStaleTintColor(locationSettings.backgroundStaleTintColor.toArgb())
+                        .foregroundStaleTintColor(locationSettings.foregroundStaleTintColor.toArgb())
+                        .accuracyColor(locationSettings.accuracyColor.toArgb())
+                        .pulseEnabled(locationSettings.pulseEnabled)
+                        .pulseColor(locationSettings.pulseColor.toArgb())
                         .build()
                 )
-                .useDefaultLocationEngine(true)
-//                .locationEngineRequest(
-//                    LocationEngineRequest.Builder(LOCATION_REQUEST_INTERVAL)
-//                        .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
-//                        .setFastestInterval(LOCATION_REQUEST_INTERVAL)
-//                        .setDisplacement(0f)
-//                        .build()
-//                )
+                .locationEngineRequest(
+                    LocationEngineRequest.Builder(LOCATION_REQUEST_INTERVAL)
+                        .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
+                        .setFastestInterval(LOCATION_REQUEST_INTERVAL)
+                        .build()
+                )
                 .build()
         )
-        map.locationComponent.renderMode = RenderMode.COMPASS
         cameraPositionState.setMap(map)
     }
 

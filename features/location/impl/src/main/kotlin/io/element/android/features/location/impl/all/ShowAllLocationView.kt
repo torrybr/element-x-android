@@ -16,6 +16,7 @@
 
 package io.element.android.features.location.impl.all
 
+import android.location.Location
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -45,7 +46,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
-import com.mapbox.mapboxsdk.geometry.LatLng
 import io.element.android.compound.theme.ElementTheme
 import io.element.android.compound.tokens.generated.TypographyTokens
 import io.element.android.features.location.api.Location.Companion.fromGeoUri
@@ -65,10 +65,13 @@ import io.element.android.libraries.designsystem.theme.components.Scaffold
 import io.element.android.libraries.designsystem.theme.components.Text
 import io.element.android.libraries.designsystem.theme.components.TopAppBar
 import io.element.android.libraries.designsystem.utils.CommonDrawables
+import org.maplibre.android.geometry.LatLng
+import org.maplibre.android.location.modes.RenderMode
 import org.ramani.compose.CircleWithItem
 import org.ramani.compose.LocationRequestProperties
 import org.ramani.compose.MapLibre
 import org.ramani.compose.CameraPosition
+import org.ramani.compose.MapProperties
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -92,9 +95,10 @@ fun ShowAllLocationView(
     }
 
     val cameraPosition = rememberSaveable {
-        mutableStateOf(CameraPosition(zoom = 15.0))
+        mutableStateOf(CameraPosition())
     }
 
+    val userLocation = rememberSaveable { mutableStateOf(Location(null)) }
 
     Scaffold(
         modifier = modifier,
@@ -120,13 +124,19 @@ fun ShowAllLocationView(
             )
         },
         floatingActionButton = {
+            // TODO (tb): should probably hoist this state to the presenter
             FloatingActionButton(
-                onClick = { state.eventSink(ShowAllLocationEvents.TrackMyLocation(true)) },
+                onClick = {
+                    cameraPosition.value = CameraPosition(cameraPosition.value).apply {
+                        this.target = LatLng(
+                            userLocation.value.latitude,
+                            userLocation.value.longitude
+                        )
+                        this.zoom = 12.0
+                    }
+                },
             ) {
-                when (state.isTrackMyLocation) {
-                    false -> Icon(imageVector = Icons.Default.LocationSearching, contentDescription = null)
-                    true -> Icon(imageVector = Icons.Default.MyLocation, contentDescription = null)
-                }
+                Icon(imageVector = Icons.Default.MyLocation, contentDescription = null)
             }
         },
     ) { paddingValues ->
@@ -137,7 +147,10 @@ fun ShowAllLocationView(
                 locationRequestProperties = LocationRequestProperties(interval = 250L),
                 images = listOf(PIN_ID to CommonDrawables.pin),
                 cameraPosition = cameraPosition.value,
+                renderMode = RenderMode.COMPASS,
+                userLocation = userLocation
             ) {
+                // TODO (tb): this is bad, just have the sdk leave out your own dot
                 state.showLocationItems.ongoing.filter { !it.state.isMine }.map { item ->
                     LocationSymbol(item)
                 }

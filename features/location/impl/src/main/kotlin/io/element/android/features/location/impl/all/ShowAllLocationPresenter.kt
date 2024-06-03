@@ -47,6 +47,7 @@ import android.annotation.SuppressLint
 import android.os.Looper
 import androidx.annotation.RequiresPermission
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.lifecycle.Lifecycle
@@ -85,6 +86,9 @@ class ShowAllLocationPresenter @Inject constructor(
 
         val roomName by remember { derivedStateOf { room.name } }
         var showTileProviderPicker: Boolean by remember { mutableStateOf(false) }
+
+        // User location is null until the fused data provider can provide a location
+        val userLocation = rememberSaveable { mutableStateOf(android.location.Location(null)) }
 
         val loc by remember { mutableStateOf(Location(38.879366660251435, -77.02429536242268, 4f)) }
 
@@ -180,7 +184,6 @@ class ShowAllLocationPresenter @Inject constructor(
         return ShowAllLocationState(
             permissionDialog = permissionDialog,
             showLocationItems = locationHistoryItems,
-            location = loc,
             description = "",
             hasLocationPermission = permissionsState.isAnyGranted,
             isTrackMyLocation = isTrackMyLocation,

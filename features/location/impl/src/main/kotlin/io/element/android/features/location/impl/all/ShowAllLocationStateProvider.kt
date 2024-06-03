@@ -70,7 +70,6 @@ fun aShowAllLocationState(
     ) = ShowAllLocationState(
     showLocationItems = TODO(),
     permissionDialog = permissionDialog,
-    location = location,
     description = description,
     hasLocationPermission = hasLocationPermission,
     isTrackMyLocation = isTrackMyLocation,
