@@ -86,12 +86,7 @@ class ShowAllLocationPresenter @Inject constructor(
 
         val roomName by remember { derivedStateOf { room.displayName } }
         var showTileProviderPicker: Boolean by remember { mutableStateOf(false) }
-
-        // User location is null until the fused data provider can provide a location
-        val userLocation = rememberSaveable { mutableStateOf(android.location.Location(null)) }
-
-        val loc by remember { mutableStateOf(Location(38.879366660251435, -77.02429536242268, 4f)) }
-
+        
         var isSharingLocation: Boolean by remember {
             mutableStateOf(false)
         }
