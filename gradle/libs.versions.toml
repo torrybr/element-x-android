@@ -59,6 +59,8 @@ autoservice = "1.1.1"
 androidx-test-ext-junit = "1.2.1"
 kover = "0.8.3"
 
+smartReplyCommon = "16.1.0"
+
 [libraries]
 # Project
 android_gradle_plugin = { module = "com.android.tools.build:gradle", version.ref = "android_gradle_plugin" }
@@ -216,6 +218,8 @@ google_autoservice_annotations = { module = "com.google.auto.service:auto-servic
 # See https://github.com/renovatebot/renovate/issues/18354
 android_composeCompiler = { module = "androidx.compose.compiler:compiler", version.ref = "composecompiler" }
 androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidx-test-ext-junit" }
+
+smart-reply-common = { group = "com.google.mlkit", name = "smart-reply-common", version.ref = "smartReplyCommon" }
 
 [bundles]
 
