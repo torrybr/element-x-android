@@ -34,8 +34,8 @@ import io.element.android.features.messages.impl.timeline.model.event.TimelineIt
 
 @Composable
 fun SmartRepliesView(state: TimelineState) {
-    val smartReplyGenerator = remember { SmartReply.getClient() }
-    val suggestions = remember { mutableStateListOf<String>() }
+//    val smartReplyGenerator = remember { SmartReply.getClient() }
+//    val suggestions = remember { mutableStateListOf<String>() }
     val scrollState = rememberScrollState()
 
     val conversation = state.timelineItems.mapNotNull { timelineItem ->
