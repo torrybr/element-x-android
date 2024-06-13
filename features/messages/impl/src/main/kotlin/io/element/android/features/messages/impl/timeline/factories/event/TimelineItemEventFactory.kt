@@ -59,6 +59,7 @@ class TimelineItemEventFactory @AssistedInject constructor(
         val senderProfile = currentTimelineItem.event.senderProfile
         val timeFormatter = DateFormat.getTimeInstance(DateFormat.SHORT)
         val sentTime = timeFormatter.format(Date(currentTimelineItem.event.timestamp))
+        val originalTimestamp = currentTimelineItem.event.timestamp
 
         val senderAvatarData = AvatarData(
             id = currentSender.value,
@@ -79,6 +80,7 @@ class TimelineItemEventFactory @AssistedInject constructor(
             isEditable = currentTimelineItem.event.isEditable,
             canBeRepliedTo = currentTimelineItem.event.canBeRepliedTo,
             sentTime = sentTime,
+            originalTimestamp = originalTimestamp,
             groupPosition = groupPosition,
             reactionsState = currentTimelineItem.computeReactionsState(),
             readReceiptState = currentTimelineItem.computeReadReceiptState(roomMembers),

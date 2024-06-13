@@ -28,16 +28,17 @@ import androidx.compose.ui.unit.dp
 import com.google.mlkit.nl.smartreply.SmartReply
 import com.google.mlkit.nl.smartreply.SmartReplySuggestionResult
 import com.google.mlkit.nl.smartreply.TextMessage
+import io.element.android.features.messages.impl.messagecomposer.MessageComposerState
 import io.element.android.features.messages.impl.timeline.TimelineState
 import io.element.android.features.messages.impl.timeline.model.TimelineItem
 
 import io.element.android.features.messages.impl.timeline.model.event.TimelineItemTextBasedContent
 
 @Composable
-fun SmartRepliesView(state: TimelineState) {
+fun SmartRepliesView(timelineState: TimelineState) {
     val scrollState = rememberScrollState()
 
-    val conversation = createConversationFromTimelineItems(state.timelineItems)
+    val conversation = createConversationFromTimelineItems(timelineState.timelineItems)
 
     val smartReplyGenerator = remember { SmartReply.getClient() }
     val suggestions = remember { mutableStateListOf<String>() }
@@ -60,6 +61,7 @@ fun SmartRepliesView(state: TimelineState) {
         }
     }
 
+    // TODO hide this view if there are no suggestions and mimick google messages styling
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -69,12 +71,16 @@ fun SmartRepliesView(state: TimelineState) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         for (suggestion in suggestions) {
-            OutlinedButton(onClick = { TODO() }) {
+            OutlinedButton(onClick = { fakeClick() }) {
                 Text(suggestion)
             }
             Spacer(Modifier.width(8.dp))
         }
     }
+}
+
+private fun fakeClick() {
+    println("Clicked")
 }
 
 private fun createConversationFromTimelineItems(timelineItems: List<TimelineItem>): List<TextMessage> {
@@ -83,13 +89,12 @@ private fun createConversationFromTimelineItems(timelineItems: List<TimelineItem
             is TimelineItem.Event -> {
                 when (val timelineEventContent = timelineItem.content) {
                     is TimelineItemTextBasedContent -> {
-                        val text = timelineEventContent.body
-                        val timestamp = System.currentTimeMillis() // Consider using actual event timestamp if available
-
+                        timelineItem.sentTime
+                        val text = timelineEventContent.plainText
                         if (timelineItem.isMine) {
-                            TextMessage.createForLocalUser(text, timestamp)
+                            TextMessage.createForLocalUser(text, timelineItem.originalTimestamp)
                         } else {
-                            TextMessage.createForRemoteUser(text, timestamp, timelineItem.senderId.toString())
+                            TextMessage.createForRemoteUser(text, timelineItem.originalTimestamp, timelineItem.senderId.toString())
                         }
                     }
                     else -> null // Skip non-text based content
@@ -97,5 +102,5 @@ private fun createConversationFromTimelineItems(timelineItems: List<TimelineItem
             }
             else -> null // Skip all non-event types
         }
-    }
+    }.sortedBy { it.timestampMillis }
 }

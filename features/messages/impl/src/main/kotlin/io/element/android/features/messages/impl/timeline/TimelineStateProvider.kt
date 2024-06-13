@@ -154,6 +154,7 @@ internal fun aTimelineItemEvent(
         reactionsState = timelineItemReactions,
         readReceiptState = readReceiptState,
         sentTime = "12:34",
+        originalTimestamp = System.currentTimeMillis(),
         isMine = isMine,
         isEditable = isEditable,
         canBeRepliedTo = canBeRepliedTo,

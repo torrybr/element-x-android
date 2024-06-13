@@ -65,6 +65,7 @@ sealed interface TimelineItem {
         val senderAvatar: AvatarData,
         val content: TimelineItemEventContent,
         val sentTime: String = "",
+        val originalTimestamp: Long,
         val isMine: Boolean = false,
         val isEditable: Boolean,
         val canBeRepliedTo: Boolean,

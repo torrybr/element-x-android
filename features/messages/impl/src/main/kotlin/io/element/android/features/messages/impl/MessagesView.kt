@@ -462,6 +462,7 @@ private fun MessagesViewComposerBottomSheetContents(
                 )
             }
             SmartRepliesView(state = state.timelineState)
+            SmartRepliesView(timelineState = state.timelineState)
             MessageComposerView(
                 state = state.composerState,
                 voiceMessageState = state.voiceMessageComposerState,
