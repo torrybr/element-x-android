@@ -30,13 +30,10 @@ android {
     }
 }
 
-anvil {
-    generateDaggerFactories.set(true)
-}
-
 dependencies {
     implementation(projects.anvilannotations)
     implementation(libs.smart.reply.common)
+    implementation(libs.smartreply)
     api(projects.features.messages.api)
     implementation(projects.appconfig)
     implementation(projects.features.call.api)
@@ -104,6 +101,4 @@ dependencies {
     testImplementation(projects.features.poll.impl)
     testImplementation(libs.androidx.compose.ui.test.junit)
     testReleaseImplementation(libs.androidx.compose.ui.test.manifest)
-
-    ksp(libs.showkase.processor)
 }

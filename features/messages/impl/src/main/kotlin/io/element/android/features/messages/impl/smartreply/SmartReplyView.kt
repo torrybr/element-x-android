@@ -26,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.google.mlkit.nl.smartreply.SmartReply
+import com.google.mlkit.nl.smartreply.SmartReplySuggestionResult
 import com.google.mlkit.nl.smartreply.TextMessage
 import io.element.android.features.messages.impl.timeline.TimelineState
 import io.element.android.features.messages.impl.timeline.model.TimelineItem
@@ -34,32 +35,30 @@ import io.element.android.features.messages.impl.timeline.model.event.TimelineIt
 
 @Composable
 fun SmartRepliesView(state: TimelineState) {
-//    val smartReplyGenerator = remember { SmartReply.getClient() }
-//    val suggestions = remember { mutableStateListOf<String>() }
     val scrollState = rememberScrollState()
 
-    val conversation = state.timelineItems.mapNotNull { timelineItem ->
-        when (timelineItem) {
-            is TimelineItem.Event -> {
-                when (val timelineEventContent = timelineItem.content) {
-                    is TimelineItemTextBasedContent -> {
-                        val text = timelineEventContent.body
+    val conversation = createConversationFromTimelineItems(state.timelineItems)
 
-                        if (timelineItem.isMine) {
-                            // Create message for local user
-                            TextMessage.createForLocalUser(text, System.currentTimeMillis())
-                        } else {
-                            // Create message for remote user
-                            TextMessage.createForRemoteUser(text, System.currentTimeMillis(), timelineItem.senderId.toString())
-                        }
-                    }
-                    else -> null // Skip non-text based content
+    val smartReplyGenerator = remember { SmartReply.getClient() }
+    val suggestions = remember { mutableStateListOf<String>() }
+
+
+    if (conversation.isNotEmpty()) {
+        LaunchedEffect(conversation) {
+            val task = smartReplyGenerator.suggestReplies(conversation)
+            task.addOnSuccessListener { result ->
+                if (result.status == SmartReplySuggestionResult.STATUS_SUCCESS) {
+                    suggestions.clear()
+                    suggestions.addAll(result.suggestions.map { it.text })
+                } else {
+                    // Handle errors
                 }
             }
-            else -> null // Skip all non-event types
+            task.addOnFailureListener { exception ->
+                // Handle exceptions
+            }
         }
     }
-
 
     Row(
         modifier = Modifier
@@ -69,16 +68,34 @@ fun SmartRepliesView(state: TimelineState) {
         horizontalArrangement = Arrangement.End,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        OutlinedButton(onClick = { TODO() }) {
-            Text("Reply 1")
+        for (suggestion in suggestions) {
+            OutlinedButton(onClick = { TODO() }) {
+                Text(suggestion)
+            }
+            Spacer(Modifier.width(8.dp))
         }
-        Spacer(Modifier.width(8.dp))
-        OutlinedButton(onClick = { TODO() }) {
-            Text("Reply 2")
-        }
-        Spacer(Modifier.width(8.dp))
-        OutlinedButton(onClick = { TODO() }) {
-            Text("Reply 3")
+    }
+}
+
+private fun createConversationFromTimelineItems(timelineItems: List<TimelineItem>): List<TextMessage> {
+    return timelineItems.mapNotNull { timelineItem ->
+        when (timelineItem) {
+            is TimelineItem.Event -> {
+                when (val timelineEventContent = timelineItem.content) {
+                    is TimelineItemTextBasedContent -> {
+                        val text = timelineEventContent.body
+                        val timestamp = System.currentTimeMillis() // Consider using actual event timestamp if available
+
+                        if (timelineItem.isMine) {
+                            TextMessage.createForLocalUser(text, timestamp)
+                        } else {
+                            TextMessage.createForRemoteUser(text, timestamp, timelineItem.senderId.toString())
+                        }
+                    }
+                    else -> null // Skip non-text based content
+                }
+            }
+            else -> null // Skip all non-event types
         }
     }
 }
