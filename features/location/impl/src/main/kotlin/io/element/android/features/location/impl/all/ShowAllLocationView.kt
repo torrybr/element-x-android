@@ -29,7 +29,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AirlineStops
 import androidx.compose.material.icons.filled.Layers
-import androidx.compose.material.icons.filled.LocationSearching
 import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Settings
@@ -37,11 +36,13 @@ import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewParameter
@@ -64,14 +65,11 @@ import io.element.android.libraries.designsystem.theme.components.IconButton
 import io.element.android.libraries.designsystem.theme.components.Scaffold
 import io.element.android.libraries.designsystem.theme.components.Text
 import io.element.android.libraries.designsystem.theme.components.TopAppBar
-import io.element.android.libraries.designsystem.utils.CommonDrawables
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.location.modes.RenderMode
-import org.ramani.compose.CircleWithItem
 import org.ramani.compose.LocationRequestProperties
 import org.ramani.compose.MapLibre
 import org.ramani.compose.CameraPosition
-import org.ramani.compose.MapProperties
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -141,11 +139,11 @@ fun ShowAllLocationView(
         },
     ) { paddingValues ->
         Box(modifier = Modifier.padding(paddingValues)) {
+
             MapLibre(
                 modifier = Modifier.fillMaxSize(),
                 styleUrl = rememberTileStyleUrl(),
                 locationRequestProperties = LocationRequestProperties(interval = 250L),
-                images = listOf(PIN_ID to CommonDrawables.pin),
                 cameraPosition = cameraPosition.value,
                 renderMode = RenderMode.COMPASS,
                 userLocation = userLocation
@@ -180,14 +178,20 @@ fun ShowAllLocationView(
                         if (!state.isSharingLocation) {
                             state.eventSink(ShowAllLocationEvents.StartBeaconInfo)
                         } else {
-                            state.eventSink(ShowAllLocationEvents.StopBeaconInfo) // Assuming you have an event for this
+                            state.eventSink(ShowAllLocationEvents.StopBeaconInfo)
                         }
                     })
                 RoundedIconButton(icon = Icons.Filled.Settings, onClick = { /* Handle Star click */ })
                 RoundedIconButton(icon = Icons.Filled.Layers, onClick = { state.eventSink(ShowAllLocationEvents.OpenTileProvider) })
                 RoundedIconButton(icon = Icons.Filled.AirlineStops, onClick = { /* Handle Settings click */ })
             }
-            TileProviderBottomSheet(state = state, onTileProviderSelected = { TODO() })
+            TileProviderBottomSheet(state = state, onTileProviderSelected = { provider ->
+                state.eventSink(
+                    ShowAllLocationEvents.ChangeProvider(
+                        provider
+                    )
+                )
+            })
         }
     }
 }
@@ -214,11 +218,11 @@ fun LocationSymbol(item: ShowLocationItem) {
     location?.let {
         val latLng = LatLng(it.lat, it.lon)
 //        Symbol(center = latLng, size = 10.0F, color = "Black", isDraggable = false, text = item.state.user, imageId = CommonDrawables.pin)
-        CircleWithItem(
+        DrawableWithItem(
             center = latLng,
             radius = 10.0F,
-            color = "Black",
-            text = item.state.user,
+            color = "White",
+            text = item.state.user.substring(0, 1),
             isDraggable = false,
             zIndex = 1,
             itemSize = 10F,

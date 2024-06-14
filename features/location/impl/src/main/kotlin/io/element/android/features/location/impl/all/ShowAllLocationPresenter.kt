@@ -50,6 +50,11 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
@@ -58,6 +63,8 @@ import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.Priority
+import io.element.android.features.location.impl.all.model.MapProvider
+import io.element.android.features.location.impl.all.store.DefaultMapDataStore
 import io.element.android.libraries.matrix.api.timeline.Timeline
 import kotlinx.coroutines.CoroutineScope
 import java.util.concurrent.TimeUnit
@@ -69,13 +76,23 @@ class ShowAllLocationPresenter @Inject constructor(
     private val buildMeta: BuildMeta,
     private val timelineProvider: TimelineProvider,
     private val showLocationItemFactory: ShowLocationItemFactory,
+    private val mapDataStore: DefaultMapDataStore
 ) : Presenter<ShowAllLocationState> {
 
     private val permissionsPresenter = permissionsPresenterFactory.create(MapDefaults.permissions)
 
+//    val android.content.Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
+//    val KEY_MAP_TILE = stringPreferencesKey("map_tile")
+
     @SuppressLint("MissingPermission", "DefaultLocale")
     @Composable
     override fun present(): ShowAllLocationState {
+
+        // create a list of map tile providers to choose from
+        val mapTileProviders = listOf(
+            MapProvider("OSM", "openstreetmap"), MapProvider("Satellite", "satellite"),
+            MapProvider("Streets", "streets-v2"), MapProvider("TOPO", "topo-v2")
+        )
 
         val permissionsState: PermissionsState = permissionsPresenter.present()
         var isTrackMyLocation by remember { mutableStateOf(false) }
@@ -86,10 +103,13 @@ class ShowAllLocationPresenter @Inject constructor(
 
         val roomName by remember { derivedStateOf { room.displayName } }
         var showTileProviderPicker: Boolean by remember { mutableStateOf(false) }
-        
+
         var isSharingLocation: Boolean by remember {
             mutableStateOf(false)
         }
+
+        // TODO (tb): I shouldnt need an inital state since its set in the datastore
+        val mapTile = mapDataStore.mapTileProviderFlow.collectAsState(initial = "OSM").value
 
         val scope = rememberCoroutineScope()
 
@@ -173,6 +193,11 @@ class ShowAllLocationPresenter @Inject constructor(
                 ShowAllLocationEvents.DismissTileProviderPicker -> {
                     showTileProviderPicker = false
                 }
+                is ShowAllLocationEvents.ChangeProvider -> {
+                    scope.launch {
+                        setMapTileProvider(event.provider.mapKey)
+                    }
+                }
             }
         }
 
@@ -186,12 +211,18 @@ class ShowAllLocationPresenter @Inject constructor(
             roomName = roomName,
             showTileProviderPicker = showTileProviderPicker,
             eventSink = ::handleEvents,
-            isSharingLocation = isSharingLocation
+            isSharingLocation = isSharingLocation,
+            mapTileProvider = mapTileProviders.find { it.mapKey == mapTile } ?: mapTileProviders[0]
         )
     }
 
     private fun CoroutineScope.loadMore(timeline: Timeline) = launch {
         timeline.paginate(Timeline.PaginationDirection.BACKWARDS)
+    }
+
+    // TODO (tb): Not sure why this works but it does, used AnalyticsStore as a reference
+    private fun CoroutineScope.setMapTileProvider(mapProvider: String) = launch {
+        mapDataStore.setMapTileProvider(mapProvider)
     }
 
     private suspend fun startBeaconInfo() {

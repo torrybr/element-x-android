@@ -30,6 +30,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Surface
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -46,6 +47,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.toUpperCase
 import androidx.compose.ui.unit.dp
 import io.element.android.compound.tokens.generated.CompoundIcons
+import io.element.android.features.location.impl.all.model.MapProvider
 import io.element.android.libraries.androidutils.ui.hideKeyboard
 import io.element.android.libraries.designsystem.components.list.ListItemContent
 import io.element.android.libraries.designsystem.preview.ElementPreview
@@ -60,7 +62,7 @@ import io.element.android.libraries.designsystem.theme.components.Text
 @Composable
 internal fun TileProviderBottomSheet(
     state: ShowAllLocationState,
-    onTileProviderSelected: (String) -> Unit,
+    onTileProviderSelected: (MapProvider) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val localView = LocalView.current
@@ -98,10 +100,10 @@ internal fun TileProviderBottomSheet(
             Row {
                 Column(Modifier.padding(16.dp, 0.dp, 16.dp, 16.dp)) {
                     Text(
-                        text = "CHOOSE MAP"
+                        text = "CHOOSE MAP "
                     )
                     Text(
-                        text = "Select a tile provider",
+                        text = state.mapTileProvider.displayName,
                     )
                 }
 
@@ -116,25 +118,29 @@ internal fun TileProviderBottomSheet(
 
 @Composable
 private fun ProviderItem(
-    provider: String,
-    onTileProviderSelected: (String) -> Unit
+    provider: MapProvider,
+    onTileProviderSelected: (MapProvider) -> Unit
 ) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.clickable { onTileProviderSelected(provider) }) {
         Box(
             modifier = Modifier
                 .background(Color.Gray)
                 .size(72.dp)
         )
-        Text(text = provider.uppercase(), modifier = Modifier.padding(top = 12.dp))
+        Text(text = provider.displayName.uppercase(), modifier = Modifier.padding(top = 12.dp))
     }
 }
 
 @Composable
 private fun TileProviderPickerMenu(
     state: ShowAllLocationState,
-    onTileProviderSelected: (String) -> Unit
+    onTileProviderSelected: (MapProvider) -> Unit
 ) {
-    val providers = listOf("OSM", "Satellite", "Traffic", "TOPO") // List of provider names
+    // TODO (tb): create a single source of truth for the list of Map providers
+    val mapTileProviders = listOf(
+        MapProvider("OSM", "openstreetmap"), MapProvider("Satellite", "satellite"),
+        MapProvider("Streets", "streets-v2"), MapProvider("TOPO", "topo-v2")
+    )
 
     // A row of 4 options with an image and text below each
     Row(
@@ -142,8 +148,7 @@ private fun TileProviderPickerMenu(
         .fillMaxWidth()
         .padding(0.dp, 0.dp, 0.dp, 16.dp)
     ) {
-        // Repeat a composable 4 times
-        for (i in providers) {
+        for (i in mapTileProviders) {
             ProviderItem(
                 provider = i,
                 onTileProviderSelected = onTileProviderSelected

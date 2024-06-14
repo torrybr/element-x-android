@@ -55,6 +55,7 @@ dependencies {
     anvil(projects.anvilcodegen)
     ksp(libs.showkase.processor)
     implementation(libs.ramani.maplibre)
+    implementation("androidx.datastore:datastore-preferences:1.1.1")
 
 //    implementation(libs.ramani.maplibre)
 //    implementation(libs.maps.compose)

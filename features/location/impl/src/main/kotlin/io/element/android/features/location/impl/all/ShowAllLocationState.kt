@@ -16,7 +16,7 @@
 
 package io.element.android.features.location.impl.all
 
-import android.location.Location
+import io.element.android.features.location.impl.all.model.MapProvider
 import io.element.android.features.location.impl.all.model.ShowLocationItems
 
 /**
@@ -33,7 +33,8 @@ data class ShowAllLocationState(
     val roomName: String,
     val eventSink: (ShowAllLocationEvents) -> Unit,
     val showLocationItems: ShowLocationItems,
-    val isSharingLocation: Boolean
+    val isSharingLocation: Boolean,
+    val mapTileProvider: MapProvider,
 ) {
     sealed interface Dialog {
         data object None : Dialog

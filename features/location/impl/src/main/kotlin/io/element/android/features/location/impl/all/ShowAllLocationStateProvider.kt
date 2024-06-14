@@ -18,6 +18,7 @@ package io.element.android.features.location.impl.all
 
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import io.element.android.features.location.api.Location
+import io.element.android.features.location.impl.all.model.MapProvider
 import io.element.android.features.location.impl.all.model.ShowLocationItem
 import io.element.android.features.location.impl.all.model.ShowLocationItemState
 import io.element.android.features.location.impl.all.model.ShowLocationItems
@@ -78,6 +79,7 @@ fun aShowAllLocationState(
     showTileProviderPicker = false,
     eventSink = eventSink,
     isSharingLocation = false,
+    mapTileProvider = MapProvider("MapProvider", "openstreetmap"),
 )
 
 //internal fun aLocationHistoryItem(

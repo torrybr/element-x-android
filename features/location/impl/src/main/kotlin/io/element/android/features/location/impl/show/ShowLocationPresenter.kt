@@ -16,6 +16,7 @@
 
 package io.element.android.features.location.impl.show
 
+import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -24,6 +25,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -62,6 +68,7 @@ class ShowLocationPresenter @AssistedInject constructor(
         var permissionDialog: ShowLocationState.Dialog by remember {
             mutableStateOf(ShowLocationState.Dialog.None)
         }
+
 
         LaunchedEffect(permissionsState.permissions) {
             if (permissionsState.isAnyGranted) {

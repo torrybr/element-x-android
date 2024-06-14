@@ -16,6 +16,9 @@
 
 package io.element.android.features.location.impl.all
 
+import android.content.Context
+import io.element.android.features.location.impl.all.model.MapProvider
+
 sealed interface ShowAllLocationEvents {
     data class TrackMyLocation(val enabled: Boolean) : ShowAllLocationEvents
     data object DismissDialog : ShowAllLocationEvents
@@ -29,4 +32,5 @@ sealed interface ShowAllLocationEvents {
     data object DismissTileProviderPicker : ShowAllLocationEvents
 
     data object StopBeaconInfo : ShowAllLocationEvents
+    data class ChangeProvider(val provider: MapProvider) : ShowAllLocationEvents
 }
