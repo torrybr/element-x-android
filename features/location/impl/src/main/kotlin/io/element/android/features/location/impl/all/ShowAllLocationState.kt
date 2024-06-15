@@ -41,4 +41,7 @@ data class ShowAllLocationState(
         data object PermissionRationale : Dialog
         data object PermissionDenied : Dialog
     }
+
+    val styleUrl: String
+        get() = "https://api.maptiler.com/maps/" + mapTileProvider.mapKey + "/style.json?key=" + "4N19bSbSelzpOSfUibeB"
 }

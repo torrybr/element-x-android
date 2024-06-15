@@ -81,9 +81,6 @@ class ShowAllLocationPresenter @Inject constructor(
 
     private val permissionsPresenter = permissionsPresenterFactory.create(MapDefaults.permissions)
 
-//    val android.content.Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
-//    val KEY_MAP_TILE = stringPreferencesKey("map_tile")
-
     @SuppressLint("MissingPermission", "DefaultLocale")
     @Composable
     override fun present(): ShowAllLocationState {
@@ -108,8 +105,9 @@ class ShowAllLocationPresenter @Inject constructor(
             mutableStateOf(false)
         }
 
-        // TODO (tb): I shouldnt need an inital state since its set in the datastore
-        val mapTile = mapDataStore.mapTileProviderFlow.collectAsState(initial = "OSM").value
+        // TODO (tb): This takes a few moments before i get the actual value in the datastore which
+        // results in teh wrong map being loaded and trigger the else condition on line 213
+        val mapTile = mapDataStore.mapTileProviderFlow.collectAsState(initial = "").value
 
         val scope = rememberCoroutineScope()
 
@@ -212,7 +210,7 @@ class ShowAllLocationPresenter @Inject constructor(
             showTileProviderPicker = showTileProviderPicker,
             eventSink = ::handleEvents,
             isSharingLocation = isSharingLocation,
-            mapTileProvider = mapTileProviders.find { it.mapKey == mapTile } ?: mapTileProviders[0]
+            mapTileProvider = mapTileProviders.find { it.mapKey == mapTile } ?: mapTileProviders[3]
         )
     }
 

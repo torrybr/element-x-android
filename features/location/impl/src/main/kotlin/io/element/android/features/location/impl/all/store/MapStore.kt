@@ -50,7 +50,7 @@ class DefaultMapDataStore @Inject constructor(
     private val mapTileProvider = stringPreferencesKey("map_tile_provider")
 
     override val mapTileProviderFlow: Flow<String> = context.dataStore.data.map { preferences ->
-        preferences[mapTileProvider] ?: "openstreetmap"
+        preferences[mapTileProvider] ?: "streets-v2"
     }
 
     override suspend fun setMapTileProvider(provider: String) {

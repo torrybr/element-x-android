@@ -142,7 +142,7 @@ fun ShowAllLocationView(
 
             MapLibre(
                 modifier = Modifier.fillMaxSize(),
-                styleUrl = rememberTileStyleUrl(),
+                styleUrl = state.styleUrl,
                 locationRequestProperties = LocationRequestProperties(interval = 250L),
                 cameraPosition = cameraPosition.value,
                 renderMode = RenderMode.COMPASS,
