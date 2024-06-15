@@ -42,29 +42,22 @@ fun DrawableWithItem(
     imageId: Int? = null,
     itemSize: Float = 0.0f,
     text: String? = null,
-    onCenterChanged: (LatLng) -> Unit = {},
-    onDragStopped: () -> Unit = {},
 ) {
     val draggableCenterState = remember { mutableStateOf(center) }
 
     UpdateCenter(coord = center, centerUpdated = { draggableCenterState.value = it })
 
-    // Invisible circle, this is the draggable
+    // Display circle
     Circle(
-        center = draggableCenterState.value,
-        radius = dragRadius,
-        isDraggable = isDraggable,
-        color = "Transparent",
-        borderColor = borderColor,
-        borderWidth = 0.0f,
-        zIndex = zIndex + 1,
-        onCenterDragged = {
-            onCenterChanged(it)
-        },
-        onDragFinished = {
-            draggableCenterState.value = center
-            onDragStopped()
-        },
+        center = center,
+        radius = radius,
+        isDraggable = false,
+        color = "Black",
+        opacity = opacity,
+        zIndex = zIndex,
+        borderColor = "White",
+        borderWidth = 2.0F,
+        onCenterDragged = {}
     )
 
     imageId?.let {
@@ -81,7 +74,7 @@ fun DrawableWithItem(
     text?.let {
         Symbol(
             center = center,
-            color = "Black",
+            color = "White",
             isDraggable = false,
             text = text,
             size = itemSize,

@@ -121,13 +121,15 @@ private fun ProviderItem(
     provider: MapProvider,
     onTileProviderSelected: (MapProvider) -> Unit
 ) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.clickable { onTileProviderSelected(provider) }) {
-        Box(
-            modifier = Modifier
-                .background(Color.Gray)
-                .size(72.dp)
-        )
-        Text(text = provider.displayName.uppercase(), modifier = Modifier.padding(top = 12.dp))
+    Surface(onClick = { onTileProviderSelected(provider) }) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Box(
+                modifier = Modifier
+                    .background(Color.Gray)
+                    .size(72.dp)
+            )
+            Text(text = provider.displayName.uppercase(), modifier = Modifier.padding(top = 12.dp))
+        }
     }
 }
 

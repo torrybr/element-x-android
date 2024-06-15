@@ -210,7 +210,7 @@ class ShowAllLocationPresenter @Inject constructor(
             showTileProviderPicker = showTileProviderPicker,
             eventSink = ::handleEvents,
             isSharingLocation = isSharingLocation,
-            mapTileProvider = mapTileProviders.find { it.mapKey == mapTile } ?: mapTileProviders[3]
+            mapTileProvider = mapTileProviders.find { it.mapKey == mapTile } ?: mapTileProviders[2]
         )
     }
 

@@ -33,6 +33,11 @@ import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Stop
+import androidx.compose.material.icons.outlined.AirlineStops
+import androidx.compose.material.icons.outlined.Layers
+import androidx.compose.material.icons.outlined.PlayArrow
+import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.outlined.Stop
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -45,6 +50,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.toUpperCase
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import io.element.android.compound.theme.ElementTheme
@@ -70,6 +76,8 @@ import org.maplibre.android.location.modes.RenderMode
 import org.ramani.compose.LocationRequestProperties
 import org.ramani.compose.MapLibre
 import org.ramani.compose.CameraPosition
+import org.ramani.compose.CircleWithItem
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -173,7 +181,7 @@ fun ShowAllLocationView(
                     .padding(end = 16.dp, top = 16.dp), // Adds padding on the right side
                 verticalArrangement = Arrangement.spacedBy(8.dp) // Space between buttons
             ) {
-                RoundedIconButton(icon = if (state.isSharingLocation) Icons.Filled.Stop else Icons.Filled.PlayArrow,
+                RoundedIconButton(icon = if (state.isSharingLocation) Icons.Filled.Stop else Icons.Outlined.PlayArrow,
                     onClick = {
                         if (!state.isSharingLocation) {
                             state.eventSink(ShowAllLocationEvents.StartBeaconInfo)
@@ -181,9 +189,8 @@ fun ShowAllLocationView(
                             state.eventSink(ShowAllLocationEvents.StopBeaconInfo)
                         }
                     })
-                RoundedIconButton(icon = Icons.Filled.Settings, onClick = { /* Handle Star click */ })
-                RoundedIconButton(icon = Icons.Filled.Layers, onClick = { state.eventSink(ShowAllLocationEvents.OpenTileProvider) })
-                RoundedIconButton(icon = Icons.Filled.AirlineStops, onClick = { /* Handle Settings click */ })
+                RoundedIconButton(icon = Icons.Outlined.Layers, onClick = { state.eventSink(ShowAllLocationEvents.OpenTileProvider) })
+                RoundedIconButton(icon = Icons.Outlined.AirlineStops, onClick = { /* Handle Settings click */ })
             }
             TileProviderBottomSheet(state = state, onTileProviderSelected = { provider ->
                 state.eventSink(
@@ -217,15 +224,14 @@ fun LocationSymbol(item: ShowLocationItem) {
     val location = fromGeoUri(item.state.location)
     location?.let {
         val latLng = LatLng(it.lat, it.lon)
-//        Symbol(center = latLng, size = 10.0F, color = "Black", isDraggable = false, text = item.state.user, imageId = CommonDrawables.pin)
         DrawableWithItem(
             center = latLng,
             radius = 10.0F,
             color = "White",
-            text = item.state.user.substring(0, 1),
+            text = item.state.user.substring(1, 2).uppercase(Locale.getDefault()),
             isDraggable = false,
             zIndex = 1,
-            itemSize = 10F,
+            itemSize = 12F,
         )
     }
 }
