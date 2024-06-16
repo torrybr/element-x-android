@@ -50,6 +50,7 @@ import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.coroutines.awaitCancellation
 import org.maplibre.android.MapLibre
+import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.Style
@@ -81,9 +82,10 @@ public fun MapLibreMap(
     uiSettings: MapUiSettings = DefaultMapUiSettings,
     symbolManagerSettings: MapSymbolManagerSettings = DefaultMapSymbolManagerSettings,
     locationSettings: MapLocationSettings = DefaultMapLocationSettings,
+    longPressHander: (LatLng) -> Unit = {},
     content: (
-        @Composable @MapLibreMapComposable
-        () -> Unit
+    @Composable @MapLibreMapComposable
+    () -> Unit
     )? = null,
 ) {
     // When in preview, early return a Box with the received modifier preserving layout
