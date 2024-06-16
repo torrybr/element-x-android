@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.element.android.features.location.impl.all
+package io.element.android.features.location.impl.all.composables
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf

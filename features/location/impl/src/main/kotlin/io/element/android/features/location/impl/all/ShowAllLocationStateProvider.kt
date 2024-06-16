@@ -19,9 +19,6 @@ package io.element.android.features.location.impl.all
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import io.element.android.features.location.api.Location
 import io.element.android.features.location.impl.all.model.MapProvider
-import io.element.android.features.location.impl.all.model.ShowLocationItem
-import io.element.android.features.location.impl.all.model.ShowLocationItemState
-import io.element.android.features.location.impl.all.model.ShowLocationItems
 
 private const val APP_NAME = "ApplicationName"
 
@@ -44,7 +41,6 @@ class ShowAllLocationStateProvider : PreviewParameterProvider<ShowAllLocationSta
             ),
             aShowAllLocationState(
                 hasLocationPermission = true,
-                isTrackMyLocation = true,
             ),
             aShowAllLocationState(
                 description = "My favourite place!",
@@ -64,20 +60,17 @@ fun aShowAllLocationState(
     location: Location = Location(1.23, 2.34, 4f),
     description: String? = null,
     hasLocationPermission: Boolean = false,
-    isTrackMyLocation: Boolean = false,
     appName: String = APP_NAME,
     eventSink: (ShowAllLocationEvents) -> Unit = {},
 
     ) = ShowAllLocationState(
     showLocationItems = TODO(),
     permissionDialog = permissionDialog,
-    description = description,
     hasLocationPermission = hasLocationPermission,
-    isTrackMyLocation = isTrackMyLocation,
-    appName = appName,
     roomName = "RoomName",
     showTileProviderPicker = false,
     eventSink = eventSink,
+    appName = appName,
     isSharingLocation = false,
     mapTileProvider = MapProvider("MapProvider", "openstreetmap"),
 )

@@ -21,13 +21,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material.icons.outlined.Layers
@@ -38,17 +38,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
-import io.element.android.compound.tokens.generated.CompoundIcons
-import io.element.android.compound.tokens.generated.TypographyTokens
-import io.element.android.features.location.api.Location.Companion.fromGeoUri
-import io.element.android.features.location.impl.all.model.ShowLocationItem
+import io.element.android.features.location.impl.all.composables.LocationSymbol
+import io.element.android.features.location.impl.all.composables.MapToolbar
 import io.element.android.features.location.impl.common.PermissionDeniedDialog
 import io.element.android.features.location.impl.common.PermissionRationaleDialog
 import io.element.android.libraries.designsystem.preview.ElementPreview
@@ -56,14 +51,11 @@ import io.element.android.libraries.designsystem.preview.PreviewsDayNight
 import io.element.android.libraries.designsystem.theme.components.Icon
 import io.element.android.libraries.designsystem.theme.components.IconButton
 import io.element.android.libraries.designsystem.theme.components.Scaffold
-import io.element.android.libraries.designsystem.theme.components.Text
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.location.modes.RenderMode
 import org.ramani.compose.CameraPosition
-import org.ramani.compose.CircleWithItem
 import org.ramani.compose.LocationRequestProperties
 import org.ramani.compose.MapLibre
-import java.util.Locale
 
 @Composable
 fun ShowAllLocationView(
@@ -92,9 +84,9 @@ fun ShowAllLocationView(
     val userLocation = rememberSaveable { mutableStateOf(Location(null)) }
 
     Scaffold(
-        modifier = modifier,
+        modifier = Modifier.windowInsetsPadding(WindowInsets.statusBars),
         topBar = {
-            MyAppBar(onBackPressed = onBackPressed, title = state.roomName)
+            MapToolbar(onBackPressed = onBackPressed, title = state.roomName)
         }
     ) { paddingValues ->
         Box(modifier = Modifier.padding(paddingValues)) {
@@ -112,19 +104,6 @@ fun ShowAllLocationView(
                 state.showLocationItems.ongoing.filter { !it.state.isMine }.map { item ->
                     LocationSymbol(item)
                 }
-            }
-
-            state.description?.let {
-                Text(
-                    text = it,
-                    textAlign = TextAlign.Center,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                    style = TypographyTokens.fontBodyMdRegular,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp),
-                )
             }
 
             Column(
@@ -164,35 +143,6 @@ fun ShowAllLocationView(
 }
 
 @Composable
-fun MyAppBar(onBackPressed: () -> Unit, title: String) {
-    TopAppBar(
-        title = {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                Alignment.Center
-            ) {
-                Text(text = title, color = Color.White)
-            }
-        },
-        navigationIcon = {
-            IconButton(
-                onClick = onBackPressed,
-            ) {
-                Icon(CompoundIcons.ArrowLeft(), contentDescription = "", tint = Color.White)
-            }
-        },
-        modifier = Modifier
-            .padding(horizontal = 16.dp, vertical = 10.dp)
-            .clip(shape = RoundedCornerShape(32.dp)),
-
-        backgroundColor = Color(0xFF1E1E1E),
-        contentColor = Color(0xFFFFFFFF),
-        elevation = 8.dp,
-    )
-}
-
-@Composable
 fun RoundedIconButton(icon: ImageVector, onClick: () -> Unit) {
     IconButton(
         onClick = onClick,
@@ -208,26 +158,6 @@ fun RoundedIconButton(icon: ImageVector, onClick: () -> Unit) {
     }
 }
 
-@Composable
-fun LocationSymbol(item: ShowLocationItem) {
-    val location = fromGeoUri(item.state.location)
-    location?.let {
-        val latLng = LatLng(it.lat, it.lon)
-
-        CircleWithItem(
-            center = latLng,
-            radius = 10.0F,
-            isDraggable = false,
-            color = "White",
-            text = item.state.user.substring(1, 2).uppercase(Locale.getDefault()),
-            zIndex = 1,
-            itemSize = 12F,
-            borderColor = "Black",
-            borderWidth = 3.0F,
-        )
-    }
-}
-
 @PreviewsDayNight
 @Composable
 internal fun ShowAllLocationViewPreview(@PreviewParameter(ShowAllLocationStateProvider::class) state: ShowAllLocationState) = ElementPreview {
@@ -236,5 +166,3 @@ internal fun ShowAllLocationViewPreview(@PreviewParameter(ShowAllLocationStatePr
         onBackPressed = {},
     )
 }
-
-private const val PIN_ID = "pin"

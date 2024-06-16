@@ -16,11 +16,9 @@
 
 package io.element.android.features.location.impl.all
 
-import android.content.Context
 import io.element.android.features.location.impl.all.model.MapProvider
 
 sealed interface ShowAllLocationEvents {
-    data class TrackMyLocation(val enabled: Boolean) : ShowAllLocationEvents
     data object DismissDialog : ShowAllLocationEvents
     data object RequestPermissions : ShowAllLocationEvents
     data object OpenAppSettings : ShowAllLocationEvents

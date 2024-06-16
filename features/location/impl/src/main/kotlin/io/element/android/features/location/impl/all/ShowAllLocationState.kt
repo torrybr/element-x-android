@@ -25,9 +25,7 @@ import io.element.android.features.location.impl.all.model.ShowLocationItems
  */
 data class ShowAllLocationState(
     val permissionDialog: Dialog,
-    val description: String?,
     val hasLocationPermission: Boolean,
-    val isTrackMyLocation: Boolean,
     val showTileProviderPicker: Boolean,
     val appName: String,
     val roomName: String,

@@ -16,7 +16,12 @@
 
 package io.element.android.features.location.impl.all
 
+import android.Manifest
+import android.annotation.SuppressLint
+import android.os.Looper
+import androidx.annotation.RequiresPermission
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
@@ -24,10 +29,23 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleOwner
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
 import io.element.android.features.location.api.Location
+import io.element.android.features.location.impl.all.model.MapProvider
 import io.element.android.features.location.impl.all.model.ShowLocationItemFactory
 import io.element.android.features.location.impl.all.model.ShowLocationItems
+import io.element.android.features.location.impl.all.store.DefaultMapDataStore
 import io.element.android.features.location.impl.common.MapDefaults
 import io.element.android.features.location.impl.common.actions.LocationActions
 import io.element.android.features.location.impl.common.permissions.PermissionsEvents
@@ -36,38 +54,14 @@ import io.element.android.features.location.impl.common.permissions.PermissionsS
 import io.element.android.libraries.architecture.Presenter
 import io.element.android.libraries.core.meta.BuildMeta
 import io.element.android.libraries.matrix.api.room.MatrixRoom
+import io.element.android.libraries.matrix.api.timeline.Timeline
 import io.element.android.libraries.matrix.api.timeline.TimelineProvider
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import javax.inject.Inject
-
-import android.Manifest
-import android.annotation.SuppressLint
-import android.os.Looper
-import androidx.annotation.RequiresPermission
-import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.datastore.preferences.preferencesDataStore
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.LifecycleOwner
-import com.google.android.gms.location.LocationCallback
-import com.google.android.gms.location.LocationResult
-import com.google.android.gms.location.LocationServices
-import com.google.android.gms.location.LocationRequest
-import com.google.android.gms.location.Priority
-import io.element.android.features.location.impl.all.model.MapProvider
-import io.element.android.features.location.impl.all.store.DefaultMapDataStore
-import io.element.android.libraries.matrix.api.timeline.Timeline
-import kotlinx.coroutines.CoroutineScope
 import java.util.concurrent.TimeUnit
+import javax.inject.Inject
 
 class ShowAllLocationPresenter @Inject constructor(
     permissionsPresenterFactory: PermissionsPresenter.Factory,
@@ -92,7 +86,6 @@ class ShowAllLocationPresenter @Inject constructor(
         )
 
         val permissionsState: PermissionsState = permissionsPresenter.present()
-        var isTrackMyLocation by remember { mutableStateOf(false) }
         val appName by remember { derivedStateOf { buildMeta.applicationName } }
         var permissionDialog: ShowAllLocationState.Dialog by remember {
             mutableStateOf(ShowAllLocationState.Dialog.None)
@@ -168,17 +161,6 @@ class ShowAllLocationPresenter @Inject constructor(
                     isSharingLocation = false
                     locationRequest = null
                 }
-                is ShowAllLocationEvents.TrackMyLocation -> {
-                    if (event.enabled) {
-                        when {
-                            permissionsState.isAnyGranted -> isTrackMyLocation = true
-                            permissionsState.shouldShowRationale -> permissionDialog = ShowAllLocationState.Dialog.PermissionRationale
-                            else -> permissionDialog = ShowAllLocationState.Dialog.PermissionDenied
-                        }
-                    } else {
-                        isTrackMyLocation = false
-                    }
-                }
                 ShowAllLocationEvents.DismissDialog -> permissionDialog = ShowAllLocationState.Dialog.None
                 ShowAllLocationEvents.OpenAppSettings -> {
                     locationActions.openSettings()
@@ -202,9 +184,7 @@ class ShowAllLocationPresenter @Inject constructor(
         return ShowAllLocationState(
             permissionDialog = permissionDialog,
             showLocationItems = locationHistoryItems,
-            description = "",
             hasLocationPermission = permissionsState.isAnyGranted,
-            isTrackMyLocation = isTrackMyLocation,
             appName = appName,
             roomName = roomName,
             showTileProviderPicker = showTileProviderPicker,
