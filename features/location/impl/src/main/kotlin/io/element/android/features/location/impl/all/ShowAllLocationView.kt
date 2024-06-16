@@ -26,60 +26,45 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AirlineStops
-import androidx.compose.material.icons.filled.Layers
-import androidx.compose.material.icons.filled.MyLocation
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Stop
-import androidx.compose.material.icons.outlined.AirlineStops
 import androidx.compose.material.icons.outlined.Layers
+import androidx.compose.material.icons.outlined.LocationSearching
 import androidx.compose.material.icons.outlined.PlayArrow
-import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material.icons.outlined.Stop
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.text.toUpperCase
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
-import io.element.android.compound.theme.ElementTheme
+import io.element.android.compound.tokens.generated.CompoundIcons
 import io.element.android.compound.tokens.generated.TypographyTokens
 import io.element.android.features.location.api.Location.Companion.fromGeoUri
-import io.element.android.features.location.api.internal.rememberTileStyleUrl
 import io.element.android.features.location.impl.all.model.ShowLocationItem
-
 import io.element.android.features.location.impl.common.PermissionDeniedDialog
 import io.element.android.features.location.impl.common.PermissionRationaleDialog
-import io.element.android.libraries.designsystem.components.button.BackButton
 import io.element.android.libraries.designsystem.preview.ElementPreview
 import io.element.android.libraries.designsystem.preview.PreviewsDayNight
-import io.element.android.libraries.designsystem.theme.aliasScreenTitle
-import io.element.android.libraries.designsystem.theme.components.FloatingActionButton
 import io.element.android.libraries.designsystem.theme.components.Icon
 import io.element.android.libraries.designsystem.theme.components.IconButton
 import io.element.android.libraries.designsystem.theme.components.Scaffold
 import io.element.android.libraries.designsystem.theme.components.Text
-import io.element.android.libraries.designsystem.theme.components.TopAppBar
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.location.modes.RenderMode
-import org.ramani.compose.LocationRequestProperties
-import org.ramani.compose.MapLibre
 import org.ramani.compose.CameraPosition
 import org.ramani.compose.CircleWithItem
+import org.ramani.compose.LocationRequestProperties
+import org.ramani.compose.MapLibre
 import java.util.Locale
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ShowAllLocationView(
     state: ShowAllLocationState,
@@ -109,52 +94,19 @@ fun ShowAllLocationView(
     Scaffold(
         modifier = modifier,
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = state.roomName,
-                        style = ElementTheme.typography.aliasScreenTitle,
-                    )
-                },
-                navigationIcon = {
-                    BackButton(
-                        onClick = onBackPressed,
-                    )
-                },
-                actions = {
-                    /// Uncommeting this will crash the app
-                    IconButton(onClick = { /*TODO*/ }) {
-
-                    }
-                }
-            )
-        },
-        floatingActionButton = {
-            // TODO (tb): should probably hoist this state to the presenter
-            FloatingActionButton(
-                onClick = {
-                    cameraPosition.value = CameraPosition(cameraPosition.value).apply {
-                        this.target = LatLng(
-                            userLocation.value.latitude,
-                            userLocation.value.longitude
-                        )
-                        this.zoom = 12.0
-                    }
-                },
-            ) {
-                Icon(imageVector = Icons.Default.MyLocation, contentDescription = null)
-            }
-        },
+            MyAppBar(onBackPressed = onBackPressed, title = state.roomName)
+        }
     ) { paddingValues ->
         Box(modifier = Modifier.padding(paddingValues)) {
 
             MapLibre(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize(),
                 styleUrl = state.styleUrl,
                 locationRequestProperties = LocationRequestProperties(interval = 250L),
                 cameraPosition = cameraPosition.value,
                 renderMode = RenderMode.COMPASS,
-                userLocation = userLocation
+                userLocation = userLocation,
             ) {
                 // TODO (tb): this is bad, just have the sdk leave out your own dot
                 state.showLocationItems.ongoing.filter { !it.state.isMine }.map { item ->
@@ -190,7 +142,15 @@ fun ShowAllLocationView(
                         }
                     })
                 RoundedIconButton(icon = Icons.Outlined.Layers, onClick = { state.eventSink(ShowAllLocationEvents.OpenTileProvider) })
-                RoundedIconButton(icon = Icons.Outlined.AirlineStops, onClick = { /* Handle Settings click */ })
+                RoundedIconButton(icon = Icons.Outlined.LocationSearching, onClick = {
+                    cameraPosition.value = CameraPosition(cameraPosition.value).apply {
+                        this.target = LatLng(
+                            userLocation.value.latitude,
+                            userLocation.value.longitude
+                        )
+                        this.zoom = 17.0
+                    }
+                })
             }
             TileProviderBottomSheet(state = state, onTileProviderSelected = { provider ->
                 state.eventSink(
@@ -201,6 +161,35 @@ fun ShowAllLocationView(
             })
         }
     }
+}
+
+@Composable
+fun MyAppBar(onBackPressed: () -> Unit, title: String) {
+    TopAppBar(
+        title = {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                Alignment.Center
+            ) {
+                Text(text = title, color = Color.White)
+            }
+        },
+        navigationIcon = {
+            IconButton(
+                onClick = onBackPressed,
+            ) {
+                Icon(CompoundIcons.ArrowLeft(), contentDescription = "", tint = Color.White)
+            }
+        },
+        modifier = Modifier
+            .padding(horizontal = 16.dp, vertical = 10.dp)
+            .clip(shape = RoundedCornerShape(32.dp)),
+
+        backgroundColor = Color(0xFF1E1E1E),
+        contentColor = Color(0xFFFFFFFF),
+        elevation = 8.dp,
+    )
 }
 
 @Composable
@@ -224,14 +213,17 @@ fun LocationSymbol(item: ShowLocationItem) {
     val location = fromGeoUri(item.state.location)
     location?.let {
         val latLng = LatLng(it.lat, it.lon)
-        DrawableWithItem(
+
+        CircleWithItem(
             center = latLng,
             radius = 10.0F,
+            isDraggable = false,
             color = "White",
             text = item.state.user.substring(1, 2).uppercase(Locale.getDefault()),
-            isDraggable = false,
             zIndex = 1,
             itemSize = 12F,
+            borderColor = "Black",
+            borderWidth = 3.0F,
         )
     }
 }

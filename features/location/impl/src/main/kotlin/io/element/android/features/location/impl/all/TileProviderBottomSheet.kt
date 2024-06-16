@@ -18,6 +18,7 @@ package io.element.android.features.location.impl.all
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -103,7 +104,7 @@ internal fun TileProviderBottomSheet(
                         text = "CHOOSE MAP "
                     )
                     Text(
-                        text = state.mapTileProvider.displayName,
+                        text = "Select map type",
                     )
                 }
 
@@ -118,6 +119,7 @@ internal fun TileProviderBottomSheet(
 
 @Composable
 private fun ProviderItem(
+    selected: Boolean,
     provider: MapProvider,
     onTileProviderSelected: (MapProvider) -> Unit
 ) {
@@ -125,8 +127,13 @@ private fun ProviderItem(
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Box(
                 modifier = Modifier
-                    .background(Color.Gray)
+                    .background(Color.Gray, shape = RoundedCornerShape(8.dp)) // Add rounded corners
                     .size(72.dp)
+                    .border(
+                        width = 2.dp,
+                        color = if (selected) Color.Blue else Color.Transparent,
+                        shape = RoundedCornerShape(8.dp)
+                    )
             )
             Text(text = provider.displayName.uppercase(), modifier = Modifier.padding(top = 12.dp))
         }
@@ -153,7 +160,8 @@ private fun TileProviderPickerMenu(
         for (i in mapTileProviders) {
             ProviderItem(
                 provider = i,
-                onTileProviderSelected = onTileProviderSelected
+                onTileProviderSelected = onTileProviderSelected,
+                selected = state.mapTileProvider.mapKey == i.mapKey
             )
         }
     }
