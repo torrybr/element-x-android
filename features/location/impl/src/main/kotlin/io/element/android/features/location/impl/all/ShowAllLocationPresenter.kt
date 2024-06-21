@@ -57,7 +57,6 @@ import io.element.android.libraries.core.meta.BuildMeta
 import io.element.android.libraries.matrix.api.room.MatrixRoom
 import io.element.android.libraries.matrix.api.timeline.Timeline
 import io.element.android.libraries.matrix.api.timeline.TimelineProvider
-import io.element.android.libraries.matrix.impl.room.RustMatrixRoom
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.map
@@ -140,7 +139,7 @@ class ShowAllLocationPresenter @Inject constructor(
                     scope.launch {
                         startBeaconInfo()
                     }
-                    LocationForegroundService.start(context, room as RustMatrixRoom)
+                    LocationForegroundService.start(context)
                 }
                 ShowAllLocationEvents.StopBeaconInfo -> {
                     isSharingLocation = false
