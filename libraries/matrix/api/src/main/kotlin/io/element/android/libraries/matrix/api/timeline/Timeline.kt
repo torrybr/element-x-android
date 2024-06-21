@@ -95,7 +95,7 @@ interface Timeline : AutoCloseable {
 
     suspend fun cancelSend(transactionId: TransactionId): Result<Unit>
 
-    suspend fun updateUserLocation(geoUri: String): Result<Unit>
+    suspend fun sendUserLocationBeacon(geoUri: String): Result<Unit>
 
     /**
      * Share a location message in the room.

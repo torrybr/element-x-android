@@ -239,7 +239,7 @@ interface MatrixRoom : Closeable {
 
     suspend fun startBeaconInfo(durationMillis: ULong): Result<Unit>
 
-    suspend fun updateUserLocation(geoUri: String): Result<Unit>
+    suspend fun sendUserLocationBeacon(geoUri: String): Result<Unit>
 
     /**
      * Create a poll in the room.

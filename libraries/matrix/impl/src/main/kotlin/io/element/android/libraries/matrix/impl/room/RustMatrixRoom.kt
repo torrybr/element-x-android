@@ -527,8 +527,8 @@ class RustMatrixRoom(
         }
     }
 
-    override suspend fun updateUserLocation(geoUri: String): Result<Unit> {
-        return liveTimeline.updateUserLocation(geoUri)
+    override suspend fun sendUserLocationBeacon(geoUri: String): Result<Unit> {
+        return liveTimeline.sendUserLocationBeacon(geoUri)
     }
 
     override suspend fun createPoll(

@@ -59,7 +59,7 @@ fun MapToolbar(onBackPressed: () -> Unit, title: String) {
             }
         },
         modifier = Modifier
-            .padding(horizontal = 16.dp, vertical = 10.dp)
+            .padding(start = 16.dp, top = 10.dp, bottom = 10.dp)
             .clip(shape = RoundedCornerShape(32.dp)),
 
         backgroundColor = Color(0xFF1E1E1E),

@@ -50,7 +50,6 @@ import io.element.android.libraries.designsystem.preview.ElementPreview
 import io.element.android.libraries.designsystem.preview.PreviewsDayNight
 import io.element.android.libraries.designsystem.theme.components.Icon
 import io.element.android.libraries.designsystem.theme.components.IconButton
-import io.element.android.libraries.designsystem.theme.components.Scaffold
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.location.modes.RenderMode
 import org.ramani.compose.CameraPosition
@@ -83,62 +82,59 @@ fun ShowAllLocationView(
 
     val userLocation = rememberSaveable { mutableStateOf(Location(null)) }
 
-    Scaffold(
-        modifier = Modifier.windowInsetsPadding(WindowInsets.statusBars),
-        topBar = {
-            MapToolbar(onBackPressed = onBackPressed, title = state.roomName)
-        }
-    ) { paddingValues ->
-        Box(modifier = Modifier.padding(paddingValues)) {
+    Box(modifier = Modifier.fillMaxSize()) {
 
-            MapLibre(
-                modifier = Modifier
-                    .fillMaxSize(),
-                styleUrl = state.styleUrl,
-                locationRequestProperties = LocationRequestProperties(interval = 250L),
-                cameraPosition = cameraPosition.value,
-                renderMode = RenderMode.COMPASS,
-                userLocation = userLocation,
-            ) {
-                // TODO (tb): this is bad, just have the sdk leave out your own dot
-                state.showLocationItems.ongoing.filter { !it.state.isMine }.map { item ->
-                    LocationSymbol(item)
-                }
+        MapLibre(
+            modifier = Modifier
+                .fillMaxSize(),
+            styleUrl = state.styleUrl,
+            locationRequestProperties = LocationRequestProperties(interval = 250L),
+            cameraPosition = cameraPosition.value,
+            renderMode = RenderMode.COMPASS,
+            userLocation = userLocation,
+        ) {
+            // TODO (tb): this is bad, just have the sdk leave out your own dot
+            state.showLocationItems.ongoing.filter { !it.state.isMine }.map { item ->
+                LocationSymbol(item)
             }
+        }
 
-            Column(
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(end = 16.dp, top = 16.dp), // Adds padding on the right side
-                verticalArrangement = Arrangement.spacedBy(8.dp) // Space between buttons
-            ) {
-                RoundedIconButton(icon = if (state.isSharingLocation) Icons.Filled.Stop else Icons.Outlined.PlayArrow,
-                    onClick = {
-                        if (!state.isSharingLocation) {
-                            state.eventSink(ShowAllLocationEvents.StartBeaconInfo)
-                        } else {
-                            state.eventSink(ShowAllLocationEvents.StopBeaconInfo)
-                        }
-                    })
-                RoundedIconButton(icon = Icons.Outlined.Layers, onClick = { state.eventSink(ShowAllLocationEvents.OpenTileProvider) })
-                RoundedIconButton(icon = Icons.Outlined.LocationSearching, onClick = {
-                    cameraPosition.value = CameraPosition(cameraPosition.value).apply {
-                        this.target = LatLng(
-                            userLocation.value.latitude,
-                            userLocation.value.longitude
-                        )
-                        this.zoom = 17.0
+        Column(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(end = 16.dp)
+                .windowInsetsPadding(WindowInsets.statusBars), // Adds padding on the right side
+            verticalArrangement = Arrangement.spacedBy(8.dp), // Space between buttons,
+            horizontalAlignment = Alignment.End
+        ) {
+            MapToolbar(onBackPressed = onBackPressed, title = state.roomName)
+            RoundedIconButton(
+                icon = if (state.isSharingLocation) Icons.Filled.Stop else Icons.Outlined.PlayArrow,
+                onClick = {
+                    if (!state.isSharingLocation) {
+                        state.eventSink(ShowAllLocationEvents.StartBeaconInfo)
+                    } else {
+                        state.eventSink(ShowAllLocationEvents.StopBeaconInfo)
                     }
                 })
-            }
-            TileProviderBottomSheet(state = state, onTileProviderSelected = { provider ->
-                state.eventSink(
-                    ShowAllLocationEvents.ChangeProvider(
-                        provider
+            RoundedIconButton(icon = Icons.Outlined.Layers, onClick = { state.eventSink(ShowAllLocationEvents.OpenTileProvider) })
+            RoundedIconButton(icon = Icons.Outlined.LocationSearching, onClick = {
+                cameraPosition.value = CameraPosition(cameraPosition.value).apply {
+                    this.target = LatLng(
+                        userLocation.value.latitude,
+                        userLocation.value.longitude
                     )
-                )
+                    this.zoom = 17.0
+                }
             })
         }
+        TileProviderBottomSheet(state = state, onTileProviderSelected = { provider ->
+            state.eventSink(
+                ShowAllLocationEvents.ChangeProvider(
+                    provider
+                )
+            )
+        })
     }
 }
 

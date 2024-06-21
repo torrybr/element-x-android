@@ -477,7 +477,7 @@ class FakeMatrixRoom(
         TODO("Not yet implemented")
     }
 
-    override suspend fun updateUserLocation(geoUri: String): Result<Unit> {
+    override suspend fun sendUserLocationBeacon(geoUri: String): Result<Unit> {
         TODO("Not yet implemented")
     }
 

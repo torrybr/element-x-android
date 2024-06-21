@@ -441,9 +441,9 @@ class RustTimeline(
     /**
      * TODO (tb): add userLocation struct as method param here
      */
-    override suspend fun updateUserLocation(geoUri: String): Result<Unit> = withContext(dispatcher) {
+    override suspend fun sendUserLocationBeacon(geoUri: String): Result<Unit> = withContext(dispatcher) {
         runCatching {
-            inner.updateUserLocation(geoUri)
+            inner.sendUserLocationBeacon(geoUri)
         }
     }
 

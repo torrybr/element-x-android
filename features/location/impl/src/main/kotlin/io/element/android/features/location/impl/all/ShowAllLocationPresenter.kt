@@ -18,6 +18,7 @@ package io.element.android.features.location.impl.all
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.Context
 import android.os.Looper
 import androidx.annotation.RequiresPermission
 import androidx.compose.runtime.Composable
@@ -40,8 +41,8 @@ import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
-import com.google.android.gms.location.Priority
 import io.element.android.features.location.api.Location
+import io.element.android.features.location.impl.LocationForegroundService
 import io.element.android.features.location.impl.all.model.MapProvider
 import io.element.android.features.location.impl.all.model.ShowLocationItemFactory
 import io.element.android.features.location.impl.all.model.ShowLocationItems
@@ -56,11 +57,11 @@ import io.element.android.libraries.core.meta.BuildMeta
 import io.element.android.libraries.matrix.api.room.MatrixRoom
 import io.element.android.libraries.matrix.api.timeline.Timeline
 import io.element.android.libraries.matrix.api.timeline.TimelineProvider
+import io.element.android.libraries.matrix.impl.room.RustMatrixRoom
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class ShowAllLocationPresenter @Inject constructor(
@@ -105,22 +106,6 @@ class ShowAllLocationPresenter @Inject constructor(
         val scope = rememberCoroutineScope()
 
         ///////////////////////////// Location Functions /////////////////////////////
-        var locationRequest by remember {
-            mutableStateOf<LocationRequest?>(null)
-        }
-
-        // Only register the location updates effect when we have a request
-        if (locationRequest != null) {
-            LocationUpdatesEffect(locationRequest!!) { result ->
-                // For each result update the text
-                for (currentLocation in result.locations) {
-                    scope.launch {
-                        locationUpdate(currentLocation)
-                    }
-                }
-            }
-        }
-
 
         LaunchedEffect(permissionsState.permissions) {
             if (permissionsState.isAnyGranted) {
@@ -147,19 +132,20 @@ class ShowAllLocationPresenter @Inject constructor(
 
         ///////////////////////////// End Timeline Functions /////////////////////////////
 
-        fun handleEvents(event: ShowAllLocationEvents) {
+        fun handleEvents(event: ShowAllLocationEvents, context: Context) {
             when (event) {
                 ShowAllLocationEvents.StartBeaconInfo -> {
                     isSharingLocation = true
-                    locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, TimeUnit.SECONDS.toMillis(3)).build()
+                    //locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, TimeUnit.SECONDS.toMillis(3)).build()
                     scope.launch {
                         startBeaconInfo()
-
                     }
+                    LocationForegroundService.start(context, room as RustMatrixRoom)
                 }
                 ShowAllLocationEvents.StopBeaconInfo -> {
                     isSharingLocation = false
-                    locationRequest = null
+                    //locationRequest = null
+                    LocationForegroundService.stop(context)
                 }
                 ShowAllLocationEvents.DismissDialog -> permissionDialog = ShowAllLocationState.Dialog.None
                 ShowAllLocationEvents.OpenAppSettings -> {
@@ -181,6 +167,8 @@ class ShowAllLocationPresenter @Inject constructor(
             }
         }
 
+        val context = LocalContext.current
+
         return ShowAllLocationState(
             permissionDialog = permissionDialog,
             showLocationItems = locationHistoryItems,
@@ -188,7 +176,9 @@ class ShowAllLocationPresenter @Inject constructor(
             appName = appName,
             roomName = roomName,
             showTileProviderPicker = showTileProviderPicker,
-            eventSink = ::handleEvents,
+            eventSink = { event ->
+                handleEvents(event, context)
+            },
             isSharingLocation = isSharingLocation,
             mapTileProvider = mapTileProviders.find { it.mapKey == mapTile } ?: mapTileProviders[2]
         )
@@ -211,7 +201,7 @@ class ShowAllLocationPresenter @Inject constructor(
 
     private suspend fun locationUpdate(currentLocation: android.location.Location) {
         val matrixLocation = Location(currentLocation.latitude, currentLocation.longitude, currentLocation.accuracy)
-        room.updateUserLocation(matrixLocation.toGeoUri())
+        room.sendUserLocationBeacon(matrixLocation.toGeoUri())
     }
 }
 
