@@ -58,7 +58,6 @@ data class MessagesState(
     val callState: RoomCallState,
     val appName: String,
     val isMessagesCollapsed: Boolean = false,
-    val mapState: ShowAllLocationState,
     val eventSink: (MessagesEvents) -> Unit
 )
 

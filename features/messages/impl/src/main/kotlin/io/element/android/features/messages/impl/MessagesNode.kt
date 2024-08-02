@@ -34,6 +34,7 @@ import com.bumble.appyx.core.plugin.plugins
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import io.element.android.anvilannotations.ContributesNode
+import io.element.android.features.location.impl.all.ShowAllLocationPresenter
 import io.element.android.features.messages.impl.attachments.Attachment
 import io.element.android.features.messages.impl.timeline.TimelineController
 import io.element.android.features.messages.impl.timeline.TimelineEvents
@@ -204,6 +205,7 @@ class MessagesNode @AssistedInject constructor(
             val state = presenter.present()
             MessagesView(
                 state = state,
+                locationState = locationPresenter.present(),
                 onBackClick = this::navigateUp,
                 onRoomDetailsClick = this::onRoomDetailsClick,
                 onEventClick = this::onEventClick,

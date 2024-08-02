@@ -36,6 +36,8 @@ anvil {
 
 dependencies {
     implementation(projects.anvilannotations)
+    implementation(projects.features.location)
+    implementation(project(":features:location:impl"))
     anvil(projects.anvilcodegen)
     api(projects.features.messages.api)
     implementation(projects.appconfig)

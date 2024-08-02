@@ -63,6 +63,8 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import io.element.android.compound.theme.ElementTheme
 import io.element.android.compound.tokens.generated.CompoundIcons
+import io.element.android.features.location.impl.all.ShowAllLocationState
+import io.element.android.features.location.impl.all.ShowAllLocationView
 import io.element.android.features.messages.impl.actionlist.ActionListEvents
 import io.element.android.features.messages.impl.actionlist.ActionListView
 import io.element.android.features.messages.impl.actionlist.model.TimelineItemAction
@@ -112,14 +114,13 @@ import io.element.android.libraries.matrix.api.core.UserId
 import io.element.android.libraries.matrix.api.timeline.item.event.LocalEventSendState
 import io.element.android.libraries.ui.strings.CommonStrings
 import kotlinx.collections.immutable.ImmutableList
-import org.ramani.compose.MapLibre
 import timber.log.Timber
 import kotlin.random.Random
 
 @Composable
 fun MessagesView(
     state: MessagesState,
-    location: ShowAllLocationState,
+    locationState: ShowAllLocationState,
     onBackClick: () -> Unit,
     onRoomDetailsClick: () -> Unit,
     onEventClick: (event: TimelineItem.Event) -> Boolean,
@@ -196,29 +197,30 @@ fun MessagesView(
         topBar = {
             Column {
                 ConnectivityIndicatorView(isOnline = state.hasNetworkConnection)
-                MessagesViewTopBar(
-                    roomName = state.roomName.dataOrNull(),
-                    roomAvatar = state.roomAvatar.dataOrNull(),
-                    callState = state.callState,
-                    onBackClick = {
-                        // Since the textfield is now based on an Android view, this is no longer done automatically.
-                        // We need to hide the keyboard when navigating out of this screen.
-                        localView.hideKeyboard()
-                        onBackClick()
-                    },
-                    onRoomDetailsClick = onRoomDetailsClick,
-                    onJoinCallClick = onJoinCallClick,
-                    onShowMapClicked = {
-                        state.eventSink(MessagesEvents.ShowMapClicked)
-                    },
-                )
+                if (!state.isMessagesCollapsed) {
+                    MessagesViewTopBar(
+                        roomName = state.roomName.dataOrNull(),
+                        roomAvatar = state.roomAvatar.dataOrNull(),
+                        callState = state.callState,
+                        onBackClick = {
+                            // Since the textfield is now based on an Android view, this is no longer done automatically.
+                            // We need to hide the keyboard when navigating out of this screen.
+                            localView.hideKeyboard()
+                            onBackClick()
+                        },
+                        onRoomDetailsClick = onRoomDetailsClick,
+                        onJoinCallClick = onJoinCallClick,
+                        onShowMapClicked = {
+                            state.eventSink(MessagesEvents.ShowMapClicked)
+                        },
+                    )
+                }
             }
         },
         content = { padding ->
             Box {
                 if (state.isMessagesCollapsed) {
-//                    ShowAllLocationView(state = state.showAllLocationState, onBackPressed = onBackClick)
-                    MapLibre(modifier = Modifier.fillMaxSize())
+                    ShowAllLocationView(state = locationState, onBackPressed = onBackClick)
                 }
                 val isKeyboardVisible by keyboardAsState()
                 val messagesModifier = if (state.isMessagesCollapsed) {
@@ -599,6 +601,7 @@ private fun CantSendMessageBanner() {
 internal fun MessagesViewPreview(@PreviewParameter(MessagesStateProvider::class) state: MessagesState) = ElementPreview {
     MessagesView(
         state = state,
+        locationState = TODO(),
         onBackClick = {},
         onRoomDetailsClick = {},
         onEventClick = { false },
