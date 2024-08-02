@@ -25,6 +25,7 @@ sealed interface MessagesEvents {
     data class ToggleReaction(val emoji: String, val eventId: EventId) : MessagesEvents
     data class InviteDialogDismissed(val action: InviteDialogAction) : MessagesEvents
     data object Dismiss : MessagesEvents
+    data object ShowMapClicked : MessagesEvents
 }
 
 enum class InviteDialogAction {

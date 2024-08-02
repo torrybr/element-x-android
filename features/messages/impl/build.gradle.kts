@@ -66,6 +66,7 @@ dependencies {
     implementation(projects.features.networkmonitor.api)
     implementation(projects.services.analytics.api)
     implementation(projects.services.toolbox.api)
+    implementation(libs.ramani.maplibre)
     implementation(libs.coil.compose)
     implementation(libs.datetime)
     implementation(libs.jsoup)

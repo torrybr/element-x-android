@@ -27,7 +27,9 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -39,6 +41,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -50,6 +53,7 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
@@ -108,12 +112,14 @@ import io.element.android.libraries.matrix.api.core.UserId
 import io.element.android.libraries.matrix.api.timeline.item.event.LocalEventSendState
 import io.element.android.libraries.ui.strings.CommonStrings
 import kotlinx.collections.immutable.ImmutableList
+import org.ramani.compose.MapLibre
 import timber.log.Timber
 import kotlin.random.Random
 
 @Composable
 fun MessagesView(
     state: MessagesState,
+    location: ShowAllLocationState,
     onBackClick: () -> Unit,
     onRoomDetailsClick: () -> Unit,
     onEventClick: (event: TimelineItem.Event) -> Boolean,
@@ -202,39 +208,57 @@ fun MessagesView(
                     },
                     onRoomDetailsClick = onRoomDetailsClick,
                     onJoinCallClick = onJoinCallClick,
-                    onShowMapClicked = onShowMapClicked,
+                    onShowMapClicked = {
+                        state.eventSink(MessagesEvents.ShowMapClicked)
+                    },
                 )
             }
         },
         content = { padding ->
-            MessagesViewContent(
-                state = state,
-                modifier = Modifier
-                    .padding(padding)
-                    .consumeWindowInsets(padding),
-                onMessageClick = ::onMessageClick,
-                onMessageLongClick = ::onMessageLongClick,
-                onUserDataClick = onUserDataClick,
-                onLinkClick = onLinkClick,
-                onTimestampClick = { event ->
-                    if (event.localSendState is LocalEventSendState.SendingFailed) {
-                        state.retrySendMenuState.eventSink(RetrySendMenuEvents.EventSelected(event))
-                    }
-                },
-                onReactionClick = ::onEmojiReactionClick,
-                onReactionLongClick = ::onEmojiReactionLongClick,
-                onMoreReactionsClick = ::onMoreReactionsClick,
-                onReadReceiptClick = { event ->
-                    state.readReceiptBottomSheetState.eventSink(ReadReceiptBottomSheetEvents.EventSelected(event))
-                },
-                onSendLocationClick = onSendLocationClick,
-                onCreatePollClick = onCreatePollClick,
-                onSwipeToReply = { targetEvent ->
-                    state.eventSink(MessagesEvents.HandleAction(TimelineItemAction.Reply, targetEvent))
-                },
-                forceJumpToBottomVisibility = forceJumpToBottomVisibility,
-                onJoinCallClick = onJoinCallClick,
-            )
+            Box {
+                if (state.isMessagesCollapsed) {
+//                    ShowAllLocationView(state = state.showAllLocationState, onBackPressed = onBackClick)
+                    MapLibre(modifier = Modifier.fillMaxSize())
+                }
+                val isKeyboardVisible by keyboardAsState()
+                val messagesModifier = if (state.isMessagesCollapsed) {
+                    Modifier
+                        .padding(padding)
+                        .consumeWindowInsets(padding)
+                        .height(if (isKeyboardVisible) 500.dp else 300.dp)
+                        .align(Alignment.BottomCenter)
+                } else {
+                    Modifier
+                        .padding(padding)
+                        .consumeWindowInsets(padding)
+                }
+                MessagesViewContent(
+                    state = state,
+                    modifier = messagesModifier,
+                    onMessageClick = ::onMessageClick,
+                    onMessageLongClick = ::onMessageLongClick,
+                    onUserDataClick = onUserDataClick,
+                    onLinkClick = onLinkClick,
+                    onTimestampClick = { event ->
+                        if (event.localSendState is LocalEventSendState.SendingFailed) {
+                            state.retrySendMenuState.eventSink(RetrySendMenuEvents.EventSelected(event))
+                        }
+                    },
+                    onReactionClick = ::onEmojiReactionClick,
+                    onReactionLongClick = ::onEmojiReactionLongClick,
+                    onMoreReactionsClick = ::onMoreReactionsClick,
+                    onReadReceiptClick = { event ->
+                        state.readReceiptBottomSheetState.eventSink(ReadReceiptBottomSheetEvents.EventSelected(event))
+                    },
+                    onSendLocationClick = onSendLocationClick,
+                    onCreatePollClick = onCreatePollClick,
+                    onSwipeToReply = { targetEvent ->
+                        state.eventSink(MessagesEvents.HandleAction(TimelineItemAction.Reply, targetEvent))
+                    },
+                    forceJumpToBottomVisibility = forceJumpToBottomVisibility,
+                    onJoinCallClick = onJoinCallClick,
+                )
+            }
         },
         snackbarHost = {
             SnackbarHost(
@@ -268,6 +292,12 @@ fun MessagesView(
         onUserDataClick = onUserDataClick,
     )
     ReinviteDialog(state = state)
+}
+
+@Composable
+fun keyboardAsState(): State<Boolean> {
+    val isImeVisible = WindowInsets.ime.getBottom(LocalDensity.current) > 0
+    return rememberUpdatedState(newValue = isImeVisible)
 }
 
 @Composable

@@ -73,6 +73,7 @@ class MessagesNode @AssistedInject constructor(
     @ApplicationContext
     private val context: Context,
     private val timelineController: TimelineController,
+    private val locationPresenter: ShowAllLocationPresenter
 ) : Node(buildContext, plugins = plugins), MessagesNavigator {
     private val presenter = presenterFactory.create(this)
     private val callback = plugins<Callback>().firstOrNull()

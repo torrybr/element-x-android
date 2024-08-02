@@ -521,9 +521,15 @@ class RustMatrixRoom(
         return liveTimeline.sendLocation(body, geoUri, description, zoomLevel, assetType)
     }
 
-    override suspend fun startBeaconInfo(durationMillis: ULong): Result<Unit> = withContext(roomDispatcher) {
+    override suspend fun sendBeaconInfo(durationMillis: ULong): Result<Unit> = withContext(roomDispatcher) {
         runCatching {
-            innerRoom.startBeaconInfo(durationMillis)
+            innerRoom.sendBeaconInfo(durationMillis)
+        }
+    }
+
+    override suspend fun stopBeaconInfo(): Result<Unit> = withContext(roomDispatcher) {
+        runCatching {
+            innerRoom.stopBeaconInfo()
         }
     }
 

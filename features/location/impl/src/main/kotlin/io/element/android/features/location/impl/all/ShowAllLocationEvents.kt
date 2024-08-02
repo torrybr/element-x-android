@@ -17,6 +17,7 @@
 package io.element.android.features.location.impl.all
 
 import io.element.android.features.location.impl.all.model.MapProvider
+import org.maplibre.android.geometry.LatLng
 
 sealed interface ShowAllLocationEvents {
     data object DismissDialog : ShowAllLocationEvents
@@ -31,4 +32,5 @@ sealed interface ShowAllLocationEvents {
 
     data object StopBeaconInfo : ShowAllLocationEvents
     data class ChangeProvider(val provider: MapProvider) : ShowAllLocationEvents
+    data class MapLongPress(val coordinates: LatLng) : ShowAllLocationEvents
 }

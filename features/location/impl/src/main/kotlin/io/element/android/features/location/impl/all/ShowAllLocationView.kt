@@ -92,6 +92,9 @@ fun ShowAllLocationView(
             cameraPosition = cameraPosition.value,
             renderMode = RenderMode.COMPASS,
             userLocation = userLocation,
+            onMapLongClick = { latLng ->
+                state.eventSink(ShowAllLocationEvents.MapLongPress(latLng))
+            },
         ) {
             // TODO (tb): this is bad, just have the sdk leave out your own dot
             state.showLocationItems.ongoing.filter { !it.state.isMine }.map { item ->

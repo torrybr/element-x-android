@@ -42,7 +42,6 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import io.element.android.features.location.api.Location
-import io.element.android.features.location.impl.LocationForegroundService
 import io.element.android.features.location.impl.all.model.MapProvider
 import io.element.android.features.location.impl.all.model.ShowLocationItemFactory
 import io.element.android.features.location.impl.all.model.ShowLocationItems
@@ -135,16 +134,20 @@ class ShowAllLocationPresenter @Inject constructor(
             when (event) {
                 ShowAllLocationEvents.StartBeaconInfo -> {
                     isSharingLocation = true
-                    //locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, TimeUnit.SECONDS.toMillis(3)).build()
                     scope.launch {
                         startBeaconInfo()
                     }
-                    LocationForegroundService.start(context)
+                    //locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, TimeUnit.SECONDS.toMillis(3)).build()
+
+//                    LocationForegroundService.start(context)
                 }
                 ShowAllLocationEvents.StopBeaconInfo -> {
                     isSharingLocation = false
+                    scope.launch {
+                        room.stopBeaconInfo()
+                    }
                     //locationRequest = null
-                    LocationForegroundService.stop(context)
+//                    LocationForegroundService.stop(context)
                 }
                 ShowAllLocationEvents.DismissDialog -> permissionDialog = ShowAllLocationState.Dialog.None
                 ShowAllLocationEvents.OpenAppSettings -> {
@@ -162,6 +165,10 @@ class ShowAllLocationPresenter @Inject constructor(
                     scope.launch {
                         setMapTileProvider(event.provider.mapKey)
                     }
+                }
+                is ShowAllLocationEvents.MapLongPress -> {
+                    // TODO (tb): This is a test to see if the long press event is working. Long press should bring up a dialog to share location
+                    println(event.coordinates)
                 }
             }
         }
@@ -193,9 +200,9 @@ class ShowAllLocationPresenter @Inject constructor(
     }
 
     private suspend fun startBeaconInfo() {
-        room.startBeaconInfo((30 * 1000).toULong())
-        //wait 5 seconds
+        room.sendBeaconInfo((60 * 1000).toULong())
         delay(5000) // pause to test arrival times
+        room.sendUserLocationBeacon("geo:40.6892532,-74.0445482;u=35")
     }
 
     private suspend fun locationUpdate(currentLocation: android.location.Location) {

@@ -57,6 +57,8 @@ data class MessagesState(
     val enableVoiceMessages: Boolean,
     val callState: RoomCallState,
     val appName: String,
+    val isMessagesCollapsed: Boolean = false,
+    val mapState: ShowAllLocationState,
     val eventSink: (MessagesEvents) -> Unit
 )
 
