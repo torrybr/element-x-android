@@ -100,6 +100,7 @@ allprojects {
         kotlinOptions.allWarningsAsErrors = project.properties["allWarningsAsErrors"] == "true"
 
         kotlinOptions {
+            jvmTarget = "17"
             /*
             // Uncomment to suppress Compose Kotlin compiler compatibility warning
             freeCompilerArgs += listOf(
@@ -236,6 +237,7 @@ subprojects {
                         "${project.layout.buildDirectory.asFile.get().absolutePath}/compose_compiler"
                 )
             }
+            jvmTarget = "17"
         }
     }
 }
