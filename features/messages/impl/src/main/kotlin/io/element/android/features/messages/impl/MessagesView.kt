@@ -461,7 +461,6 @@ private fun MessagesViewComposerBottomSheetContents(
                     onLinkClick = onLinkClick,
                 )
             }
-            SmartRepliesView(state = state.timelineState)
             SmartRepliesView(timelineState = state.timelineState)
             MessageComposerView(
                 state = state.composerState,
