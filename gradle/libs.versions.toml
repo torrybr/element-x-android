@@ -59,7 +59,7 @@ autoservice = "1.1.1"
 androidx-test-ext-junit = "1.2.1"
 kover = "0.8.3"
 
-smartReplyCommon = "16.1.0"
+smartReplyCommon = "17.0.4"
 
 [libraries]
 # Project
@@ -220,7 +220,7 @@ google_autoservice_annotations = { module = "com.google.auto.service:auto-servic
 android_composeCompiler = { module = "androidx.compose.compiler:compiler", version.ref = "composecompiler" }
 androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidx-test-ext-junit" }
 
-smart-reply-common = { group = "com.google.mlkit", name = "smart-reply-common", version.ref = "smartReplyCommon" }
+smart-reply-common = { group = "com.google.mlkit", name = "smart-reply", version.ref = "smartReplyCommon" }
 
 [bundles]
 
