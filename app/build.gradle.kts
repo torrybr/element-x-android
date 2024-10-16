@@ -305,6 +305,12 @@ licensee {
     allowUrl("https://jsoup.org/license")
     allowUrl("https://asm.ow2.io/license.html")
     allowUrl("https://www.gnu.org/licenses/agpl-3.0.txt")
+    allowDependency("com.google.mlkit", "smart-reply", "17.0.4")
+    allowDependency("com.google.mlkit", "language-id", "17.0.6")
+    allowDependency("com.google.mlkit", "language-id-common", "16.1.0")
+    allowDependency("com.google.mlkit", "common", "18.11.0")
+    allowDependency("com.google.mlkit", "smart-reply-common", "16.1.0")
+
     ignoreDependencies("com.github.matrix-org", "matrix-analytics-events")
 }
 

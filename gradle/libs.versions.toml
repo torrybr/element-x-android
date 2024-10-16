@@ -217,6 +217,7 @@ google_autoservice_annotations = { module = "com.google.auto.service:auto-servic
 android_composeCompiler = { module = "androidx.compose.compiler:compiler", version.ref = "composecompiler" }
 androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidx-test-ext-junit" }
 
+smartreply = 'com.google.mlkit:smart-reply:17.0.4'
 [bundles]
 
 [plugins]

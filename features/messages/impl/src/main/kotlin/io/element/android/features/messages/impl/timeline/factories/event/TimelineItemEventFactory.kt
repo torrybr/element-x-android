@@ -59,7 +59,7 @@ class TimelineItemEventFactory @AssistedInject constructor(
         val senderProfile = currentTimelineItem.event.senderProfile
         val timeFormatter = DateFormat.getTimeInstance(DateFormat.SHORT)
         val sentTime = timeFormatter.format(Date(currentTimelineItem.event.timestamp))
-
+        val originalTimestamp = currentTimelineItem.event.timestamp
         val senderAvatarData = AvatarData(
             id = currentSender.value,
             name = senderProfile.getDisambiguatedDisplayName(currentSender),
@@ -87,6 +87,7 @@ class TimelineItemEventFactory @AssistedInject constructor(
             isThreaded = currentTimelineItem.event.isThreaded(),
             debugInfoProvider = currentTimelineItem.event.debugInfoProvider,
             origin = currentTimelineItem.event.origin,
+            originalTimestamp = originalTimestamp,
             messageShield = currentTimelineItem.event.messageShieldProvider.getShield(strict = false)
         )
     }

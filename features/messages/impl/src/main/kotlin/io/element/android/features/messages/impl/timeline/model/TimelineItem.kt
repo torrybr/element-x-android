@@ -76,6 +76,7 @@ sealed interface TimelineItem {
         val isThreaded: Boolean,
         val debugInfoProvider: EventDebugInfoProvider,
         val origin: TimelineItemEventOrigin?,
+        val originalTimestamp: Long,
         val messageShield: MessageShield?,
     ) : TimelineItem {
         val showSenderInformation = groupPosition.isNew() && !isMine

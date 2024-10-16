@@ -168,6 +168,7 @@ internal fun aTimelineItemEvent(
         isThreaded = isThreaded,
         origin = null,
         messageShield = messageShield,
+        originalTimestamp = System.currentTimeMillis()
     )
 }
 
