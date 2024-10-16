@@ -66,7 +66,6 @@ import io.element.android.features.messages.impl.messagecomposer.suggestions.Sug
 import io.element.android.features.messages.impl.pinned.banner.PinnedMessagesBannerState
 import io.element.android.features.messages.impl.pinned.banner.PinnedMessagesBannerView
 import io.element.android.features.messages.impl.pinned.banner.PinnedMessagesBannerViewDefaults
-import io.element.android.features.messages.impl.smartreply.SmartRepliesView
 import io.element.android.features.messages.impl.timeline.FOCUS_ON_PINNED_EVENT_DEBOUNCE_DURATION_IN_MILLIS
 import io.element.android.features.messages.impl.timeline.TimelineEvents
 import io.element.android.features.messages.impl.timeline.TimelineView
@@ -461,8 +460,8 @@ private fun MessagesViewComposerBottomSheetContents(
                     onLinkClick = onLinkClick,
                 )
             }
-            SmartRepliesView(timelineState = state.timelineState)
             MessageComposerView(
+                timelineState = state.timelineState,
                 state = state.composerState,
                 voiceMessageState = state.voiceMessageComposerState,
                 subcomposing = subcomposing,

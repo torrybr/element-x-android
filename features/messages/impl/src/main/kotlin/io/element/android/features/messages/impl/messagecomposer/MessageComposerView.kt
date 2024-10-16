@@ -17,6 +17,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
+import io.element.android.features.messages.impl.smartreply.SmartRepliesView
+import io.element.android.features.messages.impl.timeline.TimelineState
 import io.element.android.features.messages.impl.voicemessages.composer.VoiceMessageComposerEvents
 import io.element.android.features.messages.impl.voicemessages.composer.VoiceMessageComposerState
 import io.element.android.features.messages.impl.voicemessages.composer.VoiceMessageComposerStateProvider
@@ -32,6 +34,7 @@ import kotlinx.coroutines.launch
 @Composable
 internal fun MessageComposerView(
     state: MessageComposerState,
+    timelineState: TimelineState,
     voiceMessageState: VoiceMessageComposerState,
     subcomposing: Boolean,
     enableVoiceMessages: Boolean,
@@ -93,7 +96,7 @@ internal fun MessageComposerView(
     val onVoicePlayerEvent = { event: VoiceMessagePlayerEvent ->
         voiceMessageState.eventSink(VoiceMessageComposerEvents.PlayerEvent(event))
     }
-
+    SmartRepliesView(timelineState = timelineState, onClick = { })
     TextComposer(
         modifier = modifier,
         state = state.textEditorState,
@@ -131,6 +134,7 @@ internal fun MessageComposerViewPreview(
             voiceMessageState = aVoiceMessageComposerState(),
             enableVoiceMessages = true,
             subcomposing = false,
+            timelineState = TODO(),
         )
         MessageComposerView(
             modifier = Modifier.height(200.dp),
@@ -138,6 +142,7 @@ internal fun MessageComposerViewPreview(
             voiceMessageState = aVoiceMessageComposerState(),
             enableVoiceMessages = true,
             subcomposing = false,
+            timelineState = TODO(),
         )
     }
 }
@@ -154,6 +159,7 @@ internal fun MessageComposerViewVoicePreview(
             voiceMessageState = state,
             enableVoiceMessages = true,
             subcomposing = false,
+            timelineState = TODO(),
         )
     }
 }
