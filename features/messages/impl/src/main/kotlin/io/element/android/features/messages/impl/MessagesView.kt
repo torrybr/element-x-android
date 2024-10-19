@@ -28,6 +28,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Public
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -123,6 +125,7 @@ fun MessagesView(
     onSendLocationClick: () -> Unit,
     onCreatePollClick: () -> Unit,
     onJoinCallClick: () -> Unit,
+    onShowMapClick: () -> Unit,
     onViewAllPinnedMessagesClick: () -> Unit,
     modifier: Modifier = Modifier,
     forceJumpToBottomVisibility: Boolean = false,
@@ -199,6 +202,9 @@ fun MessagesView(
                     },
                     onRoomDetailsClick = onRoomDetailsClick,
                     onJoinCallClick = onJoinCallClick,
+                    onShowMapClick = {
+                        state.eventSink(MessagesEvents.ShowMapClicked)
+                    }
                 )
             }
         },
@@ -483,6 +489,7 @@ private fun MessagesViewTopBar(
     onRoomDetailsClick: () -> Unit,
     onJoinCallClick: () -> Unit,
     onBackClick: () -> Unit,
+    onShowMapClick: () -> Unit,
 ) {
     TopAppBar(
         navigationIcon = {
@@ -508,6 +515,7 @@ private fun MessagesViewTopBar(
             }
         },
         actions = {
+            MapRealtimeMenuItem(onShowMapClick = onShowMapClick)
             CallMenuItem(
                 isCallOngoing = callState == RoomCallState.ONGOING,
                 onClick = onJoinCallClick,
@@ -517,6 +525,16 @@ private fun MessagesViewTopBar(
         },
         windowInsets = WindowInsets(0.dp)
     )
+}
+
+@Composable
+private fun MapRealtimeMenuItem(
+    onShowMapClick: () -> Unit,
+) {
+    // Create a button with a map icon
+    IconButton(onClick = { onShowMapClick() }) {
+        Icon(Icons.Outlined.Public, contentDescription = "Map description")
+    }
 }
 
 @Composable
@@ -598,5 +616,6 @@ internal fun MessagesViewPreview(@PreviewParameter(MessagesStateProvider::class)
         onJoinCallClick = {},
         onViewAllPinnedMessagesClick = { },
         forceJumpToBottomVisibility = true,
+        onShowMapClick = {}
     )
 }

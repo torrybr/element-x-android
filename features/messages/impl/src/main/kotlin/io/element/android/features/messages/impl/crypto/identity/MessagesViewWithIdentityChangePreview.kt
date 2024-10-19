@@ -44,5 +44,8 @@ internal fun MessagesViewWithIdentityChangePreview(
         onCreatePollClick = {},
         onJoinCallClick = {},
         onViewAllPinnedMessagesClick = {},
+        onShowMapClick = TODO(),
+        modifier = TODO(),
+        forceJumpToBottomVisibility = TODO(),
     )
 }
