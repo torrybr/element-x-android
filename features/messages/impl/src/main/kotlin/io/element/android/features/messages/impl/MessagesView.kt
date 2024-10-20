@@ -202,9 +202,7 @@ fun MessagesView(
                     },
                     onRoomDetailsClick = onRoomDetailsClick,
                     onJoinCallClick = onJoinCallClick,
-                    onShowMapClick = {
-                        state.eventSink(MessagesEvents.ShowMapClicked)
-                    }
+                    onShowMapClick = onShowMapClick
                 )
             }
         },

@@ -29,6 +29,7 @@ import io.element.android.features.call.api.ElementCallEntryPoint
 import io.element.android.features.location.api.Location
 import io.element.android.features.location.api.SendLocationEntryPoint
 import io.element.android.features.location.api.ShowLocationEntryPoint
+import io.element.android.features.maprealtime.api.MapRealtimeEntryPoint
 import io.element.android.features.messages.api.MessagesEntryPoint
 import io.element.android.features.messages.impl.attachments.Attachment
 import io.element.android.features.messages.impl.attachments.preview.AttachmentsPreviewNode
@@ -92,6 +93,7 @@ class MessagesFlowNode @AssistedInject constructor(
     private val mentionSpanTheme: MentionSpanTheme,
     private val pinnedEventsTimelineProvider: PinnedEventsTimelineProvider,
     private val timelineController: TimelineController,
+    private val showRealtimeMapEntryPoint: MapRealtimeEntryPoint,
 ) : BaseFlowNode<MessagesFlowNode.NavTarget>(
     backstack = BackStack(
         initialElement = plugins.filterIsInstance<MessagesEntryPoint.Params>().first().initialTarget.toNavTarget(),
@@ -143,6 +145,9 @@ class MessagesFlowNode @AssistedInject constructor(
 
         @Parcelize
         data object PinnedMessagesList : NavTarget
+
+        @Parcelize
+        data object ShowRealtimeMap : NavTarget
     }
 
     private val callbacks = plugins<MessagesEntryPoint.Callback>()
@@ -222,6 +227,10 @@ class MessagesFlowNode @AssistedInject constructor(
 
                     override fun onViewAllPinnedEvents() {
                         backstack.push(NavTarget.PinnedMessagesList)
+                    }
+
+                    override fun onShowMapClick() {
+                        backstack.push(NavTarget.ShowRealtimeMap)
                     }
                 }
                 val inputs = MessagesNode.Inputs(focusedEventId = navTarget.focusedEventId)
@@ -314,6 +323,9 @@ class MessagesFlowNode @AssistedInject constructor(
             }
             NavTarget.Empty -> {
                 node(buildContext) {}
+            }
+            NavTarget.ShowRealtimeMap -> {
+                showRealtimeMapEntryPoint.createNode(this, buildContext)
             }
         }
     }
