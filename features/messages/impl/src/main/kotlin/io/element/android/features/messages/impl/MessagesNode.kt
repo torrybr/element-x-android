@@ -28,6 +28,7 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import io.element.android.anvilannotations.ContributesNode
 import io.element.android.compound.theme.ElementTheme
+import io.element.android.features.maprealtime.impl.MapRealtimePresenterPresenter
 import io.element.android.features.messages.impl.attachments.Attachment
 import io.element.android.features.messages.impl.messagecomposer.MessageComposerEvents
 import io.element.android.features.messages.impl.timeline.TimelineEvents
@@ -64,6 +65,7 @@ class MessagesNode @AssistedInject constructor(
     private val timelineItemPresenterFactories: TimelineItemPresenterFactories,
     private val mediaPlayer: MediaPlayer,
     private val permalinkParser: PermalinkParser,
+    private val mapRealtimePresenterPresenter: MapRealtimePresenterPresenter
 ) : Node(buildContext, plugins = plugins), MessagesNavigator {
     private val presenter = presenterFactory.create(this)
     private val callbacks = plugins<Callback>()
@@ -226,7 +228,8 @@ class MessagesNode @AssistedInject constructor(
                 onJoinCallClick = this::onJoinCallClick,
                 onViewAllPinnedMessagesClick = this::onViewAllPinnedMessagesClick,
                 modifier = modifier,
-                onShowMapClick = this::onShowMapClick
+                onShowMapClick = this::onShowMapClick,
+                mapRealtimeState = mapRealtimePresenterPresenter.present(),
             )
 
             var focusedEventId by rememberSaveable {

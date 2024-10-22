@@ -178,6 +178,10 @@ class MessagesPresenter @AssistedInject constructor(
             enableVoiceMessages = featureFlagsService.isFeatureEnabled(FeatureFlags.VoiceMessages)
         }
 
+        var isMessagesCollapsed by remember {
+            mutableStateOf(false)
+        }
+
         fun handleEvents(event: MessagesEvents) {
             when (event) {
                 is MessagesEvents.HandleAction -> {
@@ -201,6 +205,9 @@ class MessagesPresenter @AssistedInject constructor(
                     }
                 }
                 is MessagesEvents.Dismiss -> actionListState.eventSink(ActionListEvents.Clear)
+                is MessagesEvents.ShowMapClicked -> {
+                    isMessagesCollapsed = !isMessagesCollapsed
+                }
             }
         }
 
@@ -234,7 +241,8 @@ class MessagesPresenter @AssistedInject constructor(
             appName = buildMeta.applicationName,
             callState = callState,
             pinnedMessagesBannerState = pinnedMessagesBannerState,
-            eventSink = { handleEvents(it) }
+            eventSink = { handleEvents(it) },
+            isMessagesCollapsed = isMessagesCollapsed,
         )
     }
 
