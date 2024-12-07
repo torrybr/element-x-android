@@ -847,4 +847,16 @@ class RustMatrixRoom(
             featureFlagsService = featureFlagService,
         )
     }
+
+    override suspend fun startLiveLocationShare(durationMillis: ULong): Result<Unit> = withContext(roomDispatcher) {
+        runCatching {
+            innerRoom.startLiveLocationShare(durationMillis)
+        }
+    }
+
+    override suspend fun stopLiveLocationShare(): Result<Unit> = withContext(roomDispatcher) {
+        runCatching {
+            innerRoom.stopLiveLocationShare()
+        }
+    }
 }
