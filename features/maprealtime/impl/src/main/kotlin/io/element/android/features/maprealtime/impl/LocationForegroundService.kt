@@ -26,20 +26,17 @@ import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import io.element.android.features.location.api.Location
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
+import io.element.android.features.location.api.LocationRepository
+import io.element.android.libraries.architecture.bindings
 import timber.log.Timber
+import javax.inject.Inject
 
 class LocationForegroundService : Service() {
 
-    companion object {
-        private val _locationFlow = MutableStateFlow<Location?>(null)
-        val locationFlow = _locationFlow.asStateFlow()
+    @Inject
+    lateinit var locationRepository: LocationRepository
 
+    companion object {
         fun start(context: Context) {
             val intent = Intent(context, LocationForegroundService::class.java)
             ContextCompat.startForegroundService(context, intent)
@@ -51,19 +48,13 @@ class LocationForegroundService : Service() {
         }
     }
 
-    private val job = SupervisorJob()
-    private val scope = CoroutineScope(Dispatchers.IO + job)
-
-    lateinit var locationClient: FusedLocationProviderClient
+    private lateinit var locationClient: FusedLocationProviderClient
 
     override fun onCreate() {
         super.onCreate()
-        locationClient = LocationServices.getFusedLocationProviderClient(this)
-    }
+        applicationContext.bindings<ServiceComponent>().inject(this)
 
-    override fun onDestroy() {
-        super.onDestroy()
-        job.cancel()
+        locationClient = LocationServices.getFusedLocationProviderClient(this)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -116,10 +107,8 @@ class LocationForegroundService : Service() {
             override fun onLocationResult(result: LocationResult) {
                 result.locations.forEach { location ->
                     val matrixLocation = Location(location.latitude, location.longitude, location.accuracy)
-                    scope.launch {
-                        Timber.e(matrixLocation.toGeoUri())
-                        _locationFlow.emit(matrixLocation)
-                    }
+                    Timber.tag("LocationForegroundService").d("New Location received=$matrixLocation, geoUri=${matrixLocation.toGeoUri()}")
+                    locationRepository.send(matrixLocation)
                 }
             }
         }
