@@ -48,13 +48,36 @@ class LocationForegroundService : Service() {
         }
     }
 
-    private lateinit var locationClient: FusedLocationProviderClient
+    private var locationClient: FusedLocationProviderClient? = null
+
+    private val locationRequest by lazy {
+        LocationRequest.Builder(3 * 1000)
+            .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
+            .build()
+    }
+
+    private val locationCallback: LocationCallback by lazy {
+        object : LocationCallback() {
+            override fun onLocationResult(result: LocationResult) {
+                result.locations.forEach { location ->
+                    val matrixLocation = Location(location.latitude, location.longitude, location.accuracy)
+                    Timber.tag("LocationForegroundService").d("New Location received=$matrixLocation, geoUri=${matrixLocation.toGeoUri()}")
+                    locationRepository.send(matrixLocation)
+                }
+            }
+        }
+    }
 
     override fun onCreate() {
         super.onCreate()
         applicationContext.bindings<ServiceComponent>().inject(this)
 
         locationClient = LocationServices.getFusedLocationProviderClient(this)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        locationClient?.removeLocationUpdates(locationCallback)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -100,19 +123,7 @@ class LocationForegroundService : Service() {
 
     @SuppressLint("MissingPermission")
     private fun handleLocationUpdates() {
-        val locationRequest = LocationRequest.Builder(3 * 1000)
-            .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
-            .build()
-        val locationCallback: LocationCallback = object : LocationCallback() {
-            override fun onLocationResult(result: LocationResult) {
-                result.locations.forEach { location ->
-                    val matrixLocation = Location(location.latitude, location.longitude, location.accuracy)
-                    Timber.tag("LocationForegroundService").d("New Location received=$matrixLocation, geoUri=${matrixLocation.toGeoUri()}")
-                    locationRepository.send(matrixLocation)
-                }
-            }
-        }
         // check permissions
-        locationClient.requestLocationUpdates(locationRequest, locationCallback, null)
+        locationClient?.requestLocationUpdates(locationRequest, locationCallback, null)
     }
 }
