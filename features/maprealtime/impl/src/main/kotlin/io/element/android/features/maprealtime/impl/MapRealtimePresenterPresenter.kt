@@ -39,7 +39,6 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import timber.log.Timber
 import javax.inject.Inject
 
 class MapRealtimePresenterPresenter @Inject constructor(
@@ -91,15 +90,6 @@ class MapRealtimePresenterPresenter @Inject constructor(
         LaunchedEffect(Unit) {
             if (permissionsState.isAnyGranted) {
                 permissionDialog = MapRealtimePresenterState.Dialog.None
-            }
-        }
-
-        LaunchedEffect(Unit) {
-            LocationForegroundService.locationFlow.collect { location ->
-                scope.launch {
-                    Timber.e(("SENDING LOCATION" + location?.toGeoUri()))
-                    sendLiveLocation(location?.toGeoUri() ?: "")
-                }
             }
         }
 
@@ -210,10 +200,6 @@ class MapRealtimePresenterPresenter @Inject constructor(
 
     private suspend fun stopLiveLocationShare() {
         room.stopLiveLocationShare()
-    }
-
-    private suspend fun sendLiveLocation(geoUri: String) {
-        room.sendLiveLocation(geoUri)
     }
 }
 
