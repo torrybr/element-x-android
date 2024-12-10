@@ -27,6 +27,8 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import io.element.android.features.location.api.Location
 import io.element.android.features.location.api.LocationRepository
+import io.element.android.features.location.api.LocationServiceState
+import io.element.android.features.location.api.LocationServiceStateRepository
 import io.element.android.libraries.architecture.bindings
 import timber.log.Timber
 import javax.inject.Inject
@@ -35,6 +37,11 @@ class LocationForegroundService : Service() {
 
     @Inject
     lateinit var locationRepository: LocationRepository
+
+    @Inject
+    lateinit var locationServiceStateRepository: LocationServiceStateRepository
+
+    private var isServiceRunning = false
 
     companion object {
         fun start(context: Context) {
@@ -63,6 +70,13 @@ class LocationForegroundService : Service() {
                     val matrixLocation = Location(location.latitude, location.longitude, location.accuracy)
                     Timber.tag("LocationForegroundService").d("New Location received=$matrixLocation, geoUri=${matrixLocation.toGeoUri()}")
                     locationRepository.send(matrixLocation)
+
+                    // Location might be emitted just after the service gets destroyed, hence this check is needed
+                    if (isServiceRunning) {
+                        locationServiceStateRepository.set(LocationServiceState.LOCATION_EVENT_EMITTED)
+                    } else {
+                        locationServiceStateRepository.set(LocationServiceState.STOPPED)
+                    }
                 }
             }
         }
@@ -73,14 +87,18 @@ class LocationForegroundService : Service() {
         applicationContext.bindings<ServiceComponent>().inject(this)
 
         locationClient = LocationServices.getFusedLocationProviderClient(this)
+        locationServiceStateRepository.set(LocationServiceState.CREATED)
     }
 
     override fun onDestroy() {
         super.onDestroy()
+        isServiceRunning = false
         locationClient?.removeLocationUpdates(locationCallback)
+        locationServiceStateRepository.set(LocationServiceState.STOPPED)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        isServiceRunning = true
         // check for location permissions
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -89,6 +107,7 @@ class LocationForegroundService : Service() {
             startForeground(1, createNotification())
         }
 
+        locationServiceStateRepository.set(LocationServiceState.STARTED)
         handleLocationUpdates()
         return START_STICKY
     }

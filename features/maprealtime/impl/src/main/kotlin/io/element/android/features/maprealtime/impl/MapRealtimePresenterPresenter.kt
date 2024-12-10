@@ -10,6 +10,7 @@ package io.element.android.features.maprealtime.impl
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.ProduceStateScope
+import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -20,6 +21,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import io.element.android.features.location.api.Location
+import io.element.android.features.location.api.LocationServiceState
+import io.element.android.features.location.api.LocationServiceStateRepository
 import io.element.android.features.location.impl.common.MapDefaults
 import io.element.android.features.location.impl.common.actions.LocationActions
 import io.element.android.features.maprealtime.impl.common.permissions.PermissionsEvents
@@ -46,8 +49,8 @@ class MapRealtimePresenterPresenter @Inject constructor(
     private val locationActions: LocationActions,
     private val room: MatrixRoom,
     private val buildMeta: BuildMeta,
-    private val mapTypeStore: MapTypeStore
-
+    private val mapTypeStore: MapTypeStore,
+    private val locationServiceStateRepository: LocationServiceStateRepository,
 ) : Presenter<MapRealtimePresenterState> {
 
     private val permissionsPresenter = permissionsPresenterFactory.create(MapDefaults.permissions)
@@ -86,6 +89,8 @@ class MapRealtimePresenterPresenter @Inject constructor(
         var isSharingLocation: Boolean by remember {
             mutableStateOf(false)
         }
+
+        val locationServiceState: State<LocationServiceState> = locationServiceStateRepository.observeDistinct().collectAsState()
 
         LaunchedEffect(Unit) {
             if (permissionsState.isAnyGranted) {
@@ -126,6 +131,7 @@ class MapRealtimePresenterPresenter @Inject constructor(
                         startLiveLocationShare()
                     }
 
+                    locationServiceStateRepository.set(LocationServiceState.STARTING)
                     LocationForegroundService.start(context)
                 }
                 MapRealtimeEvents.StopLiveLocationShare -> {
@@ -138,6 +144,11 @@ class MapRealtimePresenterPresenter @Inject constructor(
             }
         }
 
+        val isWaitingForLocation: Boolean = isSharingLocation &&
+            locationServiceState.value != LocationServiceState.LOCATION_EVENT_EMITTED &&
+            locationServiceState.value != LocationServiceState.STOPPED &&
+            locationServiceState.value != LocationServiceState.IDLE
+
         return MapRealtimePresenterState(
             eventSink = ::handleEvents,
             permissionDialog = permissionDialog,
@@ -147,7 +158,8 @@ class MapRealtimePresenterPresenter @Inject constructor(
             roomName = roomName,
             isSharingLocation = isSharingLocation,
             mapType = mapTypes.find { it.mapKey == mapTile } ?: mapTypes[2],
-            liveLocationShares = liveLocationShares
+            liveLocationShares = liveLocationShares,
+            isWaitingForLocation = isWaitingForLocation,
         )
     }
 

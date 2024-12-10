@@ -17,7 +17,9 @@ import dagger.Provides
 import io.element.android.appconfig.ApplicationConfig
 import io.element.android.features.enterprise.api.EnterpriseService
 import io.element.android.features.location.api.LocationRepository
+import io.element.android.features.location.api.LocationServiceStateRepository
 import io.element.android.features.location.impl.common.LocationRepositoryImpl
+import io.element.android.features.location.impl.common.LocationServiceStateRepositoryImpl
 import io.element.android.features.messages.impl.timeline.components.customreaction.DefaultEmojibaseProvider
 import io.element.android.features.messages.impl.timeline.components.customreaction.EmojibaseProvider
 import io.element.android.libraries.androidutils.system.getVersionCodeFromManifest
@@ -124,4 +126,8 @@ object AppModule {
     @Provides
     @SingleIn(AppScope::class)
     fun providesLocationRepository(): LocationRepository = LocationRepositoryImpl()
+
+    @Provides
+    @SingleIn(AppScope::class)
+    fun providesLocationServiceStateRepository(): LocationServiceStateRepository = LocationServiceStateRepositoryImpl()
 }
