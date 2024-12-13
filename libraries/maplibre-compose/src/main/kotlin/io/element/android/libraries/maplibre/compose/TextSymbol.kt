@@ -10,9 +10,6 @@ package io.element.android.libraries.maplibre.compose
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ComposeNode
 import androidx.compose.runtime.currentComposer
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.asAndroidBitmap
-import androidx.compose.ui.res.imageResource
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.plugins.annotation.SymbolOptions
 import org.maplibre.android.style.layers.Property.ICON_ANCHOR_CENTER
@@ -27,7 +24,7 @@ public fun TextSymbol(
     color: String = "",
     isDraggable: Boolean = false,
     zIndex: Int = 0,
-    imageId: Int? = org.maplibre.android.R.drawable.maplibre_marker_icon_default,
+    imageId: String? = null,
     imageAnchor: String = ICON_ANCHOR_CENTER,
     imageOffset: Array<Float> = arrayOf(0f, 0f),
     imageRotation: Float? = null,
@@ -42,15 +39,6 @@ public fun TextSymbol(
     onDragFinished: (LatLng) -> Unit = {},
 ) {
     val mapApplier = currentComposer.applier as MapApplier
-
-    imageId?.let {
-        if (mapApplier.style.getImage("$imageId") == null) {
-            mapApplier.style.addImage(
-                "$imageId",
-                ImageBitmap.imageResource(it).asAndroidBitmap()
-            )
-        }
-    }
 
     ComposeNode<MapApplier.SymbolNode, MapApplier>(factory = {
         val symbolManager = mapApplier.getOrCreateSymbolManagerForZIndex(zIndex)

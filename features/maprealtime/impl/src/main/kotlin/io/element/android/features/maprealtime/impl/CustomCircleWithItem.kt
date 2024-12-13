@@ -30,7 +30,7 @@ fun CustomCircleWithItem(
     borderWidth: Float = 0.0f,
     opacity: Float = 1.0f,
     zIndex: Int = 0,
-    imageId: Int? = null,
+    imageId: String? = null,
     itemSize: Float = 0.0f,
     text: String? = null,
     onCenterChanged: (LatLng) -> Unit = {},
