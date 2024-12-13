@@ -44,7 +44,7 @@ object MapDefaults {
         get() = MapUiSettings(
             compassEnabled = true,
             compassMargins = Rect(0, 850, 45, 0),
-            rotationGesturesEnabled = false,
+            rotationGesturesEnabled = true,
             scrollGesturesEnabled = true,
             tiltGesturesEnabled = false,
             zoomGesturesEnabled = true,
