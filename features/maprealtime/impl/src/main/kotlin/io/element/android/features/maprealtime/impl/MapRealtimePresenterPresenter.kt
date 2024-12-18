@@ -7,6 +7,8 @@
 
 package io.element.android.features.maprealtime.impl
 
+import android.content.Context
+import android.location.LocationManager
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.ProduceStateScope
@@ -57,6 +59,11 @@ class MapRealtimePresenterPresenter @Inject constructor(
     @Composable
     override fun present(): MapRealtimePresenterState {
         val context = LocalContext.current
+
+        val hasGpsEnabled: Boolean = remember {
+            val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+            locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+        }
 
         val liveLocationShares by produceState(initialValue = persistentListOf()) {
             observeLocationShares()
@@ -152,6 +159,7 @@ class MapRealtimePresenterPresenter @Inject constructor(
             eventSink = ::handleEvents,
             permissionDialog = permissionDialog,
             hasLocationPermission = permissionsState.isAnyGranted,
+            hasGpsEnabled = hasGpsEnabled,
             showMapTypeDialog = showMapTypeDialog,
             appName = appName,
             roomName = roomName,
