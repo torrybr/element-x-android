@@ -29,7 +29,6 @@ import dagger.assisted.AssistedInject
 import io.element.android.anvilannotations.ContributesNode
 import io.element.android.compound.theme.ElementTheme
 import io.element.android.features.knockrequests.api.banner.KnockRequestsBannerRenderer
-
 import io.element.android.features.maprealtime.impl.MapRealtimePresenterPresenter
 import io.element.android.features.messages.impl.actionlist.ActionListPresenter
 import io.element.android.features.messages.impl.actionlist.model.TimelineItemActionPostProcessor
@@ -231,17 +230,28 @@ class MessagesNode @AssistedInject constructor(
             val state = presenter.present()
             OnLifecycleEvent { _, event ->
                 when (event) {
-                    Lifecycle.Event.ON_PAUSE -> state.composerState.eventSink(MessageComposerEvents.SaveDraft)
+                    Lifecycle.Event.ON_PAUSE ->
+                        if (state is MessagesBottomSheetState.MessagesState) {
+                            state.composerState.eventSink(MessageComposerEvents.SaveDraft)
+                        }
                     else -> Unit
                 }
             }
+
+            val mapRealtimeState = mapRealtimePresenterPresenter.present()
+
             MessagesView(
                 state = state,
+                mapRealtimeState = mapRealtimeState,
                 onBackClick = this::navigateUp,
                 onRoomDetailsClick = this::onRoomDetailsClick,
                 onEventContentClick = this::onEventClick,
                 onUserDataClick = this::onUserDataClick,
-                onLinkClick = { url -> onLinkClick(activity, isDark, url, state.timelineState.eventSink) },
+                onLinkClick = { url ->
+                    if (state is MessagesBottomSheetState.MessagesState) {
+                        onLinkClick(activity, isDark, url, state.timelineState.eventSink)
+                    }
+                },
                 onSendLocationClick = this::onSendLocationClick,
                 onCreatePollClick = this::onCreatePollClick,
                 onJoinCallClick = this::onJoinCallClick,
@@ -253,8 +263,9 @@ class MessagesNode @AssistedInject constructor(
                     )
                 },
                 modifier = modifier,
-                onShowMapClick = this::onShowMapClick,
-                mapRealtimeState = mapRealtimePresenterPresenter.present(),
+                onShowMapClick = {
+//                    mapRealtimeState.eventSink.invoke(MapRealtimeEvents.ShowMessagesBottomSheet)
+                },
             )
 
             var focusedEventId by rememberSaveable {
@@ -262,7 +273,9 @@ class MessagesNode @AssistedInject constructor(
             }
             LaunchedEffect(Unit) {
                 focusedEventId?.also { eventId ->
-                    state.timelineState.eventSink(TimelineEvents.FocusOnEvent(eventId))
+                    if (state is MessagesBottomSheetState.MessagesState) {
+                        state.timelineState.eventSink(TimelineEvents.FocusOnEvent(eventId))
+                    }
                 }
                 // Reset the focused event id to null to avoid refocusing when restoring node.
                 focusedEventId = null

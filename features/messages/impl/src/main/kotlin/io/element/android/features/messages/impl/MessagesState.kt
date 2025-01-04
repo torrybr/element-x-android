@@ -25,31 +25,44 @@ import io.element.android.libraries.designsystem.utils.snackbar.SnackbarMessage
 import io.element.android.libraries.matrix.api.core.RoomId
 import kotlinx.collections.immutable.ImmutableList
 
-@Immutable
-data class MessagesState(
-    val roomId: RoomId,
-    val roomName: AsyncData<String>,
-    val roomAvatar: AsyncData<AvatarData>,
-    val heroes: ImmutableList<AvatarData>,
-    val userEventPermissions: UserEventPermissions,
-    val composerState: MessageComposerState,
-    val voiceMessageComposerState: VoiceMessageComposerState,
-    val timelineState: TimelineState,
-    val timelineProtectionState: TimelineProtectionState,
-    val identityChangeState: IdentityChangeState,
-    val actionListState: ActionListState,
-    val customReactionState: CustomReactionState,
-    val reactionSummaryState: ReactionSummaryState,
-    val readReceiptBottomSheetState: ReadReceiptBottomSheetState,
-    val hasNetworkConnection: Boolean,
-    val snackbarMessage: SnackbarMessage?,
-    val inviteProgress: AsyncData<Unit>,
-    val showReinvitePrompt: Boolean,
-    val enableTextFormatting: Boolean,
-    val enableVoiceMessages: Boolean,
-    val roomCallState: RoomCallState,
-    val appName: String,
-    val pinnedMessagesBannerState: PinnedMessagesBannerState,
-    val eventSink: (MessagesEvents) -> Unit,
-    val isMessagesCollapsed: Boolean = false
-)
+sealed class MessagesBottomSheetState(
+    open val snackbarMessage: SnackbarMessage?,
+    open val hasNetworkConnection: Boolean,
+    open val roomCallState: RoomCallState,
+    open val eventSink: (MessagesEvents) -> Unit,
+) {
+    data class Hidden(
+        override val snackbarMessage: SnackbarMessage?,
+        override val hasNetworkConnection: Boolean,
+        override val roomCallState: RoomCallState,
+        override val eventSink: (MessagesEvents) -> Unit
+    ) : MessagesBottomSheetState(snackbarMessage, hasNetworkConnection, roomCallState, eventSink)
+
+    @Immutable
+    data class MessagesState(
+        val roomId: RoomId,
+        val roomName: AsyncData<String>,
+        val roomAvatar: AsyncData<AvatarData>,
+        val heroes: ImmutableList<AvatarData>,
+        val userEventPermissions: UserEventPermissions,
+        val composerState: MessageComposerState,
+        val voiceMessageComposerState: VoiceMessageComposerState,
+        val timelineState: TimelineState,
+        val timelineProtectionState: TimelineProtectionState,
+        val identityChangeState: IdentityChangeState,
+        val actionListState: ActionListState,
+        val customReactionState: CustomReactionState,
+        val reactionSummaryState: ReactionSummaryState,
+        val readReceiptBottomSheetState: ReadReceiptBottomSheetState,
+        override val hasNetworkConnection: Boolean,
+        override val snackbarMessage: SnackbarMessage?,
+        val inviteProgress: AsyncData<Unit>,
+        val showReinvitePrompt: Boolean,
+        val enableTextFormatting: Boolean,
+        val enableVoiceMessages: Boolean,
+        override val roomCallState: RoomCallState,
+        val appName: String,
+        val pinnedMessagesBannerState: PinnedMessagesBannerState,
+        override val eventSink: (MessagesEvents) -> Unit,
+    ) : MessagesBottomSheetState(snackbarMessage, hasNetworkConnection, roomCallState, eventSink)
+}

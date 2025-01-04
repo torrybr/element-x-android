@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.element.android.compound.theme.ElementTheme
 import io.element.android.compound.tokens.generated.CompoundIcons
+import io.element.android.features.maprealtime.impl.CallMenuItem
 import io.element.android.features.messages.impl.timeline.aTimelineItemEvent
 import io.element.android.features.messages.impl.timeline.model.TimelineItem
 import io.element.android.features.messages.impl.timeline.model.event.TimelineItemCallNotifyContent
@@ -50,10 +51,10 @@ internal fun TimelineItemCallNotifyView(
 ) {
     Row(
         modifier = modifier
-            .fillMaxWidth()
-            .border(1.dp, ElementTheme.colors.borderInteractiveSecondary, RoundedCornerShape(8.dp))
-            .combinedClickable(enabled = true, onClick = {}, onLongClick = { onLongClick(event) })
-            .padding(12.dp),
+                .fillMaxWidth()
+                .border(1.dp, ElementTheme.colors.borderInteractiveSecondary, RoundedCornerShape(8.dp))
+                .combinedClickable(enabled = true, onClick = {}, onLongClick = { onLongClick(event) })
+                .padding(12.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
