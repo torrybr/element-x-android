@@ -39,7 +39,6 @@ fun CallMenuItem(
     modifier: Modifier = Modifier,
     isUsedInMapToolbar: Boolean = true,
 ) {
-    println("viktor, state=$roomCallState")
     when (roomCallState) {
         is RoomCallState.StandBy -> {
             StandByCallMenuItem(

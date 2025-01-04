@@ -108,7 +108,7 @@ class MessagesPresenter @AssistedInject constructor(
     private val timelineController: TimelineController,
     private val permalinkParser: PermalinkParser,
     private val analyticsService: AnalyticsService,
-) : Presenter<MessagesBottomSheetState> {
+) : Presenter<MessagesState> {
     @AssistedFactory
     interface Factory {
         fun create(
@@ -120,7 +120,7 @@ class MessagesPresenter @AssistedInject constructor(
     }
 
     @Composable
-    override fun present(): MessagesBottomSheetState {
+    override fun present(): MessagesState {
         htmlConverterProvider.Update(currentUserId = room.sessionId)
 
         val roomInfo by room.roomInfoFlow.collectAsState(null)
@@ -179,19 +179,7 @@ class MessagesPresenter @AssistedInject constructor(
             enableVoiceMessages = featureFlagsService.isFeatureEnabled(FeatureFlags.VoiceMessages)
         }
 
-
-        var messagesBottomSheetState by remember {
-            mutableStateOf<MessagesBottomSheetState>(
-                MessagesBottomSheetState.Hidden(
-                    snackbarMessage = snackbarMessage,
-                    hasNetworkConnection = networkConnectionStatus == NetworkStatus.Online,
-                    roomCallState = roomCallState,
-                    eventSink = {
-                        println("viktor, sinking")
-                    },
-                )
-            )
-        }
+        var showMessagesBottomSheet by remember { mutableStateOf(true) }
 
         fun handleEvents(event: MessagesEvents) {
             println("viktor, event=$event")
@@ -217,50 +205,42 @@ class MessagesPresenter @AssistedInject constructor(
                     }
                 }
                 is MessagesEvents.Dismiss -> actionListState.eventSink(ActionListEvents.Clear)
-                is MessagesEvents.ShowMessages -> {
-                    messagesBottomSheetState = MessagesBottomSheetState.MessagesState(
-                        roomId = room.roomId,
-                        roomName = roomName,
-                        roomAvatar = roomAvatar,
-                        heroes = heroes,
-                        composerState = composerState,
-                        userEventPermissions = userEventPermissions,
-                        voiceMessageComposerState = voiceMessageComposerState,
-                        timelineState = timelineState,
-                        timelineProtectionState = timelineProtectionState,
-                        identityChangeState = identityChangeState,
-                        actionListState = actionListState,
-                        customReactionState = customReactionState,
-                        reactionSummaryState = reactionSummaryState,
-                        readReceiptBottomSheetState = readReceiptBottomSheetState,
-                        hasNetworkConnection = networkConnectionStatus == NetworkStatus.Online,
-                        snackbarMessage = snackbarMessage,
-                        showReinvitePrompt = showReinvitePrompt,
-                        inviteProgress = inviteProgress.value,
-                        enableTextFormatting = MessageComposerConfig.ENABLE_RICH_TEXT_EDITING,
-                        enableVoiceMessages = enableVoiceMessages,
-                        appName = buildMeta.applicationName,
-                        roomCallState = roomCallState,
-                        pinnedMessagesBannerState = pinnedMessagesBannerState,
-                        eventSink = { handleEvents(it) },
-                    )
-                }
-                MessagesEvents.HideMessages -> {
-                    messagesBottomSheetState = MessagesBottomSheetState.Hidden(
-                        snackbarMessage = snackbarMessage,
-                        hasNetworkConnection = networkConnectionStatus == NetworkStatus.Online,
-                        roomCallState = roomCallState,
-                        eventSink = { handleEvents(it) },
-                    )
-                }
+                is MessagesEvents.ShowMessages -> showMessagesBottomSheet = true
+                MessagesEvents.HideMessages -> showMessagesBottomSheet = false
             }
         }
 
-        messagesBottomSheetState = remember(messagesBottomSheetState) {
-            (messagesBottomSheetState as? MessagesBottomSheetState.Hidden)?.copy(eventSink = { handleEvents(it) }) ?: messagesBottomSheetState
+        return MessagesState(
+            roomId = room.roomId,
+            roomName = roomName,
+            roomAvatar = roomAvatar,
+            heroes = heroes,
+            composerState = composerState,
+            userEventPermissions = userEventPermissions,
+            voiceMessageComposerState = voiceMessageComposerState,
+            timelineState = timelineState,
+            timelineProtectionState = timelineProtectionState,
+            identityChangeState = identityChangeState,
+            actionListState = actionListState,
+            customReactionState = customReactionState,
+            reactionSummaryState = reactionSummaryState,
+            readReceiptBottomSheetState = readReceiptBottomSheetState,
+            hasNetworkConnection = networkConnectionStatus == NetworkStatus.Online,
+            snackbarMessage = snackbarMessage,
+            showReinvitePrompt = showReinvitePrompt,
+            inviteProgress = inviteProgress.value,
+            enableTextFormatting = MessageComposerConfig.ENABLE_RICH_TEXT_EDITING,
+            enableVoiceMessages = enableVoiceMessages,
+            appName = buildMeta.applicationName,
+            roomCallState = roomCallState,
+            pinnedMessagesBannerState = pinnedMessagesBannerState,
+            eventSink = { handleEvents(it) },
+            showMessagesBottomSheet = showMessagesBottomSheet,
+        ).also {
+            runCatching {
+                println("viktor, presenter state=$it")
+            }
         }
-
-        return messagesBottomSheetState
     }
 
     @Composable

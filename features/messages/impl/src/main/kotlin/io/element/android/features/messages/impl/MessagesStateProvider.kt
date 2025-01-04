@@ -44,8 +44,8 @@ import io.element.android.libraries.textcomposer.model.aTextEditorStateRich
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentSetOf
 
-open class MessagesStateProvider : PreviewParameterProvider<MessagesBottomSheetState> {
-    override val values: Sequence<MessagesBottomSheetState>
+open class MessagesStateProvider : PreviewParameterProvider<MessagesState> {
+    override val values: Sequence<MessagesState>
         get() = sequenceOf(
             aMessagesState(),
             aMessagesState(hasNetworkConnection = false),
@@ -110,7 +110,7 @@ fun aMessagesState(
     roomCallState: RoomCallState = aStandByCallState(),
     pinnedMessagesBannerState: PinnedMessagesBannerState = aLoadedPinnedMessagesBannerState(),
     eventSink: (MessagesEvents) -> Unit = {},
-) = MessagesBottomSheetState.MessagesState(
+) = MessagesState(
     roomId = RoomId("!id:domain"),
     roomName = roomName,
     roomAvatar = roomAvatar,
@@ -135,6 +135,7 @@ fun aMessagesState(
     appName = "Element",
     pinnedMessagesBannerState = pinnedMessagesBannerState,
     eventSink = eventSink,
+    showMessagesBottomSheet = true,
 )
 
 fun aUserEventPermissions(

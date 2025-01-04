@@ -87,7 +87,7 @@ import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 internal fun MessagesViewContent(
-    state: MessagesBottomSheetState.MessagesState,
+    state: MessagesState,
     onUserDataClick: (UserId) -> Unit,
     onLinkClick: (String) -> Unit,
     onReadReceiptClick: (TimelineItem.Event) -> Unit,
@@ -284,7 +284,7 @@ internal fun MessagesViewContent(
 }
 
 @Composable
-private fun ReinviteDialog(state: MessagesBottomSheetState.MessagesState) {
+private fun ReinviteDialog(state: MessagesState) {
     if (state.showReinvitePrompt) {
         ConfirmationDialog(
             title = stringResource(id = R.string.screen_room_invite_again_alert_title),
@@ -300,7 +300,7 @@ private fun ReinviteDialog(state: MessagesBottomSheetState.MessagesState) {
 @Composable
 private fun MessagesViewComposerBottomSheetContents(
     subcomposing: Boolean,
-    state: MessagesBottomSheetState.MessagesState,
+    state: MessagesState,
     onLinkClick: (String) -> Unit,
 ) {
     if (state.userEventPermissions.canSendMessage) {

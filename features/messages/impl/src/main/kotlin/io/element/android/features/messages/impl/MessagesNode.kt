@@ -230,10 +230,7 @@ class MessagesNode @AssistedInject constructor(
             val state = presenter.present()
             OnLifecycleEvent { _, event ->
                 when (event) {
-                    Lifecycle.Event.ON_PAUSE ->
-                        if (state is MessagesBottomSheetState.MessagesState) {
-                            state.composerState.eventSink(MessageComposerEvents.SaveDraft)
-                        }
+                    Lifecycle.Event.ON_PAUSE -> state.composerState.eventSink(MessageComposerEvents.SaveDraft)
                     else -> Unit
                 }
             }
@@ -247,10 +244,7 @@ class MessagesNode @AssistedInject constructor(
                 onRoomDetailsClick = this::onRoomDetailsClick,
                 onEventContentClick = this::onEventClick,
                 onUserDataClick = this::onUserDataClick,
-                onLinkClick = { url ->
-                    if (state is MessagesBottomSheetState.MessagesState) {
-                        onLinkClick(activity, isDark, url, state.timelineState.eventSink)
-                    }
+                onLinkClick = { url -> onLinkClick(activity, isDark, url, state.timelineState.eventSink)
                 },
                 onSendLocationClick = this::onSendLocationClick,
                 onCreatePollClick = this::onCreatePollClick,
@@ -272,10 +266,7 @@ class MessagesNode @AssistedInject constructor(
                 mutableStateOf(inputs.focusedEventId)
             }
             LaunchedEffect(Unit) {
-                focusedEventId?.also { eventId ->
-                    if (state is MessagesBottomSheetState.MessagesState) {
-                        state.timelineState.eventSink(TimelineEvents.FocusOnEvent(eventId))
-                    }
+                focusedEventId?.also { eventId -> state.timelineState.eventSink(TimelineEvents.FocusOnEvent(eventId))
                 }
                 // Reset the focused event id to null to avoid refocusing when restoring node.
                 focusedEventId = null

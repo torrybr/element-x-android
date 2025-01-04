@@ -44,7 +44,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun MessagesView(
-    state: MessagesBottomSheetState,
+    state: MessagesState,
     mapRealtimeState: MapRealtimePresenterState,
     onBackClick: () -> Unit,
     onRoomDetailsClick: () -> Unit,
@@ -143,34 +143,31 @@ fun MessagesView(
                     }
                 }
 
-                when (state) {
-                    is MessagesBottomSheetState.Hidden -> Unit
-                    is MessagesBottomSheetState.MessagesState -> {
-                        ModalBottomSheet(
-                            sheetState = sheetState,
-                            onDismissRequest = {
-                                state.eventSink(MessagesEvents.HideMessages)
-                            }
-                        ) {
-                            MessagesViewContent(
-                                state = state,
-                                modifier = Modifier,
-                                onUserDataClick = { hidingKeyboard { onUserDataClick(it) } },
-                                onLinkClick = onLinkClick,
-                                onReadReceiptClick = { event ->
-                                    state.readReceiptBottomSheetState.eventSink(ReadReceiptBottomSheetEvents.EventSelected(event))
-                                },
-                                onSendLocationClick = onSendLocationClick,
-                                onCreatePollClick = onCreatePollClick,
-                                onSwipeToReply = { targetEvent ->
-                                    state.eventSink(MessagesEvents.HandleAction(TimelineItemAction.Reply, targetEvent))
-                                },
-                                forceJumpToBottomVisibility = forceJumpToBottomVisibility,
-                                onJoinCallClick = onJoinCallClick,
-                                onViewAllPinnedMessagesClick = onViewAllPinnedMessagesClick,
-                                knockRequestsBannerView = knockRequestsBannerView,
-                            )
+                if (state.showMessagesBottomSheet) {
+                    ModalBottomSheet(
+                        sheetState = sheetState,
+                        onDismissRequest = {
+                            state.eventSink(MessagesEvents.HideMessages)
                         }
+                    ) {
+                        MessagesViewContent(
+                            state = state,
+                            modifier = Modifier,
+                            onUserDataClick = { hidingKeyboard { onUserDataClick(it) } },
+                            onLinkClick = onLinkClick,
+                            onReadReceiptClick = { event ->
+                                state.readReceiptBottomSheetState.eventSink(ReadReceiptBottomSheetEvents.EventSelected(event))
+                            },
+                            onSendLocationClick = onSendLocationClick,
+                            onCreatePollClick = onCreatePollClick,
+                            onSwipeToReply = { targetEvent ->
+                                state.eventSink(MessagesEvents.HandleAction(TimelineItemAction.Reply, targetEvent))
+                            },
+                            forceJumpToBottomVisibility = forceJumpToBottomVisibility,
+                            onJoinCallClick = onJoinCallClick,
+                            onViewAllPinnedMessagesClick = onViewAllPinnedMessagesClick,
+                            knockRequestsBannerView = knockRequestsBannerView,
+                        )
                     }
                 }
             }
@@ -192,7 +189,7 @@ fun keyboardAsState(): State<Boolean> {
 
 @PreviewsDayNight
 @Composable
-internal fun MessagesViewPreview(@PreviewParameter(MessagesStateProvider::class) state: MessagesBottomSheetState) = ElementPreview {
+internal fun MessagesViewPreview(@PreviewParameter(MessagesStateProvider::class) state: MessagesState) = ElementPreview {
     MessagesView(
         state = state,
         onBackClick = {},
