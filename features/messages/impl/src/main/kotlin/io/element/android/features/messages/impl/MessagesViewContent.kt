@@ -91,6 +91,7 @@ internal fun MessagesViewContent(
     onUserDataClick: (UserId) -> Unit,
     onLinkClick: (String) -> Unit,
     onReadReceiptClick: (TimelineItem.Event) -> Unit,
+    onEventContentClick: (event: TimelineItem.Event) -> Boolean,
     onSendLocationClick: () -> Unit,
     onCreatePollClick: () -> Unit,
     onJoinCallClick: () -> Unit,
@@ -118,10 +119,10 @@ internal fun MessagesViewContent(
 
     fun onContentClick(event: TimelineItem.Event) {
         Timber.v("onMessageClick= ${event.id}")
-//        val hideKeyboard = onEventContentClick(event)
-//        if (hideKeyboard) {
-//            localView.hideKeyboard()
-//        }
+        val hideKeyboard = onEventContentClick(event)
+        if (hideKeyboard) {
+            localView.hideKeyboard()
+        }
     }
 
     fun onMessageLongClick(event: TimelineItem.Event) {

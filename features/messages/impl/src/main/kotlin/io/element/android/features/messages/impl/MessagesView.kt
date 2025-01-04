@@ -9,38 +9,33 @@
 
 package io.element.android.features.messages.impl
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.unit.dp
+import io.element.android.compound.theme.ElementTheme
 import io.element.android.features.maprealtime.impl.MapRealtimePresenterState
 import io.element.android.features.maprealtime.impl.MapRealtimeView
 import io.element.android.features.messages.impl.actionlist.model.TimelineItemAction
 import io.element.android.features.messages.impl.timeline.components.receipt.bottomsheet.ReadReceiptBottomSheetEvents
 import io.element.android.features.messages.impl.timeline.model.TimelineItem
-import io.element.android.features.networkmonitor.api.ui.ConnectivityIndicatorView
 import io.element.android.libraries.androidutils.ui.hideKeyboard
 import io.element.android.libraries.designsystem.preview.ElementPreview
 import io.element.android.libraries.designsystem.preview.PreviewsDayNight
-import io.element.android.libraries.designsystem.theme.components.ModalBottomSheet
-import io.element.android.libraries.designsystem.theme.components.Scaffold
 import io.element.android.libraries.designsystem.utils.snackbar.SnackbarHost
 import io.element.android.libraries.designsystem.utils.snackbar.rememberSnackbarHostState
 import io.element.android.libraries.matrix.api.core.UserId
-import kotlinx.coroutines.launch
 
 @Composable
 fun MessagesView(
@@ -70,7 +65,6 @@ fun MessagesView(
 //
     val snackbarHostState = rememberSnackbarHostState(snackbarMessage = state.snackbarMessage)
 
-//     This is needed because the composer is inside an AndroidView that can't be affected by the FocusManager in Compose
     val localView = LocalView.current
 
     fun hidingKeyboard(block: () -> Unit) {
@@ -78,107 +72,56 @@ fun MessagesView(
         block()
     }
 
-    Scaffold(
-        modifier = modifier,
-        contentWindowInsets = WindowInsets.statusBars,
-        topBar = {
-            ConnectivityIndicatorView(isOnline = state.hasNetworkConnection)
-        },
-        content = { padding ->
-            Box {
-//                if (state.isMessagesCollapsed) {
-                MapRealtimeView(
-                    state = mapRealtimeState,
-                    onBackPressed = {
-                        // Since the textfield is now based on an Android view, this is no longer done automatically.
-                        // We need to hide the keyboard when navigating out of this screen.
-                        localView.hideKeyboard()
-                        onBackClick()
-                    },
-                    onJoinCallClick = onJoinCallClick,
-                    roomCallState = state.roomCallState,
-                    onMessagesPressed = {
-                        println("viktor, onMessagePressed")
-                        onShowMapClick()
-                        state.eventSink(MessagesEvents.ShowMessages)
-                    })
-//                }
-                val isKeyboardVisible by keyboardAsState()
-//                if (state.isMessagesCollapsed) {
-//                    Modifier
-//                        .padding(padding)
-//                        .consumeWindowInsets(padding)
-//                        .height(if (isKeyboardVisible) 500.dp else 390.dp)
-//                        .align(Alignment.BottomCenter)
-//                } else {
-//                    Modifier
-//                        .padding(padding)
-//                        .consumeWindowInsets(padding)
-//                }
+    val scaffoldState = rememberBottomSheetScaffoldState()
 
-//                val messagesModifier = if (state.isMessagesCollapsed) {
-//                    Modifier
-//                        .padding(padding)
-//                        .consumeWindowInsets(padding)
-//                        .height(if (isKeyboardVisible) 500.dp else 300.dp)
-//                        .align(Alignment.BottomCenter)
-//                        .clip(RoundedCornerShape(topStart = 18.dp, topEnd = 18.dp))
-//                } else {
-//                    Modifier
-//                        .padding(padding)
-//                        .consumeWindowInsets(padding)
-//                }
-
-                val scope = rememberCoroutineScope()
-                val sheetState = rememberModalBottomSheetState(
-                    skipPartiallyExpanded = false,
-                )
-
-                LaunchedEffect(isKeyboardVisible) {
-                    println("viktor, isKeybVisible=$isKeyboardVisible")
-                    if (isKeyboardVisible) {
-                        scope.launch {
-                            sheetState.show()
-                        }
-                    }
-                }
-
-                if (state.showMessagesBottomSheet) {
-                    ModalBottomSheet(
-                        sheetState = sheetState,
-                        onDismissRequest = {
-                            state.eventSink(MessagesEvents.HideMessages)
-                        }
-                    ) {
-                        MessagesViewContent(
-                            state = state,
-                            modifier = Modifier,
-                            onUserDataClick = { hidingKeyboard { onUserDataClick(it) } },
-                            onLinkClick = onLinkClick,
-                            onReadReceiptClick = { event ->
-                                state.readReceiptBottomSheetState.eventSink(ReadReceiptBottomSheetEvents.EventSelected(event))
-                            },
-                            onSendLocationClick = onSendLocationClick,
-                            onCreatePollClick = onCreatePollClick,
-                            onSwipeToReply = { targetEvent ->
-                                state.eventSink(MessagesEvents.HandleAction(TimelineItemAction.Reply, targetEvent))
-                            },
-                            forceJumpToBottomVisibility = forceJumpToBottomVisibility,
-                            onJoinCallClick = onJoinCallClick,
-                            onViewAllPinnedMessagesClick = onViewAllPinnedMessagesClick,
-                            knockRequestsBannerView = knockRequestsBannerView,
-                        )
-                    }
-                }
-            }
+    BottomSheetScaffold(
+        scaffoldState = scaffoldState,
+        sheetPeekHeight = 300.dp,
+        sheetContainerColor = ElementTheme.colors.bgCanvasDefault,
+        sheetShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
+        sheetContent = {
+            MessagesViewContent(
+                state = state,
+                modifier = Modifier,
+                onUserDataClick = { hidingKeyboard { onUserDataClick(it) } },
+                onLinkClick = onLinkClick,
+                onReadReceiptClick = { event ->
+                    state.readReceiptBottomSheetState.eventSink(ReadReceiptBottomSheetEvents.EventSelected(event))
+                },
+                onEventContentClick = onEventContentClick,
+                onSendLocationClick = onSendLocationClick,
+                onCreatePollClick = onCreatePollClick,
+                onSwipeToReply = { targetEvent ->
+                    state.eventSink(MessagesEvents.HandleAction(TimelineItemAction.Reply, targetEvent))
+                },
+                forceJumpToBottomVisibility = forceJumpToBottomVisibility,
+                onJoinCallClick = onJoinCallClick,
+                onViewAllPinnedMessagesClick = onViewAllPinnedMessagesClick,
+                knockRequestsBannerView = knockRequestsBannerView,
+            )
         },
         snackbarHost = {
             SnackbarHost(
-                snackbarHostState,
-                modifier = Modifier.navigationBarsPadding()
+                hostState = snackbarHostState,
+                modifier = Modifier.navigationBarsPadding(),
             )
-        },
-    )
+        }
+    ) { _ ->
+        MapRealtimeView(
+            state = mapRealtimeState,
+            onBackPressed = {
+                // Since the textfield is now based on an Android view, this is no longer done automatically.
+                // We need to hide the keyboard when navigating out of this screen.
+                localView.hideKeyboard()
+                onBackClick()
+            },
+            onJoinCallClick = onJoinCallClick,
+            roomCallState = state.roomCallState,
+            onMessagesPressed = {
+                onShowMapClick()
+                state.eventSink(MessagesEvents.ShowMessages)
+            })
+    }
 }
 
 @Composable

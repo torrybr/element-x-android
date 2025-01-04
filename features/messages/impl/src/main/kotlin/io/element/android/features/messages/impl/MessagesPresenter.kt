@@ -182,7 +182,6 @@ class MessagesPresenter @AssistedInject constructor(
         var showMessagesBottomSheet by remember { mutableStateOf(true) }
 
         fun handleEvents(event: MessagesEvents) {
-            println("viktor, event=$event")
             when (event) {
                 is MessagesEvents.HandleAction -> {
                     localCoroutineScope.handleTimelineAction(
@@ -236,11 +235,7 @@ class MessagesPresenter @AssistedInject constructor(
             pinnedMessagesBannerState = pinnedMessagesBannerState,
             eventSink = { handleEvents(it) },
             showMessagesBottomSheet = showMessagesBottomSheet,
-        ).also {
-            runCatching {
-                println("viktor, presenter state=$it")
-            }
-        }
+        )
     }
 
     @Composable
