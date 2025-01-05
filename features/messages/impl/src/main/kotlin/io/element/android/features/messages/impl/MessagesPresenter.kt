@@ -179,7 +179,7 @@ class MessagesPresenter @AssistedInject constructor(
             enableVoiceMessages = featureFlagsService.isFeatureEnabled(FeatureFlags.VoiceMessages)
         }
 
-        var showMessagesBottomSheet by remember { mutableStateOf(true) }
+        var showMapView by remember { mutableStateOf(false) }
 
         fun handleEvents(event: MessagesEvents) {
             when (event) {
@@ -204,8 +204,8 @@ class MessagesPresenter @AssistedInject constructor(
                     }
                 }
                 is MessagesEvents.Dismiss -> actionListState.eventSink(ActionListEvents.Clear)
-                is MessagesEvents.ShowMessages -> showMessagesBottomSheet = true
-                MessagesEvents.HideMessages -> showMessagesBottomSheet = false
+                is MessagesEvents.ShowMap -> showMapView = true
+                MessagesEvents.HideMap -> showMapView = false
             }
         }
 
@@ -234,7 +234,7 @@ class MessagesPresenter @AssistedInject constructor(
             roomCallState = roomCallState,
             pinnedMessagesBannerState = pinnedMessagesBannerState,
             eventSink = { handleEvents(it) },
-            showMessagesBottomSheet = showMessagesBottomSheet,
+            showMapView = showMapView,
         )
     }
 

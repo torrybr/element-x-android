@@ -51,5 +51,5 @@ data class MessagesState(
     val appName: String,
     val pinnedMessagesBannerState: PinnedMessagesBannerState,
     val eventSink: (MessagesEvents) -> Unit,
-    val showMessagesBottomSheet: Boolean,
+    val showMapView: Boolean
 )

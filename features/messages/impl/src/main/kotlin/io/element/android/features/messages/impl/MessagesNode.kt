@@ -257,9 +257,6 @@ class MessagesNode @AssistedInject constructor(
                     )
                 },
                 modifier = modifier,
-                onShowMapClick = {
-//                    mapRealtimeState.eventSink.invoke(MapRealtimeEvents.ShowMessagesBottomSheet)
-                },
             )
 
             var focusedEventId by rememberSaveable {

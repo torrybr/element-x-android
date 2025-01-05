@@ -11,18 +11,24 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Public
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -30,6 +36,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
@@ -42,6 +49,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import io.element.android.compound.theme.ElementTheme
+import io.element.android.features.maprealtime.impl.CallMenuItem
 import io.element.android.features.messages.impl.actionlist.ActionListEvents
 import io.element.android.features.messages.impl.actionlist.ActionListView
 import io.element.android.features.messages.impl.actionlist.model.TimelineItemAction
@@ -65,14 +73,19 @@ import io.element.android.features.messages.impl.timeline.model.TimelineItem
 import io.element.android.features.messages.impl.voicemessages.composer.VoiceMessageComposerEvents
 import io.element.android.features.messages.impl.voicemessages.composer.VoiceMessagePermissionRationaleDialog
 import io.element.android.features.messages.impl.voicemessages.composer.VoiceMessageSendingFailedDialog
+import io.element.android.features.roomcall.api.RoomCallState
 import io.element.android.libraries.androidutils.ui.hideKeyboard
+import io.element.android.libraries.designsystem.atomic.molecules.IconTitlePlaceholdersRowMolecule
 import io.element.android.libraries.designsystem.components.avatar.AvatarData
+import io.element.android.libraries.designsystem.components.avatar.AvatarSize
 import io.element.android.libraries.designsystem.components.avatar.CompositeAvatar
+import io.element.android.libraries.designsystem.components.button.BackButton
 import io.element.android.libraries.designsystem.components.dialogs.ConfirmationDialog
 import io.element.android.libraries.designsystem.theme.components.BottomSheetDragHandle
 import io.element.android.libraries.designsystem.theme.components.Icon
 import io.element.android.libraries.designsystem.theme.components.IconButton
 import io.element.android.libraries.designsystem.theme.components.Text
+import io.element.android.libraries.designsystem.theme.components.TopAppBar
 import io.element.android.libraries.designsystem.utils.HideKeyboardWhenDisposed
 import io.element.android.libraries.designsystem.utils.KeepScreenOn
 import io.element.android.libraries.designsystem.utils.OnLifecycleEvent
@@ -344,52 +357,52 @@ private fun MessagesViewComposerBottomSheetContents(
     }
 }
 
-//@OptIn(ExperimentalMaterial3Api::class)
-//@Composable
-//private fun MessagesViewTopBar(
-//    roomName: String?,
-//    roomAvatar: AvatarData?,
-//    heroes: ImmutableList<AvatarData>,
-//    roomCallState: RoomCallState,
-//    onRoomDetailsClick: () -> Unit,
-//    onJoinCallClick: () -> Unit,
-//    onBackClick: () -> Unit,
-//    onShowMapClick: () -> Unit,
-//) {
-//    TopAppBar(
-//        navigationIcon = {
-//            BackButton(onClick = onBackClick)
-//        },
-//        title = {
-//            val roundedCornerShape = RoundedCornerShape(8.dp)
-//            val titleModifier = Modifier
-//                .clip(roundedCornerShape)
-//                .clickable { onRoomDetailsClick() }
-//            if (roomName != null && roomAvatar != null) {
-//                RoomAvatarAndNameRow(
-//                    roomName = roomName,
-//                    roomAvatar = roomAvatar,
-//                    heroes = heroes,
-//                    modifier = titleModifier
-//                )
-//            } else {
-//                IconTitlePlaceholdersRowMolecule(
-//                    iconSize = AvatarSize.TimelineRoom.dp,
-//                    modifier = titleModifier
-//                )
-//            }
-//        },
-//        actions = {
-//            MapRealtimeMenuItem(onShowMapClick = onShowMapClick)
-//            CallMenuItem(
-//                roomCallState = roomCallState,
-//                onJoinCallClick = onJoinCallClick,
-//            )
-//            Spacer(Modifier.width(8.dp))
-//        },
-//        windowInsets = WindowInsets(0.dp)
-//    )
-//}
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+internal fun MessagesViewTopBar(
+    roomName: String?,
+    roomAvatar: AvatarData?,
+    heroes: ImmutableList<AvatarData>,
+    roomCallState: RoomCallState,
+    onRoomDetailsClick: () -> Unit,
+    onJoinCallClick: () -> Unit,
+    onBackClick: () -> Unit,
+    onShowMapClick: () -> Unit,
+) {
+    TopAppBar(
+        navigationIcon = {
+            BackButton(onClick = onBackClick)
+        },
+        title = {
+            val roundedCornerShape = RoundedCornerShape(8.dp)
+            val titleModifier = Modifier
+                .clip(roundedCornerShape)
+                .clickable { onRoomDetailsClick() }
+            if (roomName != null && roomAvatar != null) {
+                RoomAvatarAndNameRow(
+                    roomName = roomName,
+                    roomAvatar = roomAvatar,
+                    heroes = heroes,
+                    modifier = titleModifier
+                )
+            } else {
+                IconTitlePlaceholdersRowMolecule(
+                    iconSize = AvatarSize.TimelineRoom.dp,
+                    modifier = titleModifier
+                )
+            }
+        },
+        actions = {
+            MapRealtimeMenuItem(onShowMapClick = onShowMapClick)
+            CallMenuItem(
+                roomCallState = roomCallState,
+                onJoinCallClick = onJoinCallClick,
+            )
+            Spacer(Modifier.width(8.dp))
+        },
+        windowInsets = WindowInsets(0.dp)
+    )
+}
 
 @Composable
 private fun MapRealtimeMenuItem(
