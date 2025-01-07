@@ -33,14 +33,12 @@ import androidx.compose.material3.SheetValue
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.Dp
@@ -59,6 +57,10 @@ import io.element.android.libraries.designsystem.theme.components.Scaffold
 import io.element.android.libraries.designsystem.utils.snackbar.SnackbarHost
 import io.element.android.libraries.designsystem.utils.snackbar.rememberSnackbarHostState
 import io.element.android.libraries.matrix.api.core.UserId
+
+private const val BOTTOM_SHEET_CONTENT_TRANSITION_DURATION_IN_MS = 300
+private const val SHEET_PEEK_HEIGHT_DIVISOR = 4
+private const val MAX_HEIGHT_DIVISOR = 2
 
 @Composable
 fun MessagesView(
@@ -160,29 +162,19 @@ fun MessagesView(
             ),
             snackbarHostState = snackbarHostState,
         )
-        val isKeyboardVisible by keyboardAsState()
-        val keyboardController = LocalSoftwareKeyboardController.current
-
-        LaunchedEffect(scaffoldState.bottomSheetState.currentValue) {
-            if (scaffoldState.bottomSheetState.currentValue == SheetValue.PartiallyExpanded && isKeyboardVisible) {
-//                keyboardController?.hide()
-            }
-        }
 
         val configuration = LocalConfiguration.current
-
         val screenHeight: Dp = configuration.screenHeightDp.dp
-
 
         val imeInsets = WindowInsets.ime.only(WindowInsetsSides.Bottom).asPaddingValues()
         val imeBottomPadding = imeInsets.calculateBottomPadding()
 
-        val defaultHeight: Dp = (screenHeight / 4) + imeBottomPadding
-        val maxHeight: Dp = (screenHeight / 2) + imeBottomPadding
+        val sheetPeekHeight: Dp = (screenHeight / SHEET_PEEK_HEIGHT_DIVISOR) + imeBottomPadding
+        val maxHeight: Dp = (screenHeight / MAX_HEIGHT_DIVISOR) + imeBottomPadding
 
         BottomSheetScaffold(
             scaffoldState = scaffoldState,
-            sheetPeekHeight = if (isKeyboardVisible) defaultHeight else defaultHeight,
+            sheetPeekHeight = sheetPeekHeight,
             sheetContainerColor = ElementTheme.colors.bgCanvasDefault,
             sheetShape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
             sheetContent = {
@@ -191,17 +183,16 @@ fun MessagesView(
                         .fillMaxWidth()
                         .height(maxHeight)
                 ) {
-                    val imeInsets = WindowInsets.ime.only(WindowInsetsSides.Bottom)
                     val navBarInsets = WindowInsets.navigationBars.only(WindowInsetsSides.Bottom)
-                    val bottomPadding = navBarInsets.asPaddingValues().calculateBottomPadding()
+                    val navBarBottomPadding = navBarInsets.asPaddingValues().calculateBottomPadding()
 
                     val animatedBottomPadding: Dp by animateDpAsState(
                         targetValue = if (scaffoldState.bottomSheetState.currentValue == SheetValue.PartiallyExpanded) {
-                            maxHeight - defaultHeight + bottomPadding + 24.dp
+                            maxHeight - sheetPeekHeight + navBarBottomPadding + 24.dp
                         } else {
                             0.dp
                         },
-                        animationSpec = tween(durationMillis = 300) // You can adjust the duration as needed
+                        animationSpec = tween(durationMillis = BOTTOM_SHEET_CONTENT_TRANSITION_DURATION_IN_MS), label = ""
                     )
 
                     Column(
