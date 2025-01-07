@@ -305,7 +305,7 @@ fun TextComposer(
 
     if (!subcomposing) {
         SoftKeyboardEffect(composerMode, onRequestFocus) {
-            it is MessageComposerMode.Special || it is MessageComposerMode.RequestFocus
+            it is MessageComposerMode.Special
         }
 
         SoftKeyboardEffect(showTextFormatting, onRequestFocus) { it }

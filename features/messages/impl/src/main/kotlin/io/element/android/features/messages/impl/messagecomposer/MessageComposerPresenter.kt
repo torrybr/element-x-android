@@ -445,9 +445,6 @@ class MessageComposerPresenter @AssistedInject constructor(
                     replyMessage(capturedMode.eventId, message.markdown, message.html, message.intentionalMentions)
                 }
             }
-            is MessageComposerMode.RequestFocus -> {
-                // no-op
-            }
         }
         analyticsService.capture(
             Composer(
@@ -573,9 +570,6 @@ class MessageComposerPresenter @AssistedInject constructor(
             is MessageComposerMode.EditCaption -> {
                 // TODO Need a new type to save caption in the SDK
                 null
-            }
-            is MessageComposerMode.RequestFocus -> {
-                ComposerDraftType.NewMessage
             }
         }
         return if (draftType == null || message.markdown.isBlank()) {

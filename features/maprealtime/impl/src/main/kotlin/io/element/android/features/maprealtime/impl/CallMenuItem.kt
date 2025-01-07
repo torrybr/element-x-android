@@ -45,7 +45,7 @@ fun CallMenuItem(
                 roomCallState = roomCallState,
                 onJoinCallClick = onJoinCallClick,
                 modifier = modifier,
-                isUsedInMapToolbar,
+                isUsedInMapToolbar = isUsedInMapToolbar,
             )
         }
         is RoomCallState.OnGoing -> {

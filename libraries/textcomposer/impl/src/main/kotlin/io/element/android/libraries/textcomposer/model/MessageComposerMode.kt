@@ -25,8 +25,6 @@ sealed interface MessageComposerMode {
 
     sealed interface Special : MessageComposerMode
 
-    data object RequestFocus : MessageComposerMode
-
     data class Edit(
         val eventOrTransactionId: EventOrTransactionId,
         val content: String
