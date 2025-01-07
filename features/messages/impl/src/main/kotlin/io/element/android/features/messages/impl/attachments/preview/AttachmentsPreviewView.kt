@@ -197,8 +197,6 @@ private fun AttachmentsPreviewBottomActions(
         onError = {},
         onTyping = {},
         onSelectRichContent = {},
-        showTextInputOverlay = true,
-        onTextInputOverlayClicked = {},
     )
 }
 

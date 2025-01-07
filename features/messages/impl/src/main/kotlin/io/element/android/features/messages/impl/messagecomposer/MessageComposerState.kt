@@ -23,7 +23,6 @@ data class MessageComposerState(
     val showTextFormatting: Boolean,
     val canShareLocation: Boolean,
     val canCreatePoll: Boolean,
-    val showTextInputOverlay: Boolean,
     val suggestions: ImmutableList<ResolvedSuggestion>,
     val resolveMentionDisplay: (String, String) -> TextDisplay,
     val eventSink: (MessageComposerEvents) -> Unit,

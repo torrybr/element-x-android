@@ -96,14 +96,12 @@ fun MessagesView(
     @Composable
     fun MessagesViewContent(
         modifier: Modifier,
-        onTextInputOverlayClicked: (() -> Unit)? = null,
     ) {
         MessagesViewContent(
             state = state,
             modifier = modifier,
             onUserDataClick = { hidingKeyboard { onUserDataClick(it) } },
             onLinkClick = onLinkClick,
-            onTextInputOverlayClicked = onTextInputOverlayClicked,
             onReadReceiptClick = { event ->
                 state.readReceiptBottomSheetState.eventSink(ReadReceiptBottomSheetEvents.EventSelected(event))
             },
@@ -166,9 +164,6 @@ fun MessagesView(
         val keyboardController = LocalSoftwareKeyboardController.current
 
         LaunchedEffect(scaffoldState.bottomSheetState.currentValue) {
-            val showTextInputOverlay = scaffoldState.bottomSheetState.currentValue == SheetValue.PartiallyExpanded
-//            state.composerState.eventSink.invoke(MessageComposerEvents.ShowTextInputOverlay(showTextInputOverlay))
-
             if (scaffoldState.bottomSheetState.currentValue == SheetValue.PartiallyExpanded && isKeyboardVisible) {
 //                keyboardController?.hide()
             }
@@ -185,7 +180,6 @@ fun MessagesView(
         val defaultHeight: Dp = (screenHeight / 4) + imeBottomPadding
         val maxHeight: Dp = (screenHeight / 2) + imeBottomPadding
 
-        println("viktor, ime=${imeBottomPadding}")
         BottomSheetScaffold(
             scaffoldState = scaffoldState,
             sheetPeekHeight = if (isKeyboardVisible) defaultHeight else defaultHeight,
@@ -209,10 +203,6 @@ fun MessagesView(
                         },
                         animationSpec = tween(durationMillis = 300) // You can adjust the duration as needed
                     )
-                    println("viktor, animatedBottomPad=$animatedBottomPadding")
-//                    val topInsets = WindowInsets.systemBars.only(WindowInsetsSides.Top)
-//                    val scope = rememberCoroutineScope()
-//                    println("viktor, navBar=${navBarInsets.asPaddingValues().calculateBottomPadding()}")
 
                     Column(
                         modifier = Modifier
@@ -221,15 +211,7 @@ fun MessagesView(
                             .padding(bottom = animatedBottomPadding),
                         verticalArrangement = Arrangement.Bottom,
                     ) {
-                        MessagesViewContent(modifier = Modifier) {
-                            println("viktor, onOverlayClicked=")
-//                            scope.launch {
-//                                scaffoldState.bottomSheetState.expand()
-//                                state.composerState.eventSink(MessageComposerEvents.ShowTextInputOverlay(false))
-//                                delay(1000)
-//                                state.composerState.eventSink(MessageComposerEvents.SetMode(composerMode = MessageComposerMode.RequestFocus))
-//                            }
-                        }
+                        MessagesViewContent(modifier = Modifier)
                     }
                 }
             },

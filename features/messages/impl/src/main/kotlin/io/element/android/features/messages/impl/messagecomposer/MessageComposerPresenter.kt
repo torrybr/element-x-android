@@ -245,10 +245,6 @@ class MessageComposerPresenter @AssistedInject constructor(
             }
         )
 
-        var showTextInputOverlay by remember {
-            mutableStateOf(false)
-        }
-
         LaunchedEffect(Unit) {
             val draft = draftService.loadDraft(room.roomId, isVolatile = false)
             if (draft != null) {
@@ -374,7 +370,6 @@ class MessageComposerPresenter @AssistedInject constructor(
                     val draft = createDraftFromState(markdownTextEditorState, richTextEditorState)
                     appCoroutineScope.updateDraft(draft, isVolatile = false)
                 }
-                is MessageComposerEvents.ShowTextInputOverlay -> showTextInputOverlay = event.isShown
             }
         }
 
@@ -404,7 +399,6 @@ class MessageComposerPresenter @AssistedInject constructor(
             canCreatePoll = canCreatePoll.value,
             suggestions = suggestions.toPersistentList(),
             resolveMentionDisplay = resolveMentionDisplay,
-            showTextInputOverlay = showTextInputOverlay,
             eventSink = { handleEvents(it) },
         )
     }

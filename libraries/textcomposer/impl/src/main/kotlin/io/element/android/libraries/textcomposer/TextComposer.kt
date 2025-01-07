@@ -11,7 +11,6 @@ import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -36,7 +35,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewParameter
@@ -104,8 +102,6 @@ fun TextComposer(
     onTyping: (Boolean) -> Unit,
     onReceiveSuggestion: (Suggestion?) -> Unit,
     onSelectRichContent: ((Uri) -> Unit)?,
-    onTextInputOverlayClicked: (() -> Unit)?,
-    showTextInputOverlay: Boolean,
     resolveMentionDisplay: (text: String, url: String) -> TextDisplay,
     modifier: Modifier = Modifier,
     showTextFormatting: Boolean = false,
@@ -182,8 +178,6 @@ fun TextComposer(
                             onError = onError,
                             onTyping = onTyping,
                             onSelectRichContent = onSelectRichContent,
-                            showTextInputOverlay = showTextInputOverlay,
-                            onTextInputOverlayClicked = onTextInputOverlayClicked,
                         )
                     }
                 }
@@ -197,8 +191,6 @@ fun TextComposer(
                         placeholder = placeholder,
                         showPlaceholder = state.state.text.value().isEmpty(),
                         subcomposing = subcomposing,
-                        showTextInputOverlay = showTextInputOverlay,
-                        onTextInputOverlayClicked = onTextInputOverlayClicked,
                     ) {
                         MarkdownTextInput(
                             state = state.state,
@@ -442,8 +434,6 @@ private fun TextFormattingLayout(
 private fun TextInputBox(
     composerMode: MessageComposerMode,
     onResetComposerMode: () -> Unit,
-    onTextInputOverlayClicked: (() -> Unit)?,
-    showTextInputOverlay: Boolean,
     placeholder: String,
     showPlaceholder: Boolean,
     subcomposing: Boolean,
@@ -508,28 +498,6 @@ private fun TextInputBox(
             }
         }
     }
-
-    if (showTextInputOverlay) {
-        TextInputOverlay(onTextInputOverlayClicked)
-    }
-}
-
-@Composable
-private fun TextInputOverlay(onOverlayClicked: (() -> Unit)?) {
-    val interactionSource = remember { MutableInteractionSource() }
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(color = Color.Transparent)
-            .clickable(
-                interactionSource = interactionSource,
-                indication = null,
-                onClick = {
-                    println("viktor Overlay clicked")
-                    onOverlayClicked?.invoke()
-                }
-            )
-    )
 }
 
 @Composable
@@ -539,22 +507,18 @@ private fun TextInput(
     placeholder: String,
     composerMode: MessageComposerMode,
     onResetComposerMode: () -> Unit,
-    showTextInputOverlay: Boolean,
     resolveRoomMentionDisplay: () -> TextDisplay,
     resolveMentionDisplay: (text: String, url: String) -> TextDisplay,
     onError: (Throwable) -> Unit,
     onTyping: (Boolean) -> Unit,
     onSelectRichContent: ((Uri) -> Unit)?,
-    onTextInputOverlayClicked: (() -> Unit)?,
 ) {
     TextInputBox(
         composerMode = composerMode,
         onResetComposerMode = onResetComposerMode,
         placeholder = placeholder,
         showPlaceholder = state.messageHtml.isEmpty(),
-        showTextInputOverlay = showTextInputOverlay,
         subcomposing = subcomposing,
-        onTextInputOverlayClicked = onTextInputOverlayClicked,
     ) {
         RichTextEditor(
             state = state,
@@ -571,10 +535,6 @@ private fun TextInput(
             onRichContentSelected = onSelectRichContent,
             onTyping = onTyping,
         )
-    }
-
-    if (showTextInputOverlay) {
-        TextInputOverlay(onTextInputOverlayClicked)
     }
 }
 
@@ -815,10 +775,8 @@ private fun ATextComposer(
         onError = {},
         onTyping = {},
         onReceiveSuggestion = {},
-        onTextInputOverlayClicked = {},
         resolveMentionDisplay = { _, _ -> TextDisplay.Plain },
         onSelectRichContent = null,
-        showTextInputOverlay = false,
     )
 }
 
