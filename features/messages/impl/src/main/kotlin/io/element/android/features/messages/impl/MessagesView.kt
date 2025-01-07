@@ -192,7 +192,8 @@ fun MessagesView(
                         } else {
                             0.dp
                         },
-                        animationSpec = tween(durationMillis = BOTTOM_SHEET_CONTENT_TRANSITION_DURATION_IN_MS), label = ""
+                        animationSpec = tween(durationMillis = BOTTOM_SHEET_CONTENT_TRANSITION_DURATION_IN_MS),
+                        label = "bottomSheetContentPaddingAnimation"
                     )
 
                     Column(
