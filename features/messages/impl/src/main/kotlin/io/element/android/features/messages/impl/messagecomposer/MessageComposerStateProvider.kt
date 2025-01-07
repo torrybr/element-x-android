@@ -44,4 +44,5 @@ fun aMessageComposerState(
     suggestions = suggestions,
     resolveMentionDisplay = { _, _ -> TextDisplay.Plain },
     eventSink = eventSink,
+    showTextInputOverlay = false,
 )

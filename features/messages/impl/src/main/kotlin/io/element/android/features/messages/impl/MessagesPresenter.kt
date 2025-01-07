@@ -447,6 +447,7 @@ class MessagesPresenter @AssistedInject constructor(
                 replyToDetails = replyToDetails,
                 hideImage = timelineProtectionState.hideMediaContent(targetEvent.eventId),
             )
+
             composerState.eventSink(
                 MessageComposerEvents.SetMode(composerMode)
             )

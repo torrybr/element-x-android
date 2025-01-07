@@ -103,6 +103,7 @@ internal fun MessagesViewContent(
     state: MessagesState,
     onUserDataClick: (UserId) -> Unit,
     onLinkClick: (String) -> Unit,
+    onTextInputOverlayClicked: (() -> Unit)?,
     onReadReceiptClick: (TimelineItem.Event) -> Unit,
     onEventContentClick: (event: TimelineItem.Event) -> Boolean,
     onSendLocationClick: () -> Unit,
@@ -262,6 +263,7 @@ internal fun MessagesViewContent(
                     subcomposing = subcomposing,
                     state = state,
                     onLinkClick = onLinkClick,
+                    onTextInputOverlayClicked = onTextInputOverlayClicked,
                 )
             },
             sheetContentKey = sheetResizeContentKey.intValue,
@@ -316,6 +318,7 @@ private fun MessagesViewComposerBottomSheetContents(
     subcomposing: Boolean,
     state: MessagesState,
     onLinkClick: (String) -> Unit,
+    onTextInputOverlayClicked: (() -> Unit)?,
 ) {
     if (state.userEventPermissions.canSendMessage) {
         Column(modifier = Modifier.fillMaxWidth()) {
@@ -348,6 +351,7 @@ private fun MessagesViewComposerBottomSheetContents(
                 state = state.composerState,
                 voiceMessageState = state.voiceMessageComposerState,
                 subcomposing = subcomposing,
+                onTextInputOverlayClicked = onTextInputOverlayClicked,
                 enableVoiceMessages = state.enableVoiceMessages,
                 modifier = Modifier.fillMaxWidth(),
             )

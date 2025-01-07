@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.viewinterop.AndroidView
 import io.element.android.libraries.androidutils.ui.awaitWindowFocus
@@ -32,6 +33,8 @@ internal fun <T> SoftKeyboardEffect(
     onRequestFocus: () -> Unit,
     predicate: (T) -> Boolean,
 ) {
+    val keyboardController = LocalSoftwareKeyboardController.current
+
     val view = LocalView.current
     val latestOnRequestFocus by rememberUpdatedState(onRequestFocus)
     val latestPredicate by rememberUpdatedState(predicate)
@@ -39,12 +42,13 @@ internal fun <T> SoftKeyboardEffect(
         if (latestPredicate(key)) {
             // Await window focus in case returning from a dialog
             view.awaitWindowFocus()
-
+            println("viktor, showKeyboard")
             // Show the keyboard, temporarily using the root view for focus
             view.showKeyboard(andRequestFocus = true)
 
             // Refocus to the correct view
             latestOnRequestFocus()
+            keyboardController?.show()
         }
     }
 }

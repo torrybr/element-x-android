@@ -35,6 +35,7 @@ internal fun MessageComposerView(
     voiceMessageState: VoiceMessageComposerState,
     subcomposing: Boolean,
     enableVoiceMessages: Boolean,
+    onTextInputOverlayClicked: (() -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
     val view = LocalView.current
@@ -112,10 +113,12 @@ internal fun MessageComposerView(
         onSendVoiceMessage = onSendVoiceMessage,
         onDeleteVoiceMessage = onDeleteVoiceMessage,
         onReceiveSuggestion = ::onSuggestionReceived,
+        onTextInputOverlayClicked = onTextInputOverlayClicked,
         resolveMentionDisplay = state.resolveMentionDisplay,
         onError = ::onError,
         onTyping = ::onTyping,
         onSelectRichContent = ::sendUri,
+        showTextInputOverlay = state.showTextInputOverlay,
     )
 }
 
@@ -130,6 +133,7 @@ internal fun MessageComposerViewPreview(
             state = state,
             voiceMessageState = aVoiceMessageComposerState(),
             enableVoiceMessages = true,
+            onTextInputOverlayClicked = {},
             subcomposing = false,
         )
         MessageComposerView(
@@ -137,6 +141,7 @@ internal fun MessageComposerViewPreview(
             state = state,
             voiceMessageState = aVoiceMessageComposerState(),
             enableVoiceMessages = true,
+            onTextInputOverlayClicked = {},
             subcomposing = false,
         )
     }
@@ -153,6 +158,7 @@ internal fun MessageComposerViewVoicePreview(
             state = aMessageComposerState(),
             voiceMessageState = state,
             enableVoiceMessages = true,
+            onTextInputOverlayClicked = {},
             subcomposing = false,
         )
     }

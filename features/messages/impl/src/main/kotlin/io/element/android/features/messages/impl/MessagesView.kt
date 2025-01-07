@@ -9,11 +9,21 @@
 
 package io.element.android.features.messages.impl
 
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -21,16 +31,19 @@ import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.rememberBottomSheetScaffoldState
+import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.element.android.compound.theme.ElementTheme
 import io.element.android.features.maprealtime.impl.MapRealtimePresenterState
@@ -81,12 +94,16 @@ fun MessagesView(
     }
 
     @Composable
-    fun MessagesViewContent(modifier: Modifier) {
+    fun MessagesViewContent(
+        modifier: Modifier,
+        onTextInputOverlayClicked: (() -> Unit)? = null,
+    ) {
         MessagesViewContent(
             state = state,
             modifier = modifier,
             onUserDataClick = { hidingKeyboard { onUserDataClick(it) } },
             onLinkClick = onLinkClick,
+            onTextInputOverlayClicked = onTextInputOverlayClicked,
             onReadReceiptClick = { event ->
                 state.readReceiptBottomSheetState.eventSink(ReadReceiptBottomSheetEvents.EventSelected(event))
             },
@@ -128,7 +145,7 @@ fun MessagesView(
                 MessagesViewContent(
                     modifier = Modifier
                         .padding(padding)
-                        .consumeWindowInsets(padding)
+                        .consumeWindowInsets(padding),
                 )
             },
             snackbarHost = {
@@ -139,23 +156,82 @@ fun MessagesView(
             },
         )
     } else {
-        val scaffoldState = rememberBottomSheetScaffoldState()
+        val scaffoldState = rememberBottomSheetScaffoldState(
+            bottomSheetState = rememberStandardBottomSheetState(
+                skipHiddenState = true
+            ),
+            snackbarHostState = snackbarHostState,
+        )
         val isKeyboardVisible by keyboardAsState()
         val keyboardController = LocalSoftwareKeyboardController.current
 
         LaunchedEffect(scaffoldState.bottomSheetState.currentValue) {
+            val showTextInputOverlay = scaffoldState.bottomSheetState.currentValue == SheetValue.PartiallyExpanded
+//            state.composerState.eventSink.invoke(MessageComposerEvents.ShowTextInputOverlay(showTextInputOverlay))
+
             if (scaffoldState.bottomSheetState.currentValue == SheetValue.PartiallyExpanded && isKeyboardVisible) {
-                keyboardController?.hide()
+//                keyboardController?.hide()
             }
         }
 
+        val configuration = LocalConfiguration.current
+
+        val screenHeight: Dp = configuration.screenHeightDp.dp
+
+
+        val imeInsets = WindowInsets.ime.only(WindowInsetsSides.Bottom).asPaddingValues()
+        val imeBottomPadding = imeInsets.calculateBottomPadding()
+
+        val defaultHeight: Dp = (screenHeight / 4) + imeBottomPadding
+        val maxHeight: Dp = (screenHeight / 2) + imeBottomPadding
+
+        println("viktor, ime=${imeBottomPadding}")
         BottomSheetScaffold(
             scaffoldState = scaffoldState,
-            sheetPeekHeight = 300.dp,
+            sheetPeekHeight = if (isKeyboardVisible) defaultHeight else defaultHeight,
             sheetContainerColor = ElementTheme.colors.bgCanvasDefault,
             sheetShape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
             sheetContent = {
-                MessagesViewContent(modifier = Modifier)
+                Box(
+                    Modifier
+                        .fillMaxWidth()
+                        .height(maxHeight)
+                ) {
+                    val imeInsets = WindowInsets.ime.only(WindowInsetsSides.Bottom)
+                    val navBarInsets = WindowInsets.navigationBars.only(WindowInsetsSides.Bottom)
+                    val bottomPadding = navBarInsets.asPaddingValues().calculateBottomPadding()
+
+                    val animatedBottomPadding: Dp by animateDpAsState(
+                        targetValue = if (scaffoldState.bottomSheetState.currentValue == SheetValue.PartiallyExpanded) {
+                            maxHeight - defaultHeight + bottomPadding + 24.dp
+                        } else {
+                            0.dp
+                        },
+                        animationSpec = tween(durationMillis = 300) // You can adjust the duration as needed
+                    )
+                    println("viktor, animatedBottomPad=$animatedBottomPadding")
+//                    val topInsets = WindowInsets.systemBars.only(WindowInsetsSides.Top)
+//                    val scope = rememberCoroutineScope()
+//                    println("viktor, navBar=${navBarInsets.asPaddingValues().calculateBottomPadding()}")
+
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(maxHeight)
+                            .padding(bottom = animatedBottomPadding),
+                        verticalArrangement = Arrangement.Bottom,
+                    ) {
+                        MessagesViewContent(modifier = Modifier) {
+                            println("viktor, onOverlayClicked=")
+//                            scope.launch {
+//                                scaffoldState.bottomSheetState.expand()
+//                                state.composerState.eventSink(MessageComposerEvents.ShowTextInputOverlay(false))
+//                                delay(1000)
+//                                state.composerState.eventSink(MessageComposerEvents.SetMode(composerMode = MessageComposerMode.RequestFocus))
+//                            }
+                        }
+                    }
+                }
             },
             snackbarHost = {
                 SnackbarHost(
