@@ -26,6 +26,8 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -98,6 +100,7 @@ fun MessagesView(
     @Composable
     fun MessagesViewContent(
         modifier: Modifier,
+        timelineLazyListState: LazyListState = rememberLazyListState(),
     ) {
         MessagesViewContent(
             state = state,
@@ -116,6 +119,7 @@ fun MessagesView(
             forceJumpToBottomVisibility = forceJumpToBottomVisibility,
             onJoinCallClick = onJoinCallClick,
             onViewAllPinnedMessagesClick = onViewAllPinnedMessagesClick,
+            timelineLazyListState = timelineLazyListState,
             knockRequestsBannerView = knockRequestsBannerView,
         )
     }
@@ -172,9 +176,12 @@ fun MessagesView(
         val sheetPeekHeight: Dp = (screenHeight / SHEET_PEEK_HEIGHT_DIVISOR) + imeBottomPadding
         val maxHeight: Dp = (screenHeight / MAX_HEIGHT_DIVISOR) + imeBottomPadding
 
+        val timelineLazyListState: LazyListState = rememberLazyListState()
+
         BottomSheetScaffold(
             scaffoldState = scaffoldState,
             sheetPeekHeight = sheetPeekHeight,
+            sheetSwipeEnabled = !timelineLazyListState.isScrollInProgress,
             sheetContainerColor = ElementTheme.colors.bgCanvasDefault,
             sheetShape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
             sheetContent = {
@@ -203,7 +210,10 @@ fun MessagesView(
                             .padding(bottom = animatedBottomPadding),
                         verticalArrangement = Arrangement.Bottom,
                     ) {
-                        MessagesViewContent(modifier = Modifier)
+                        MessagesViewContent(
+                            modifier = Modifier,
+                            timelineLazyListState = timelineLazyListState,
+                        )
                     }
                 }
             },

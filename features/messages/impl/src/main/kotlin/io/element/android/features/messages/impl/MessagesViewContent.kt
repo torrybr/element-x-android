@@ -25,6 +25,8 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Public
@@ -112,6 +114,7 @@ internal fun MessagesViewContent(
     forceJumpToBottomVisibility: Boolean,
     onSwipeToReply: (TimelineItem.Event) -> Unit,
     modifier: Modifier = Modifier,
+    timelineLazyListState: LazyListState = rememberLazyListState(),
     knockRequestsBannerView: @Composable () -> Unit,
 ) {
     OnLifecycleEvent { _, event ->
@@ -236,6 +239,7 @@ internal fun MessagesViewContent(
                         onReadReceiptClick = onReadReceiptClick,
                         forceJumpToBottomVisibility = forceJumpToBottomVisibility,
                         onJoinCallClick = onJoinCallClick,
+                        lazyListState = timelineLazyListState,
                         nestedScrollConnection = scrollBehavior.nestedScrollConnection,
                     )
                     AnimatedVisibility(
