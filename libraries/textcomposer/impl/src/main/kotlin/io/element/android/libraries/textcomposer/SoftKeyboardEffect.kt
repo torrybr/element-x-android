@@ -39,6 +39,7 @@ internal fun <T> SoftKeyboardEffect(
         if (latestPredicate(key)) {
             // Await window focus in case returning from a dialog
             view.awaitWindowFocus()
+
             // Show the keyboard, temporarily using the root view for focus
             view.showKeyboard(andRequestFocus = true)
 
