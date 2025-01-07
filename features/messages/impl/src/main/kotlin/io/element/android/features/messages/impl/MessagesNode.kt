@@ -244,7 +244,8 @@ class MessagesNode @AssistedInject constructor(
                 onRoomDetailsClick = this::onRoomDetailsClick,
                 onEventContentClick = this::onEventClick,
                 onUserDataClick = this::onUserDataClick,
-                onLinkClick = { url -> onLinkClick(activity, isDark, url, state.timelineState.eventSink)
+                onLinkClick = { url ->
+                    onLinkClick(activity, isDark, url, state.timelineState.eventSink)
                 },
                 onSendLocationClick = this::onSendLocationClick,
                 onCreatePollClick = this::onCreatePollClick,
@@ -263,7 +264,8 @@ class MessagesNode @AssistedInject constructor(
                 mutableStateOf(inputs.focusedEventId)
             }
             LaunchedEffect(Unit) {
-                focusedEventId?.also { eventId -> state.timelineState.eventSink(TimelineEvents.FocusOnEvent(eventId))
+                focusedEventId?.also { eventId ->
+                    state.timelineState.eventSink(TimelineEvents.FocusOnEvent(eventId))
                 }
                 // Reset the focused event id to null to avoid refocusing when restoring node.
                 focusedEventId = null
