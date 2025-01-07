@@ -51,10 +51,10 @@ internal fun TimelineItemCallNotifyView(
 ) {
     Row(
         modifier = modifier
-                .fillMaxWidth()
-                .border(1.dp, ElementTheme.colors.borderInteractiveSecondary, RoundedCornerShape(8.dp))
-                .combinedClickable(enabled = true, onClick = {}, onLongClick = { onLongClick(event) })
-                .padding(12.dp),
+            .fillMaxWidth()
+            .border(1.dp, ElementTheme.colors.borderInteractiveSecondary, RoundedCornerShape(8.dp))
+            .combinedClickable(enabled = true, onClick = {}, onLongClick = { onLongClick(event) })
+            .padding(12.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
