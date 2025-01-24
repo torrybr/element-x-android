@@ -8,6 +8,7 @@
 package io.element.android.libraries.matrix.api.room
 
 enum class StateEventType {
+    BEACON_INFO,
     POLICY_RULE_ROOM,
     POLICY_RULE_SERVER,
     POLICY_RULE_USER,

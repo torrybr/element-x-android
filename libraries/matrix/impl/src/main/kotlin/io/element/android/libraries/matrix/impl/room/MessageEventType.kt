@@ -11,6 +11,7 @@ import io.element.android.libraries.matrix.api.room.MessageEventType
 import org.matrix.rustcomponents.sdk.MessageLikeEventType
 
 fun MessageEventType.map(): MessageLikeEventType = when (this) {
+    MessageEventType.BEACON -> MessageLikeEventType.BEACON
     MessageEventType.CALL_ANSWER -> MessageLikeEventType.CALL_ANSWER
     MessageEventType.CALL_INVITE -> MessageLikeEventType.CALL_INVITE
     MessageEventType.CALL_HANGUP -> MessageLikeEventType.CALL_HANGUP
@@ -37,6 +38,7 @@ fun MessageEventType.map(): MessageLikeEventType = when (this) {
 }
 
 fun MessageLikeEventType.map(): MessageEventType = when (this) {
+    MessageLikeEventType.BEACON -> MessageEventType.BEACON
     MessageLikeEventType.CALL_ANSWER -> MessageEventType.CALL_ANSWER
     MessageLikeEventType.CALL_INVITE -> MessageEventType.CALL_INVITE
     MessageLikeEventType.CALL_HANGUP -> MessageEventType.CALL_HANGUP

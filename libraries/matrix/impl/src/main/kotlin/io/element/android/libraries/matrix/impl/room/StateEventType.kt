@@ -11,6 +11,7 @@ import io.element.android.libraries.matrix.api.room.StateEventType
 import org.matrix.rustcomponents.sdk.StateEventType as RustStateEventType
 
 fun StateEventType.map(): RustStateEventType = when (this) {
+    StateEventType.BEACON_INFO -> RustStateEventType.BEACON_INFO
     StateEventType.POLICY_RULE_ROOM -> RustStateEventType.POLICY_RULE_ROOM
     StateEventType.POLICY_RULE_SERVER -> RustStateEventType.POLICY_RULE_SERVER
     StateEventType.POLICY_RULE_USER -> RustStateEventType.POLICY_RULE_USER
@@ -36,6 +37,7 @@ fun StateEventType.map(): RustStateEventType = when (this) {
 }
 
 fun RustStateEventType.map(): StateEventType = when (this) {
+    RustStateEventType.BEACON_INFO -> StateEventType.BEACON_INFO
     RustStateEventType.POLICY_RULE_ROOM -> StateEventType.POLICY_RULE_ROOM
     RustStateEventType.POLICY_RULE_SERVER -> StateEventType.POLICY_RULE_SERVER
     RustStateEventType.POLICY_RULE_USER -> StateEventType.POLICY_RULE_USER

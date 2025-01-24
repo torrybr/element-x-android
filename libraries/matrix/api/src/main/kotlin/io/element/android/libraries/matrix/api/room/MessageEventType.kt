@@ -8,6 +8,7 @@
 package io.element.android.libraries.matrix.api.room
 
 enum class MessageEventType {
+    BEACON,
     CALL_ANSWER,
     CALL_INVITE,
     CALL_HANGUP,
