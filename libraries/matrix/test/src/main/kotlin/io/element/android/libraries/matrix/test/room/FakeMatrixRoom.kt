@@ -174,13 +174,12 @@ class FakeMatrixRoom(
 
     fun emitKnockRequests(knockRequests: List<KnockRequest>) {
         _knockRequestsFlow.tryEmit(knockRequests)
-=======
+
     private val _liveLocationShareFlow: MutableSharedFlow<List<LiveLocationShare>> = MutableSharedFlow(replay = 1)
     override val liveLocationShareFlow: Flow<List<LiveLocationShare>> = _liveLocationShareFlow
 
     fun givenLiveLocationShares(liveLocationShares: List<LiveLocationShare>) {
         _liveLocationShareFlow.tryEmit(liveLocationShares)
->>>>>>> c5e4f96dff (subscriber)
     }
 
     override val membersStateFlow: MutableStateFlow<MatrixRoomMembersState> = MutableStateFlow(MatrixRoomMembersState.Unknown)

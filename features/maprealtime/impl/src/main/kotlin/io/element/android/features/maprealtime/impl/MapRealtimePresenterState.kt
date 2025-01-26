@@ -7,6 +7,7 @@
 
 package io.element.android.features.maprealtime.impl
 
+import io.element.android.libraries.maplibre.compose.CameraMode
 import io.element.android.libraries.matrix.api.location.LiveLocationShare
 
 // TODO add your ui models. Remove the eventSink if you don't have events.
@@ -25,6 +26,7 @@ data class MapRealtimePresenterState(
     val isWaitingForLocation: Boolean,
     val mapType: MapType,
     val liveLocationShares: List<LiveLocationShare>,
+    val selectedCameraMode: CameraMode,
 ) {
     sealed interface Dialog {
         data object None : Dialog

@@ -28,11 +28,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import io.element.android.features.location.impl.common.MapDefaults
+import io.element.android.features.maprealtime.impl.cameramode.toggleNextCameraMode
 import io.element.android.features.maprealtime.impl.common.PermissionDeniedDialog
 import io.element.android.features.maprealtime.impl.common.PermissionRationaleDialog
 import io.element.android.features.roomcall.api.RoomCallState
@@ -43,9 +47,11 @@ import io.element.android.libraries.designsystem.theme.components.Icon
 import io.element.android.libraries.designsystem.theme.components.IconButton
 import io.element.android.libraries.designsystem.utils.KeepScreenOn
 import io.element.android.libraries.maplibre.compose.CameraMode
+import io.element.android.libraries.maplibre.compose.CameraPositionState
 import io.element.android.libraries.maplibre.compose.MapLibreMap
 import io.element.android.libraries.maplibre.compose.rememberCameraPositionState
 import org.maplibre.android.camera.CameraPosition
+import org.maplibre.android.geometry.LatLng
 
 @Composable
 fun MapRealtimeView(
@@ -55,9 +61,10 @@ fun MapRealtimeView(
     onJoinCallClick: () -> Unit,
     roomCallState: RoomCallState,
 ) {
+    val cameraPositionState = rememberCameraPositionState { cameraMode = state.selectedCameraMode }
 
-    val cameraPositionState = rememberCameraPositionState {
-        cameraMode = CameraMode.TRACKING
+    LaunchedEffect(cameraPositionState.cameraMode) {
+        state.eventSink(MapRealtimeEvents.ToggleNextCameraMode(cameraPositionState.cameraMode))
     }
 
     KeepScreenOn()
@@ -67,10 +74,12 @@ fun MapRealtimeView(
 
         if (state.hasGpsEnabled && state.hasLocationPermission) {
             cameraPositionState.position = CameraPosition.Builder()
-                .zoom(MapDefaults.DEFAULT_ZOOM)
-                .build()
-
-            cameraPositionState.cameraMode = CameraMode.TRACKING
+                .apply {
+                    cameraPositionState.location?.let {
+                        target(LatLng(it))
+                    }
+                    zoom(MapDefaults.DEFAULT_ZOOM)
+                }.build()
         } else {
             cameraPositionState.position = MapDefaults.fallbackCameraPosition
         }
@@ -138,12 +147,22 @@ fun MapRealtimeView(
             RoundedIconButton(
                 icon = Icons.Outlined.Layers,
                 onClick = { state.eventSink(MapRealtimeEvents.OpenMapTypeDialog) })
-            RoundedIconButton(icon = Icons.Outlined.LocationSearching, onClick = {
-                cameraPositionState.position = CameraPosition.Builder()
-                    .zoom(MapDefaults.DEFAULT_ZOOM)
-                    .build()
-                cameraPositionState.cameraMode = CameraMode.TRACKING
-            })
+            RoundedIconButton(
+                icon = Icons.Outlined.LocationSearching,
+                onClick = {
+                    cameraPositionState.position = CameraPosition.Builder()
+                        .apply {
+                            cameraPositionState.location?.let {
+                                target(LatLng(it))
+                            }
+                            zoom(MapDefaults.DEFAULT_ZOOM)
+                        }.build()
+                })
+            TrackingLocationButton(
+                cameraPositionState = cameraPositionState,
+            ) {
+                cameraPositionState.cameraMode = cameraPositionState.cameraMode.toggleNextCameraMode()
+            }
         }
         MapTypeBottomSheet(state = state, onTileProviderSelected = { provider ->
             state.eventSink(
@@ -198,18 +217,49 @@ fun LocationButton(
 }
 
 @Composable
-fun RoundedIconButton(icon: ImageVector, onClick: () -> Unit, color: Color = Color.White) {
+fun TrackingLocationButton(
+    cameraPositionState: CameraPositionState,
+    onClick: () -> Unit,
+) {
+    val rotation = -cameraPositionState.position.bearing.toFloat()
+    RoundedIconButton(
+        modifier = Modifier.rotate(rotation),
+        icon = painterResource(R.drawable.ic_cardinal_point),
+        iconTint = if (cameraPositionState.cameraMode == CameraMode.NONE) Color.Black else Color.Unspecified,
+        onClick = onClick,
+    )
+}
+
+@Composable
+fun RoundedIconButton(
+    modifier: Modifier = Modifier,
+    icon: Any,
+    backgroundColor: Color = Color.White,
+    iconTint: Color = Color.Black,
+    onClick: () -> Unit,
+) {
     IconButton(
         onClick = onClick,
-        modifier = Modifier
+        modifier = modifier
             .size(48.dp)
-            .background(color, CircleShape)
+            .background(backgroundColor, CircleShape)
     ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = "Icon",
-            tint = Color.Black
-        )
+        when (icon) {
+            is ImageVector -> {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = "Icon",
+                    tint = iconTint,
+                )
+            }
+            is Painter -> {
+                Icon(
+                    painter = icon,
+                    contentDescription = "Icon",
+                    tint = iconTint,
+                )
+            }
+        }
     }
 }
 

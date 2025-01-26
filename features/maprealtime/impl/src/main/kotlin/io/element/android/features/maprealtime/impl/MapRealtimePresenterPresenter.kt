@@ -32,6 +32,7 @@ import io.element.android.features.maprealtime.impl.common.permissions.Permissio
 import io.element.android.features.maprealtime.impl.common.permissions.PermissionsState
 import io.element.android.libraries.architecture.Presenter
 import io.element.android.libraries.core.meta.BuildMeta
+import io.element.android.libraries.maplibre.compose.CameraMode
 import io.element.android.libraries.matrix.api.location.LiveLocationShare
 import io.element.android.libraries.matrix.api.room.MatrixRoom
 import io.element.android.libraries.matrix.api.room.location.AssetType
@@ -147,6 +148,9 @@ class MapRealtimePresenterPresenter @Inject constructor(
                     }
                     LocationForegroundService.stop(context)
                 }
+                is MapRealtimeEvents.ToggleNextCameraMode -> {
+
+                }
             }
         }
 
@@ -167,6 +171,7 @@ class MapRealtimePresenterPresenter @Inject constructor(
             mapType = mapTypes.find { it.mapKey == mapTile } ?: mapTypes[2],
             liveLocationShares = liveLocationShares,
             isWaitingForLocation = isWaitingForLocation,
+            selectedCameraMode = CameraMode.TRACKING_GPS_NORTH,
         )
     }
 

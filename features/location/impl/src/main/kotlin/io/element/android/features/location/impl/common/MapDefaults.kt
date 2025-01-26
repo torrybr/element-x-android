@@ -19,6 +19,7 @@ import io.element.android.libraries.maplibre.compose.MapSymbolManagerSettings
 import io.element.android.libraries.maplibre.compose.MapUiSettings
 import org.maplibre.android.camera.CameraPosition
 import org.maplibre.android.geometry.LatLng
+import org.maplibre.android.location.modes.RenderMode
 
 /**
  * Common configuration values for the map.
@@ -43,6 +44,7 @@ object MapDefaults {
         @ReadOnlyComposable
         get() = MapUiSettings(
             compassEnabled = true,
+            renderMode = RenderMode.GPS,
             compassMargins = Rect(0, 850, 45, 0),
             rotationGesturesEnabled = true,
             scrollGesturesEnabled = true,

@@ -7,6 +7,7 @@
 
 package io.element.android.features.maprealtime.impl
 
+import io.element.android.libraries.maplibre.compose.CameraMode
 import org.maplibre.android.geometry.LatLng
 
 sealed interface MapRealtimeEvents {
@@ -20,4 +21,5 @@ sealed interface MapRealtimeEvents {
     data class MapTypeSelected(val mapType: MapType) : MapRealtimeEvents
     data object StartLiveLocationShare : MapRealtimeEvents
     data object StopLiveLocationShare : MapRealtimeEvents
+    data class ToggleNextCameraMode(val cameraMode: CameraMode) : MapRealtimeEvents
 }
