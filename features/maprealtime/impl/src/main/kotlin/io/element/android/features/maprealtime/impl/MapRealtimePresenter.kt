@@ -46,7 +46,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-class MapRealtimePresenterPresenter @Inject constructor(
+class MapRealtimePresenter @Inject constructor(
     permissionsPresenterFactory: PermissionsPresenter.Factory,
     private val locationActions: LocationActions,
     private val room: MatrixRoom,

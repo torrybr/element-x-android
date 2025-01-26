@@ -150,13 +150,15 @@ fun MapRealtimeView(
             RoundedIconButton(
                 icon = Icons.Outlined.LocationSearching,
                 onClick = {
-                    cameraPositionState.position = CameraPosition.Builder()
-                        .apply {
-                            cameraPositionState.location?.let {
-                                target(LatLng(it))
-                            }
-                            zoom(MapDefaults.DEFAULT_ZOOM)
-                        }.build()
+                    cameraPositionState.animateCameraPosition(
+                        CameraPosition.Builder()
+                            .apply {
+                                cameraPositionState.location?.let {
+                                    target(LatLng(it))
+                                }
+                                zoom(MapDefaults.DEFAULT_ZOOM)
+                            }.build()
+                    )
                 })
             TrackingLocationButton(
                 cameraPositionState = cameraPositionState,
@@ -221,11 +223,12 @@ fun TrackingLocationButton(
     cameraPositionState: CameraPositionState,
     onClick: () -> Unit,
 ) {
-    val rotation = -cameraPositionState.position.bearing.toFloat()
+    val cameraMode = cameraPositionState.cameraMode
+    val rotation = if (cameraMode != CameraMode.NONE) -cameraPositionState.position.bearing.toFloat() else 0f
     RoundedIconButton(
         modifier = Modifier.rotate(rotation),
         icon = painterResource(R.drawable.ic_cardinal_point),
-        iconTint = if (cameraPositionState.cameraMode == CameraMode.NONE) Color.Black else Color.Unspecified,
+        iconTint = if (cameraMode == CameraMode.NONE) Color.Black else Color.Unspecified,
         onClick = onClick,
     )
 }
