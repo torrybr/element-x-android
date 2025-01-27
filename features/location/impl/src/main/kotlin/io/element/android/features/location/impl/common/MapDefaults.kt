@@ -43,7 +43,7 @@ object MapDefaults {
         @Composable
         @ReadOnlyComposable
         get() = MapUiSettings(
-            compassEnabled = true,
+            compassEnabled = false,
             renderMode = RenderMode.GPS,
             compassMargins = Rect(0, 850, 45, 0),
             rotationGesturesEnabled = true,

@@ -52,6 +52,7 @@ import io.element.android.libraries.maplibre.compose.MapLibreMap
 import io.element.android.libraries.maplibre.compose.rememberCameraPositionState
 import org.maplibre.android.camera.CameraPosition
 import org.maplibre.android.geometry.LatLng
+import timber.log.Timber
 
 @Composable
 fun MapRealtimeView(
@@ -150,15 +151,20 @@ fun MapRealtimeView(
             RoundedIconButton(
                 icon = Icons.Outlined.LocationSearching,
                 onClick = {
-                    cameraPositionState.animateCameraPosition(
-                        CameraPosition.Builder()
-                            .apply {
-                                cameraPositionState.location?.let {
-                                    target(LatLng(it))
-                                }
-                                zoom(MapDefaults.DEFAULT_ZOOM)
-                            }.build()
-                    )
+                    if (cameraPositionState.cameraMode == CameraMode.NONE) {
+                        cameraPositionState.animateCameraPosition(
+                            CameraPosition.Builder()
+                                .apply {
+                                    cameraPositionState.location?.let {
+                                        target(LatLng(it))
+                                    }
+                                    zoom(MapDefaults.DEFAULT_ZOOM)
+                                }.build()
+
+                        )
+                    } else {
+                        Timber.d("MapRealtimeView Camera tracking is active, skipping camera move...")
+                    }
                 })
             TrackingLocationButton(
                 cameraPositionState = cameraPositionState,

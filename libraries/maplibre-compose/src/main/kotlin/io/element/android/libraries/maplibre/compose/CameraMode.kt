@@ -22,7 +22,7 @@ public enum class CameraMode {
     TRACKING_GPS_NORTH;
 
     @InternalCameraMode.Mode
-    internal fun toInternal(): Int = when (this) {
+    public fun toInternal(): Int = when (this) {
         NONE -> InternalCameraMode.NONE
         NONE_COMPASS -> InternalCameraMode.NONE_COMPASS
         NONE_GPS -> InternalCameraMode.NONE_GPS
@@ -32,8 +32,8 @@ public enum class CameraMode {
         TRACKING_GPS_NORTH -> InternalCameraMode.TRACKING_GPS_NORTH
     }
 
-    internal companion object {
-        fun fromInternal(@InternalCameraMode.Mode mode: Int): CameraMode = when (mode) {
+    public companion object {
+        public fun fromInternal(@InternalCameraMode.Mode mode: Int): CameraMode = when (mode) {
             InternalCameraMode.NONE -> NONE
             InternalCameraMode.NONE_COMPASS -> NONE_COMPASS
             InternalCameraMode.NONE_GPS -> NONE_GPS
