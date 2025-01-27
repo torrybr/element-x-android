@@ -44,7 +44,7 @@ object MapDefaults {
         @ReadOnlyComposable
         get() = MapUiSettings(
             compassEnabled = false,
-            renderMode = RenderMode.GPS,
+            renderMode = RenderMode.COMPASS,
             compassMargins = Rect(0, 850, 45, 0),
             rotationGesturesEnabled = true,
             scrollGesturesEnabled = true,
