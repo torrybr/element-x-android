@@ -74,13 +74,18 @@ fun MapRealtimeView(
         state.eventSink(MapRealtimeEvents.RequestPermissions)
 
         if (state.hasGpsEnabled && state.hasLocationPermission) {
-            cameraPositionState.position = CameraPosition.Builder()
-                .apply {
-                    cameraPositionState.location?.let {
-                        target(LatLng(it))
-                    }
-                    zoom(MapDefaults.DEFAULT_ZOOM)
-                }.build()
+            val builder = CameraPosition.Builder().zoom(MapDefaults.DEFAULT_ZOOM)
+
+            cameraPositionState.position = if (cameraPositionState.cameraMode == CameraMode.NONE) {
+                if (cameraPositionState.location != null) {
+                    builder.target(LatLng(checkNotNull(cameraPositionState.location)))
+                } else {
+                    builder.target(LatLng(checkNotNull(MapDefaults.fallbackCameraPosition.target)))
+                }
+                builder.build()
+            } else {
+                MapDefaults.fallbackCameraPosition
+            }
         } else {
             cameraPositionState.position = MapDefaults.fallbackCameraPosition
         }
