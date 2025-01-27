@@ -95,6 +95,7 @@ class MapRealtimePresenter @Inject constructor(
 
         val mapTile by mapPreferencesRepository.mapTileProviderFlow.collectAsState(initial = "")
         val selectedCameraMode by mapPreferencesRepository.selectedCameraModeFlow.collectAsState(initial = CameraMode.TRACKING_GPS_NORTH)
+        val lastKnownPosition by mapPreferencesRepository.locationFlow.collectAsState(initial = null)
 
         var isSharingLocation: Boolean by remember {
             mutableStateOf(locationServiceStateRepository.get() == LocationServiceState.LOCATION_EVENT_EMITTED)
@@ -151,9 +152,14 @@ class MapRealtimePresenter @Inject constructor(
                     }
                     LocationForegroundService.stop(context)
                 }
-                is MapRealtimeEvents.ToggleNextCameraMode -> {
+                is MapRealtimeEvents.SaveLastCameraMode -> {
                     scope.launch(dispatchers.io) {
                         mapPreferencesRepository.setCameraMode(event.cameraMode)
+                    }
+                }
+                is MapRealtimeEvents.SaveLastLocation -> {
+                    scope.launch(dispatchers.io) {
+                        mapPreferencesRepository.setPosition(event.position)
                     }
                 }
             }
@@ -177,6 +183,7 @@ class MapRealtimePresenter @Inject constructor(
             liveLocationShares = liveLocationShares,
             isWaitingForLocation = isWaitingForLocation,
             selectedCameraMode = selectedCameraMode,
+            lastKnownPosition = lastKnownPosition,
         )
     }
 

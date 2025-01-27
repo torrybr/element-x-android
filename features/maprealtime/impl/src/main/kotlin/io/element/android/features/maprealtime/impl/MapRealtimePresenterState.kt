@@ -7,6 +7,7 @@
 
 package io.element.android.features.maprealtime.impl
 
+import io.element.android.features.maprealtime.impl.common.LtLg
 import io.element.android.libraries.maplibre.compose.CameraMode
 import io.element.android.libraries.matrix.api.location.LiveLocationShare
 
@@ -27,6 +28,7 @@ data class MapRealtimePresenterState(
     val mapType: MapType,
     val liveLocationShares: List<LiveLocationShare>,
     val selectedCameraMode: CameraMode,
+    val lastKnownPosition: LtLg?,
 ) {
     sealed interface Dialog {
         data object None : Dialog

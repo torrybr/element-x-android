@@ -26,6 +26,7 @@ open class FakeMapRealtimeStateProvider : PreviewParameterProvider<MapRealtimePr
                 liveLocationShares = emptyList(),
                 isWaitingForLocation = false,
                 selectedCameraMode = CameraMode.TRACKING_GPS_NORTH,
+                lastKnownPosition = null,
             )
         )
 }

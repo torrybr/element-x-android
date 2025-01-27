@@ -30,7 +30,9 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.google.gson.Gson
 import com.squareup.anvil.annotations.ContributesBinding
+import io.element.android.features.maprealtime.impl.common.LtLg
 import io.element.android.libraries.core.coroutine.CoroutineDispatchers
 import io.element.android.libraries.di.ApplicationContext
 import io.element.android.libraries.di.RoomScope
@@ -53,9 +55,11 @@ private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(na
 interface MapPreferencesRepository {
     val mapTileProviderFlow: Flow<String>
     val selectedCameraModeFlow: Flow<CameraMode>
+    val locationFlow: Flow<LtLg?>
 
     suspend fun setMapTileProvider(provider: String)
     suspend fun setCameraMode(cameraMode: CameraMode)
+    suspend fun setPosition(position: LtLg)
 }
 
 @ContributesBinding(RoomScope::class)
@@ -68,10 +72,15 @@ class MapPreferencesRepositoryImpl @Inject constructor(
     private companion object {
         private const val KEY_MAP_TILE_PROVIDER = "map_tile_provider"
         private const val KEY_SELECTED_CAMERA_MODE = "selected_camera_mode_key"
+        private const val LAST_KNOWN_POSITION_KEY = "last_known_position_key"
     }
 
     private val mapTileProvider by lazy { stringPreferencesKey(KEY_MAP_TILE_PROVIDER) }
     private val selectedCameraModeKey by lazy { intPreferencesKey(KEY_SELECTED_CAMERA_MODE) }
+    private val lastKnownPositionKey by lazy { stringPreferencesKey(LAST_KNOWN_POSITION_KEY) }
+
+    // TODO: Provide via constructor, declare in the DI or use alternative methods for parsing
+    private val gson by lazy { Gson() }
 
     override val mapTileProviderFlow: Flow<String> = context.dataStore.data.map { preferences ->
         preferences[mapTileProvider] ?: "streets-v2"
@@ -81,6 +90,12 @@ class MapPreferencesRepositoryImpl @Inject constructor(
         preferences[selectedCameraModeKey]?.let {
             CameraMode.fromInternal(it)
         } ?: CameraMode.TRACKING_GPS_NORTH
+    }.flowOn(dispatchers.io)
+
+    override val locationFlow: Flow<LtLg?> = context.dataStore.data.map { preferences ->
+        preferences[lastKnownPositionKey]?.let {
+            gson.fromJson(it, LtLg::class.java)
+        }
     }.flowOn(dispatchers.io)
 
     override suspend fun setMapTileProvider(provider: String) {
@@ -94,6 +109,13 @@ class MapPreferencesRepositoryImpl @Inject constructor(
         Timber.d("MapPreferencesRepository setCameraMode=$cameraMode")
         context.dataStore.edit { settings ->
             settings[selectedCameraModeKey] = cameraMode.toInternal()
+        }
+    }
+
+    override suspend fun setPosition(position: LtLg) {
+        Timber.d("MapPreferencesRepository setPosition=$position")
+        context.dataStore.edit { settings ->
+            settings[lastKnownPositionKey] = gson.toJson(position)
         }
     }
 }
