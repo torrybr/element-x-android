@@ -8,9 +8,15 @@
 package io.element.android.features.call.impl.ui
 
 import android.Manifest
+import android.app.PendingIntent
 import android.app.PictureInPictureParams
+import android.app.RemoteAction
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.res.Configuration
+import android.graphics.drawable.Icon
 import android.media.AudioAttributes
 import android.media.AudioFocusRequest
 import android.media.AudioManager
@@ -22,6 +28,7 @@ import android.webkit.PermissionRequest
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.DrawableRes
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.Composable
@@ -37,6 +44,8 @@ import androidx.lifecycle.Lifecycle
 import io.element.android.features.call.api.CallType
 import io.element.android.features.call.api.CallType.ExternalUrl
 import io.element.android.features.call.impl.DefaultElementCallEntryPoint
+import io.element.android.features.call.impl.R
+import io.element.android.features.call.impl.data.DeviceMuteMessage
 import io.element.android.features.call.impl.di.CallBindings
 import io.element.android.features.call.impl.pip.PictureInPictureEvents
 import io.element.android.features.call.impl.pip.PictureInPicturePresenter
@@ -58,6 +67,13 @@ class ElementCallActivity :
     AppCompatActivity(),
     CallScreenNavigator,
     PipView {
+
+    private companion object {
+        const val ACTION_BROADCAST_DEVICE_MUTE = "ACTION_BROADCAST_DEVICE_MUTE"
+
+        const val IS_AUDIO_ENABLED = "IS_AUDIO_ENABLED"
+    }
+
     @Inject lateinit var callIntentDataParser: CallIntentDataParser
     @Inject lateinit var presenterFactory: CallScreenPresenter.Factory
     @Inject lateinit var appPreferencesStore: AppPreferencesStore
@@ -78,6 +94,26 @@ class ElementCallActivity :
     private val webViewTarget = mutableStateOf<CallType?>(null)
 
     private var eventSink: ((CallScreenEvents) -> Unit)? = null
+
+    private var isAudioEnabled: Boolean = false
+
+    private val deviceMuteRemoteActionReceiver: BroadcastReceiver by lazy {
+        object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                if (intent?.action == ACTION_BROADCAST_DEVICE_MUTE) {
+                    val isAudioEnabled: Boolean = intent.getBooleanExtra(IS_AUDIO_ENABLED, false)
+                    eventSink?.invoke(
+                        CallScreenEvents.DeviceMute(
+                            message = DeviceMuteMessage(
+                                isAudioEnabled = isAudioEnabled,
+                                isVideoEnabled = null,
+                            )
+                        )
+                    )
+                }
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -102,6 +138,15 @@ class ElementCallActivity :
             updateUiMode(resources.configuration)
         }
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                registerReceiver(deviceMuteRemoteActionReceiver, IntentFilter(ACTION_BROADCAST_DEVICE_MUTE), RECEIVER_EXPORTED)
+            } else {
+                @Suppress("UnspecifiedRegisterReceiverFlag")
+                registerReceiver(deviceMuteRemoteActionReceiver, IntentFilter(ACTION_BROADCAST_DEVICE_MUTE))
+            }
+        }
+
         pictureInPicturePresenter.setPipView(this)
 
         audioManager = getSystemService(AUDIO_SERVICE) as AudioManager
@@ -112,10 +157,16 @@ class ElementCallActivity :
             ElementThemeApp(appPreferencesStore) {
                 val state = presenter.present()
                 eventSink = state.eventSink
+                isAudioEnabled = state.isAudioEnabled
                 LaunchedEffect(state.isCallActive, state.isInWidgetMode) {
                     // Note when not in WidgetMode, isCallActive will never be true, so consider the call is active
                     if (state.isCallActive || !state.isInWidgetMode) {
                         setCallIsActive()
+                    }
+                }
+                LaunchedEffect(state.isAudioEnabled) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        setPipParams()
                     }
                 }
                 CallScreenView(
@@ -181,6 +232,10 @@ class ElementCallActivity :
         releaseAudioFocus()
         CallForegroundService.stop(this)
         pictureInPicturePresenter.setPipView(null)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            unregisterReceiver(deviceMuteRemoteActionReceiver)
+        }
     }
 
     override fun finish() {
@@ -304,6 +359,28 @@ class ElementCallActivity :
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun getPictureInPictureParams(): PictureInPictureParams {
+        val deviceMuteIntent = Intent(ACTION_BROADCAST_DEVICE_MUTE)
+            .putExtra(IS_AUDIO_ENABLED, !isAudioEnabled)
+
+        val requestCode = if (isAudioEnabled) 0 else 1
+
+        val pendingMuteIntent = PendingIntent.getBroadcast(
+            /* context = */ this,
+            /* requestCode = */ requestCode,
+            /* intent = */ deviceMuteIntent,
+            /* flags = */ PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+        )
+
+        @DrawableRes
+        val drawableRes: Int = if (isAudioEnabled) R.drawable.ic_mic else R.drawable.ic_mic_off
+
+        val deviceMuteAction = RemoteAction(
+            Icon.createWithResource(this, drawableRes),
+            "Mute",
+            "Toggle Mute",
+            pendingMuteIntent
+        )
+
         return PictureInPictureParams.Builder()
             // Portrait for calls seems more appropriate
             .setAspectRatio(Rational(3, 5))
@@ -312,6 +389,7 @@ class ElementCallActivity :
                     setAutoEnterEnabled(true)
                 }
             }
+            .setActions(listOf(deviceMuteAction))
             .build()
     }
 

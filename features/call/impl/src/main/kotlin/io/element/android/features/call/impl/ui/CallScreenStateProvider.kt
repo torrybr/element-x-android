@@ -34,6 +34,7 @@ internal fun aCallScreenState(
         userAgent = userAgent,
         isCallActive = isCallActive,
         isInWidgetMode = isInWidgetMode,
+        isAudioEnabled = false,
         eventSink = eventSink,
     )
 }
