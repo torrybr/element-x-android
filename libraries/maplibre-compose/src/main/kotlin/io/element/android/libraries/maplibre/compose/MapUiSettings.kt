@@ -11,6 +11,7 @@ package io.element.android.libraries.maplibre.compose
 import android.graphics.Rect
 import android.view.Gravity
 import androidx.compose.ui.graphics.Color
+import org.maplibre.android.location.modes.RenderMode
 
 internal val DefaultMapUiSettings = MapUiSettings()
 
@@ -22,6 +23,7 @@ internal val DefaultMapUiSettings = MapUiSettings()
  */
 public data class MapUiSettings(
     public val compassEnabled: Boolean = true,
+    public val renderMode: Int = RenderMode.COMPASS,
     public val compassMargins: Rect = Rect(),
     public val rotationGesturesEnabled: Boolean = true,
     public val scrollGesturesEnabled: Boolean = true,

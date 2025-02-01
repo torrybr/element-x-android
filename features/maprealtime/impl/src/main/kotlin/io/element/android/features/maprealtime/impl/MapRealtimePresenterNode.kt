@@ -23,7 +23,7 @@ import io.element.android.libraries.di.RoomScope
 class MapRealtimePresenterNode @AssistedInject constructor(
     @Assisted buildContext: BuildContext,
     @Assisted plugins: List<Plugin>,
-    private val presenter: MapRealtimePresenterPresenter,
+    private val presenter: MapRealtimePresenter,
 ) : Node(buildContext, plugins = plugins) {
 
     @Composable

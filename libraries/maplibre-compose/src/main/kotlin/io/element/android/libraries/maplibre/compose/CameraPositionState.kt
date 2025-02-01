@@ -98,6 +98,14 @@ public class CameraPositionState(
         }
 
     /**
+     * Animates camera position on the map.
+     */
+    public fun animateCameraPosition(cameraPosition: CameraPosition) {
+        rawPosition = cameraPosition
+        map?.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
+    }
+
+    /**
      * Local source of truth for the current camera mode.
      * While [map] is non-null this reflects the current camera mode as it changes.
      * While [map] is null it reflects the last known camera mode, or the last value set by

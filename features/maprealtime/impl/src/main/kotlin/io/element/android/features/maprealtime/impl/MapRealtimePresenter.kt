@@ -31,27 +31,30 @@ import io.element.android.features.maprealtime.impl.common.permissions.Permissio
 import io.element.android.features.maprealtime.impl.common.permissions.PermissionsPresenter
 import io.element.android.features.maprealtime.impl.common.permissions.PermissionsState
 import io.element.android.libraries.architecture.Presenter
+import io.element.android.libraries.core.coroutine.CoroutineDispatchers
 import io.element.android.libraries.core.meta.BuildMeta
+import io.element.android.libraries.maplibre.compose.CameraMode
 import io.element.android.libraries.matrix.api.location.LiveLocationShare
 import io.element.android.libraries.matrix.api.room.MatrixRoom
 import io.element.android.libraries.matrix.api.room.location.AssetType
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-class MapRealtimePresenterPresenter @Inject constructor(
+class MapRealtimePresenter @Inject constructor(
     permissionsPresenterFactory: PermissionsPresenter.Factory,
     private val locationActions: LocationActions,
     private val room: MatrixRoom,
     private val buildMeta: BuildMeta,
-    private val mapTypeStore: MapTypeStore,
+    private val mapPreferencesRepository: MapPreferencesRepository,
     private val locationServiceStateRepository: LocationServiceStateRepository,
+    private val dispatchers: CoroutineDispatchers,
 ) : Presenter<MapRealtimePresenterState> {
 
     private val permissionsPresenter = permissionsPresenterFactory.create(MapDefaults.permissions)
@@ -90,7 +93,9 @@ class MapRealtimePresenterPresenter @Inject constructor(
 
         val scope = rememberCoroutineScope()
 
-        val mapTile by mapTypeStore.mapTileProviderFlow.collectAsState(initial = "")
+        val mapTile by mapPreferencesRepository.mapTileProviderFlow.collectAsState(initial = "")
+        val selectedCameraMode by mapPreferencesRepository.selectedCameraModeFlow.collectAsState(initial = CameraMode.TRACKING_GPS_NORTH)
+        val lastKnownPosition by mapPreferencesRepository.locationFlow.collectAsState(initial = null)
 
         var isSharingLocation: Boolean by remember {
             mutableStateOf(locationServiceStateRepository.get() == LocationServiceState.LOCATION_EVENT_EMITTED)
@@ -114,8 +119,8 @@ class MapRealtimePresenterPresenter @Inject constructor(
                     println(event.coords)
                 }
                 is MapRealtimeEvents.MapTypeSelected -> {
-                    scope.launch {
-                        setMapTileProvider(event.mapType.mapKey)
+                    scope.launch(dispatchers.io) {
+                        mapPreferencesRepository.setMapTileProvider(event.mapType.mapKey)
                     }
                 }
                 MapRealtimeEvents.OpenAppSettings -> {
@@ -127,13 +132,13 @@ class MapRealtimePresenterPresenter @Inject constructor(
                 }
                 MapRealtimeEvents.RequestPermissions -> permissionsState.eventSink(PermissionsEvents.RequestPermissions)
                 is MapRealtimeEvents.SendLongPressLocation -> {
-                    scope.launch {
+                    scope.launch(dispatchers.io) {
                         sendLocation(event)
                     }
                 }
                 MapRealtimeEvents.StartLiveLocationShare -> {
                     isSharingLocation = true
-                    scope.launch {
+                    scope.launch(dispatchers.io) {
                         startLiveLocationShare()
                     }
 
@@ -142,10 +147,20 @@ class MapRealtimePresenterPresenter @Inject constructor(
                 }
                 MapRealtimeEvents.StopLiveLocationShare -> {
                     isSharingLocation = false
-                    scope.launch {
+                    scope.launch(dispatchers.io) {
                         stopLiveLocationShare()
                     }
                     LocationForegroundService.stop(context)
+                }
+                is MapRealtimeEvents.SaveLastCameraMode -> {
+                    scope.launch(dispatchers.io) {
+                        mapPreferencesRepository.setCameraMode(event.cameraMode)
+                    }
+                }
+                is MapRealtimeEvents.SaveLastLocation -> {
+                    scope.launch(dispatchers.io) {
+                        mapPreferencesRepository.setPosition(event.position)
+                    }
                 }
             }
         }
@@ -167,6 +182,8 @@ class MapRealtimePresenterPresenter @Inject constructor(
             mapType = mapTypes.find { it.mapKey == mapTile } ?: mapTypes[2],
             liveLocationShares = liveLocationShares,
             isWaitingForLocation = isWaitingForLocation,
+            selectedCameraMode = selectedCameraMode,
+            lastKnownPosition = lastKnownPosition,
         )
     }
 
@@ -185,14 +202,12 @@ class MapRealtimePresenterPresenter @Inject constructor(
                     } else {
                         accumulatedShares[existingShareIndex] = newShare
                     }
+
                     value = accumulatedShares.toImmutableList()
                 }
             }
+            .flowOn(dispatchers.io)
             .launchIn(this)
-    }
-
-    private fun CoroutineScope.setMapTileProvider(mapProvider: String) = launch {
-        mapTypeStore.setMapTileProvider(mapProvider)
     }
 
     private suspend fun sendLocation(event: MapRealtimeEvents.SendLongPressLocation) {

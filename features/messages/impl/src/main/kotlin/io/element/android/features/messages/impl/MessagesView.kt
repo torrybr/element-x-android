@@ -46,6 +46,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.element.android.compound.theme.ElementTheme
+import io.element.android.features.maprealtime.impl.FakeMapRealtimeStateProvider
 import io.element.android.features.maprealtime.impl.MapRealtimePresenterState
 import io.element.android.features.maprealtime.impl.MapRealtimeView
 import io.element.android.features.messages.impl.actionlist.model.TimelineItemAction

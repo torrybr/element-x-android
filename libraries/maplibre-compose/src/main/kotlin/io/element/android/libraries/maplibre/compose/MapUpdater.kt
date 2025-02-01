@@ -22,7 +22,6 @@ import org.maplibre.android.location.LocationComponentActivationOptions
 import org.maplibre.android.location.LocationComponentOptions
 import org.maplibre.android.location.OnCameraTrackingChangedListener
 import org.maplibre.android.location.engine.LocationEngineRequest
-import org.maplibre.android.location.modes.RenderMode
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.Style
 
@@ -118,7 +117,9 @@ internal class MapPropertiesNode(
             cameraPositionState.location = map.locationComponent.lastKnownLocation
         }
         map.locationComponent.addOnCameraTrackingChangedListener(object : OnCameraTrackingChangedListener {
-            override fun onCameraTrackingDismissed() {}
+            override fun onCameraTrackingDismissed() {
+                cameraPositionState.rawCameraMode = CameraMode.NONE
+            }
 
             override fun onCameraTrackingChanged(currentMode: Int) {
                 cameraPositionState.rawCameraMode = CameraMode.fromInternal(currentMode)
@@ -165,8 +166,8 @@ internal fun MapUpdater(
         update = {
             set(locationSettings.locationEnabled) {
                 map.locationComponent.isLocationComponentEnabled = it
-                map.locationComponent.renderMode = RenderMode.COMPASS
             }
+            set(uiSettings.renderMode) { map.locationComponent.renderMode = it }
 
             set(uiSettings.compassEnabled) { map.uiSettings.isCompassEnabled = it }
             set(uiSettings.compassMargins) {

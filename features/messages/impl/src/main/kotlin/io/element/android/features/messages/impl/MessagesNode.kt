@@ -29,7 +29,7 @@ import dagger.assisted.AssistedInject
 import io.element.android.anvilannotations.ContributesNode
 import io.element.android.compound.theme.ElementTheme
 import io.element.android.features.knockrequests.api.banner.KnockRequestsBannerRenderer
-import io.element.android.features.maprealtime.impl.MapRealtimePresenterPresenter
+import io.element.android.features.maprealtime.impl.MapRealtimePresenter
 import io.element.android.features.messages.impl.actionlist.ActionListPresenter
 import io.element.android.features.messages.impl.actionlist.model.TimelineItemActionPostProcessor
 import io.element.android.features.messages.impl.attachments.Attachment
@@ -74,7 +74,7 @@ class MessagesNode @AssistedInject constructor(
     private val mediaPlayer: MediaPlayer,
     private val permalinkParser: PermalinkParser,
     private val knockRequestsBannerRenderer: KnockRequestsBannerRenderer,
-    private val mapRealtimePresenterPresenter: MapRealtimePresenterPresenter
+    private val mapRealtimePresenter: MapRealtimePresenter
 ) : Node(buildContext, plugins = plugins), MessagesNavigator {
     private val presenter = presenterFactory.create(
         navigator = this,
@@ -235,7 +235,7 @@ class MessagesNode @AssistedInject constructor(
                 }
             }
 
-            val mapRealtimeState = mapRealtimePresenterPresenter.present()
+            val mapRealtimeState = mapRealtimePresenter.present()
 
             MessagesView(
                 state = state,
