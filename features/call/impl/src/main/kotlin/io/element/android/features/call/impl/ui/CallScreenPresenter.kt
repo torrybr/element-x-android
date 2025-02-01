@@ -23,6 +23,7 @@ import dagger.assisted.AssistedInject
 import im.vector.app.features.analytics.plan.MobileScreen
 import io.element.android.compound.theme.ElementTheme
 import io.element.android.features.call.api.CallType
+import io.element.android.features.call.impl.data.DeviceMuteMessage
 import io.element.android.features.call.impl.data.WidgetMessage
 import io.element.android.features.call.impl.utils.ActiveCallManager
 import io.element.android.features.call.impl.utils.CallWidgetProvider
@@ -44,9 +45,13 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import kotlinx.serialization.SerializationException
+import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import timber.log.Timber
 import java.util.UUID
 
 class CallScreenPresenter @AssistedInject constructor(
@@ -80,6 +85,7 @@ class CallScreenPresenter @AssistedInject constructor(
         var isJoinedCall by rememberSaveable { mutableStateOf(false) }
         var ignoreWebViewError by rememberSaveable { mutableStateOf(false) }
         var webViewError by remember { mutableStateOf<String?>(null) }
+        var isAudioEnabled by rememberSaveable { mutableStateOf(false) }
         val languageTag = languageTagProvider.provideLanguageTag()
         val theme = if (ElementTheme.isLightTheme) "light" else "dark"
         DisposableEffect(Unit) {
@@ -134,13 +140,26 @@ class CallScreenPresenter @AssistedInject constructor(
 
                         val parsedMessage = parseMessage(it)
                         if (parsedMessage?.direction == WidgetMessage.Direction.FromWidget) {
-                            if (parsedMessage.action == WidgetMessage.Action.HangUp) {
-                                close(callWidgetDriver.value, navigator)
-                            } else if (parsedMessage.action == WidgetMessage.Action.SendEvent) {
-                                // This event is received when a member joins the call, the first one will be the current one
-                                val type = parsedMessage.data?.jsonObject?.get("type")?.jsonPrimitive?.contentOrNull
-                                if (type == "org.matrix.msc3401.call.member") {
-                                    isJoinedCall = true
+                            when (parsedMessage.action) {
+                                WidgetMessage.Action.HangUp -> {
+                                    close(callWidgetDriver.value, navigator)
+                                }
+                                WidgetMessage.Action.SendEvent -> {
+                                    // This event is received when a member joins the call, the first one will be the current one
+                                    val type = parsedMessage.data?.jsonObject?.get("type")?.jsonPrimitive?.contentOrNull
+                                    if (type == "org.matrix.msc3401.call.member") {
+                                        isJoinedCall = true
+                                    }
+                                }
+                                WidgetMessage.Action.DeviceMute -> {
+                                    if (parsedMessage.data != null) {
+                                        try {
+                                            val decodedMessage: DeviceMuteMessage = Json.decodeFromJsonElement(parsedMessage.data)
+                                            isAudioEnabled = decodedMessage.isAudioEnabled == true
+                                        } catch (e: Exception) {
+                                            Timber.e(e, "Failed to decode DeviceMuteMessage: ${parsedMessage.data}")
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -173,6 +192,25 @@ class CallScreenPresenter @AssistedInject constructor(
                     }
                     // Else ignore the error, give a chance the Element Call to recover by itself.
                 }
+                is CallScreenEvents.DeviceMute -> {
+                    val widgetId = callWidgetDriver.value?.id
+                    val interceptor = messageInterceptor.value
+
+                    if (widgetId != null && interceptor != null && isJoinedCall) {
+                        sendDeviceMuteMessage(
+                            widgetId = widgetId,
+                            messageInterceptor = interceptor,
+                            message = event.message,
+                        )
+                    } else {
+                        Timber.w(
+                            "CallScreenEvents.DeviceMute failed: " +
+                                "widgetId=${widgetId ?: "null"}, " +
+                                "interceptor=${interceptor ?: "null"}, " +
+                                "isJoinedCall=$isJoinedCall"
+                        )
+                    }
+                }
             }
         }
 
@@ -182,6 +220,7 @@ class CallScreenPresenter @AssistedInject constructor(
             userAgent = userAgent,
             isCallActive = isJoinedCall,
             isInWidgetMode = isInWidgetMode,
+            isAudioEnabled = isAudioEnabled,
             eventSink = { handleEvents(it) },
         )
     }
@@ -263,6 +302,28 @@ class CallScreenPresenter @AssistedInject constructor(
             data = null,
         )
         messageInterceptor.sendMessage(WidgetMessageSerializer.serialize(message))
+    }
+
+    private fun sendDeviceMuteMessage(
+        widgetId: String,
+        messageInterceptor: WidgetMessageInterceptor,
+        message: DeviceMuteMessage,
+    ) {
+        try {
+            val encodedString: String = Json.encodeToString(message)
+
+            val widgetMessage = WidgetMessage(
+                direction = WidgetMessage.Direction.ToWidget,
+                widgetId = widgetId,
+                requestId = "widgetapi-${clock.epochMillis()}",
+                action = WidgetMessage.Action.DeviceMute,
+                data = Json.parseToJsonElement(encodedString),
+            )
+
+            messageInterceptor.sendMessage(WidgetMessageSerializer.serialize(widgetMessage))
+        } catch (e: SerializationException) {
+            Timber.e("Sending device mute message failure", e)
+        }
     }
 
     private fun CoroutineScope.close(widgetDriver: MatrixWidgetDriver?, navigator: CallScreenNavigator) = launch(dispatchers.io) {

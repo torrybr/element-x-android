@@ -7,10 +7,12 @@
 
 package io.element.android.features.call.impl.ui
 
+import io.element.android.features.call.impl.data.DeviceMuteMessage
 import io.element.android.features.call.impl.utils.WidgetMessageInterceptor
 
 sealed interface CallScreenEvents {
     data object Hangup : CallScreenEvents
+    data class DeviceMute(val message: DeviceMuteMessage) : CallScreenEvents
     data class SetupMessageChannels(val widgetMessageInterceptor: WidgetMessageInterceptor) : CallScreenEvents
     data class OnWebViewError(val description: String?) : CallScreenEvents
 }

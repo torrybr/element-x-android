@@ -33,6 +33,9 @@ data class WidgetMessage(
         @SerialName("im.vector.hangup")
         HangUp,
 
+        @SerialName("io.element.device_mute")
+        DeviceMute,
+
         @SerialName("send_event")
         SendEvent,
     }
