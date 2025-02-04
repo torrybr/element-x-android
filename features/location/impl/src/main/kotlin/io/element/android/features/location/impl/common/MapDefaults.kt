@@ -82,7 +82,7 @@ object MapDefaults {
         .zoom(2.7)
         .build()
 
-    const val DEFAULT_ZOOM = 14.0
+    const val DEFAULT_ZOOM = 17.0
 
     // Is used when permissions were not granted or GPS not enabled
     val fallbackCameraPosition = CameraPosition.Builder()
