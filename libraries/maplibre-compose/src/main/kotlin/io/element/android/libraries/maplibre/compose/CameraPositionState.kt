@@ -100,9 +100,9 @@ public class CameraPositionState(
     /**
      * Animates camera position on the map.
      */
-    public fun animateCameraPosition(cameraPosition: CameraPosition) {
+    public fun animateCameraPosition(cameraPosition: CameraPosition, onAnimationFinished: MapLibreMap.CancelableCallback? = null) {
         rawPosition = cameraPosition
-        map?.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
+        map?.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition), onAnimationFinished)
     }
 
     /**

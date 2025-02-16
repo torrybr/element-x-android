@@ -192,7 +192,7 @@ fun MapRealtimeView(
             TrackingLocationButton(
                 cameraPositionState = cameraPositionState,
             ) {
-                cameraPositionState.cameraMode = cameraPositionState.cameraMode.toggleNextCameraMode()
+                cameraPositionState.toggleNextCameraMode()
             }
         }
         MapTypeBottomSheet(state = state, onTileProviderSelected = { provider ->
