@@ -145,9 +145,9 @@ fun MapRealtimeView(
 
         Column(
             modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(end = 16.dp)
-                    .windowInsetsPadding(WindowInsets.statusBars), // Adds padding on the right side
+                .align(Alignment.TopEnd)
+                .padding(end = 16.dp)
+                .windowInsetsPadding(WindowInsets.statusBars), // Adds padding on the right side
             verticalArrangement = Arrangement.spacedBy(8.dp), // Space between buttons,
             horizontalAlignment = Alignment.End
         ) {
@@ -234,8 +234,8 @@ fun LocationButton(
             IconButton(
                 onClick = onClick,
                 modifier = Modifier
-                        .size(48.dp)
-                        .background(backgroundColor, CircleShape)
+                    .size(48.dp)
+                    .background(backgroundColor, CircleShape)
             ) {
                 Icon(
                     imageVector = imageVector,
@@ -256,9 +256,21 @@ fun TrackingLocationButton(
     val rotation = if (cameraMode != CameraMode.NONE) -cameraPositionState.position.bearing.toFloat() else 0f
 
     val (icon, iconModifier) = if (cameraMode == CameraMode.TRACKING_GPS) {
-        painterResource(R.drawable.ic_compass) to Modifier.fillMaxSize()
+        painterResource(
+            if (cameraPositionState.cameraWasDismissed) {
+                R.drawable.ic_compass_inactive
+            } else {
+                R.drawable.ic_compass
+            }
+        ) to Modifier.fillMaxSize()
     } else {
-        painterResource(R.drawable.ic_cardinal_point) to Modifier
+        painterResource(
+            if (cameraPositionState.cameraWasDismissed) {
+                R.drawable.ic_cardinal_point_inactive
+            } else {
+                R.drawable.ic_cardinal_point
+            }
+        ) to Modifier
     }
 
     RoundedIconButton(
@@ -282,8 +294,8 @@ fun RoundedIconButton(
     IconButton(
         onClick = onClick,
         modifier = modifier
-                .size(48.dp)
-                .background(backgroundColor, CircleShape)
+            .size(48.dp)
+            .background(backgroundColor, CircleShape)
     ) {
         when (icon) {
             is ImageVector -> {
