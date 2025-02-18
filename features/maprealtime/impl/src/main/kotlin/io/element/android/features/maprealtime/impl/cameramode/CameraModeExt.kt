@@ -27,32 +27,46 @@ import timber.log.Timber
  * set to prevent animation conflicts.
  *
  */
-fun CameraPositionState.toggleNextCameraMode() {
-    val nextCameraMode: CameraMode = when (this.cameraMode) {
-        CameraMode.NONE -> CameraMode.TRACKING_GPS_NORTH
-        CameraMode.TRACKING_GPS_NORTH -> CameraMode.TRACKING_GPS
-        CameraMode.TRACKING_GPS -> CameraMode.NONE
-        else -> {
-            Timber.w("Unsupported selected camera mode=$this")
-            return
+fun CameraPositionState.toggleCameraMode() {
+    val nextCameraMode: CameraMode =
+        if (!cameraWasDismissed || cameraMode == CameraMode.NONE) {
+            val nextCameraMode: CameraMode = when (this.cameraMode) {
+                CameraMode.NONE -> CameraMode.TRACKING_GPS_NORTH
+                CameraMode.TRACKING_GPS_NORTH -> CameraMode.TRACKING_GPS
+                CameraMode.TRACKING_GPS -> CameraMode.NONE
+                else -> {
+                    Timber.w("Unsupported selected camera mode=$this")
+                    return
+                }
+            }
+            nextCameraMode
+        } else {
+            val currentCameraMode = cameraMode
+            cameraMode = currentCameraMode
+            currentCameraMode
         }
-    }
 
-    if (nextCameraMode == CameraMode.TRACKING_GPS_NORTH) {
+    forceCameraModeSet = nextCameraMode == CameraMode.NONE
+
+    if (
+        position.zoom != MapDefaults.DEFAULT_ZOOM &&
+        (nextCameraMode == CameraMode.TRACKING_GPS_NORTH || nextCameraMode == CameraMode.TRACKING_GPS)
+    ) {
         val newCameraPosition: CameraPosition = CameraPosition.Builder()
             .apply {
-                this@toggleNextCameraMode.location?.let {
+                this@toggleCameraMode.location?.let {
                     target(LatLng(it))
                 }
                 zoom(MapDefaults.DEFAULT_ZOOM)
             }.build()
+
         this.animateCameraPosition(
             cameraPosition = newCameraPosition,
             onAnimationFinished = object : MapLibreMap.CancelableCallback {
                 override fun onCancel() = Unit
 
                 override fun onFinish() {
-                    this@toggleNextCameraMode.cameraMode = nextCameraMode
+                    this@toggleCameraMode.cameraMode = nextCameraMode
                 }
             },
         )

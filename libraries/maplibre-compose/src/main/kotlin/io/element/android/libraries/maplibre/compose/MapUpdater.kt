@@ -118,11 +118,17 @@ internal class MapPropertiesNode(
         }
         map.locationComponent.addOnCameraTrackingChangedListener(object : OnCameraTrackingChangedListener {
             override fun onCameraTrackingDismissed() {
-                cameraPositionState.rawCameraMode = CameraMode.NONE
+                cameraPositionState.cameraWasDismissed = true
             }
 
             override fun onCameraTrackingChanged(currentMode: Int) {
-                cameraPositionState.rawCameraMode = CameraMode.fromInternal(currentMode)
+                cameraPositionState.cameraWasDismissed = false
+
+                val cameraMode: CameraMode = CameraMode.fromInternal(currentMode)
+
+                if (cameraMode != CameraMode.NONE || cameraPositionState.forceCameraModeSet) {
+                    cameraPositionState.rawCameraMode = cameraMode
+                }
             }
         })
     }

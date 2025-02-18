@@ -114,6 +114,16 @@ public class CameraPositionState(
     internal var rawCameraMode by mutableStateOf(cameraMode)
 
     /**
+     * The flag that indicates whether camera was dismissed.
+     */
+    public var cameraWasDismissed: Boolean = false
+
+    /**
+     * Flag indicating whether the camera mode should be forcibly set.
+     */
+    public var forceCameraModeSet: Boolean = false
+
+    /**
      * Current tracking mode of the camera.
      */
     public var cameraMode: CameraMode

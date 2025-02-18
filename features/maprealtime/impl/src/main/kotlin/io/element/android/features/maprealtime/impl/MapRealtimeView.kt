@@ -36,7 +36,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import io.element.android.features.location.impl.common.MapDefaults
-import io.element.android.features.maprealtime.impl.cameramode.toggleNextCameraMode
+import io.element.android.features.maprealtime.impl.cameramode.toggleCameraMode
 import io.element.android.features.maprealtime.impl.common.PermissionDeniedDialog
 import io.element.android.features.maprealtime.impl.common.PermissionRationaleDialog
 import io.element.android.features.maprealtime.impl.common.toLtLg
@@ -192,7 +192,7 @@ fun MapRealtimeView(
             TrackingLocationButton(
                 cameraPositionState = cameraPositionState,
             ) {
-                cameraPositionState.toggleNextCameraMode()
+                cameraPositionState.toggleCameraMode()
             }
         }
         MapTypeBottomSheet(state = state, onTileProviderSelected = { provider ->
